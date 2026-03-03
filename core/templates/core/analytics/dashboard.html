@@ -1,0 +1,347 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Analytics Dashboard{% endblock %}
+
+{% block extra_css %}
+<!-- Chart.js for beautiful charts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+    /* Fix for chart containers to prevent vertical elongation */
+    .chart-container {
+        position: relative;
+        height: 200px !important;
+        width: 100%;
+    }
+
+    .level-chart-wrapper {
+        height: 160px !important;
+        margin-bottom: 10px;
+    }
+
+    /* Ensure cards with charts don't stretch */
+    .card-body.p-3 {
+        padding: 0.75rem !important;
+    }
+
+    /* Better spacing for badge */
+    .scope-badge {
+        font-size: 0.85rem;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-2">
+    <!-- Header with scope badge -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="h2"><i class="fas fa-chart-line me-2 text-primary-blue"></i>Analytics Dashboard</h1>
+            <!-- SCOPE BADGE - NEW! -->
+            <span class="badge scope-badge {% if is_admin %}bg-danger{% elif is_senior_moderator %}bg-warning{% else %}bg-info{% endif %} mt-1">
+                <i class="fas fa-eye me-1"></i> Viewing: {{ scope|default:"All Data" }}
+            </span>
+        </div>
+        <span class="badge bg-primary mt-2 mt-md-0">{{ user.username }} ({{ user.get_role_display }})</span>
+    </div>
+
+    <!-- Overview Cards - Reduced margin -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-0 small">Total Users</h6>
+                            <h3 class="mt-1 mb-0">{{ total_users }}</h3>
+                            <small class="opacity-75">{{ new_users_7d }} new in 7d</small>
+                        </div>
+                        <i class="fas fa-users fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success">
+                <div class="card-body py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-0 small">Resources</h6>
+                            <h3 class="mt-1 mb-0">{{ total_resources }}</h3>
+                            <small class="opacity-75">{{ approved_resources }} approved</small>
+                        </div>
+                        <i class="fas fa-file-alt fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-info">
+                <div class="card-body py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-0 small">Downloads</h6>
+                            <h3 class="mt-1 mb-0">{{ total_downloads }}</h3>
+                            <small class="opacity-75">{{ total_views }} views</small>
+                        </div>
+                        <i class="fas fa-download fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-0 small">Requests</h6>
+                            <h3 class="mt-1 mb-0">{{ total_requests }}</h3>
+                            <small class="opacity-75">{{ open_requests }} open</small>
+                        </div>
+                        <i class="fas fa-hand-holding-heart fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row - Fixed height for level chart -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-white py-2">
+                    <h6 class="mb-0"><i class="fas fa-chart-bar me-2 text-primary-blue"></i>Activity (Last 7 Days)</h6>
+                </div>
+                <div class="card-body p-3">
+                    <div class="chart-container" style="height: 220px;">
+                        <canvas id="activityChart" style="height: 100%; width: 100%;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-white py-2">
+                    <h6 class="mb-0"><i class="fas fa-pie-chart me-2 text-primary-blue"></i>By Level</h6>
+                </div>
+                <div class="card-body p-3">
+                    <div class="level-chart-wrapper" style="height: 140px;">
+                        <canvas id="levelChart" style="height: 100%; width: 100%;"></canvas>
+                    </div>
+                    <div class="mt-2 small d-flex flex-wrap gap-1">
+                        <span class="badge bg-info">Pre-Med: {{ premed_count }}</span>
+                        <span class="badge bg-primary">Undergrad: {{ undergrad_count }}</span>
+                        <span class="badge bg-secondary">Postgrad: {{ postgraduate_count }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Lists - Reduced margin -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-white py-2">
+                    <h6 class="mb-0"><i class="fas fa-crown me-2 text-warning"></i>Top Resources</h6>
+                </div>
+                <div class="card-body p-2">
+                    <div class="list-group list-group-flush">
+                        {% for resource in top_resources %}
+                        <div class="list-group-item px-2 py-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0 small">
+                                        <a href="{% url 'resource_detail' resource.id %}" class="text-decoration-none">
+                                            {{ resource.title|truncatechars:35 }}
+                                        </a>
+                                    </h6>
+                                    <small class="text-muted">
+                                        <i class="fas fa-user me-1"></i>{{ resource.uploader.username }}
+                                    </small>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-success">{{ resource.download_count }} downloads</span>
+                                    <br>
+                                    <small class="text-muted">{{ resource.view_count }} views</small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-white py-2">
+                    <h6 class="mb-0"><i class="fas fa-users me-2 text-success"></i>Top Contributors</h6>
+                </div>
+                <div class="card-body p-2">
+                    <div class="list-group list-group-flush">
+                        {% for contributor in top_uploaders %}
+                        <div class="list-group-item px-2 py-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0 small">{{ contributor.username }}</h6>
+                                    <small class="text-muted">{{ contributor.email|truncatechars:25 }}</small>
+                                </div>
+                                <span class="badge bg-primary">{{ contributor.resource_count }} uploads</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity - Reduced margin -->
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-white py-2">
+                    <h6 class="mb-0"><i class="fas fa-clock me-2 text-info"></i>Recent Uploads</h6>
+                </div>
+                <div class="card-body p-2">
+                    <div class="list-group">
+                        {% for resource in recent_uploads %}
+                        <div class="list-group-item px-2 py-2">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <strong class="small">{{ resource.title|truncatechars:30 }}</strong>
+                                    <br>
+                                    <small class="text-muted">
+                                        <i class="fas fa-user me-1"></i>{{ resource.uploader.username }}
+                                        <i class="fas fa-clock ms-2 me-1"></i>{{ resource.upload_date|timesince }} ago
+                                    </small>
+                                </div>
+                                <span class="badge bg-success">{{ resource.download_count }} downloads</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-white py-2">
+                    <h6 class="mb-0"><i class="fas fa-hand-holding-heart me-2 text-warning"></i>Recent Requests</h6>
+                </div>
+                <div class="card-body p-2">
+                    <div class="list-group">
+                        {% for req in recent_requests %}
+                        <div class="list-group-item px-2 py-2">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <strong class="small">{{ req.title|truncatechars:30 }}</strong>
+                                    <br>
+                                    <small class="text-muted">
+                                        <i class="fas fa-user me-1"></i>{{ req.requester.username }}
+                                        <i class="fas fa-arrow-up ms-2 me-1 text-success"></i>{{ req.upvotes }}
+                                        <span class="badge {% if req.status == 'open' %}bg-success{% elif req.status == 'in_progress' %}bg-warning{% else %}bg-info{% endif %} ms-2">
+                                            {{ req.get_status_display }}
+                                        </span>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Activity Chart
+    const ctx1 = document.getElementById('activityChart').getContext('2d');
+    new Chart(ctx1, {
+        type: 'line',
+        data: {
+            labels: {{ dates|safe }},
+            datasets: [
+                {
+                    label: 'Downloads',
+                    data: {{ daily_downloads|safe }},
+                    borderColor: '#28a745',
+                    backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 3,
+                    borderWidth: 2
+                },
+                {
+                    label: 'Uploads',
+                    data: {{ daily_uploads|safe }},
+                    borderColor: '#0066CC',
+                    backgroundColor: 'rgba(0, 102, 204, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 3,
+                    borderWidth: 2
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom',
+                    labels: { boxWidth: 12, padding: 8 }
+                }
+            },
+            layout: { padding: { top: 5, bottom: 5 } }
+        }
+    });
+
+    // Level Chart - Reduced height to prevent vertical elongation
+    const ctx2 = document.getElementById('levelChart').getContext('2d');
+    new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+            labels: ['Pre-Med', 'Undergraduate', 'Postgraduate'],
+            datasets: [{
+                data: [{{ premed_count }}, {{ undergrad_count }}, {{ postgraduate_count }}],
+                backgroundColor: ['#17a2b8', '#0066CC', '#6c757d'],
+                borderWidth: 0,
+                borderRadius: 4,
+                spacing: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '65%',
+            plugins: {
+                legend: {
+                    display: false  // Hide legend since we show badges below
+                },
+                tooltip: {
+                    enabled: true
+                }
+            },
+            layout: {
+                padding: {
+                    top: 5,
+                    bottom: 5,
+                    left: 5,
+                    right: 5
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

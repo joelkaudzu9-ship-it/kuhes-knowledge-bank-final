@@ -1,0 +1,150 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Moderator Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4"><i class="fas fa-shield-alt me-2 text-primary-blue"></i>Moderator Dashboard</h1>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-0">Pending</h6>
+                            <h2 class="mt-2 mb-0">{{ total_pending }}</h2>
+                        </div>
+                        <i class="fas fa-clock fa-3x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-0">Approved</h6>
+                            <h2 class="mt-2 mb-0">{{ total_approved }}</h2>
+                        </div>
+                        <i class="fas fa-check-circle fa-3x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-danger">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-0">Rejected</h6>
+                            <h2 class="mt-2 mb-0">{{ total_rejected }}</h2>
+                        </div>
+                        <i class="fas fa-times-circle fa-3x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Resources -->
+    <div class="card mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="fas fa-clock me-2 text-warning"></i>Pending Approval ({{ total_pending }})</h5>
+        </div>
+        <div class="card-body">
+            {% if pending_resources %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Type</th>
+                                <th>Uploader</th>
+                                <th>Level</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for resource in pending_resources %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'resource_detail' resource.id %}" target="_blank">
+                                        {{ resource.title|truncatechars:40 }}
+                                    </a>
+                                </td>
+                                <td>{{ resource.get_resource_type_display }}</td>
+                                <td>{{ resource.uploader.username }}</td>
+                                <td>
+                                    {% if resource.level == 'premed' %}
+                                        <span class="badge bg-info">{{ resource.get_premed_subject_display }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ resource.get_level_display }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ resource.upload_date|timesince }} ago</td>
+                                <td>
+                                    <!-- Preview Button -->
+                                    <a href="{% url 'resource_detail' resource.id %}" target="_blank" class="btn btn-sm btn-outline-primary mb-1" title="Preview">
+                                        <i class="fas fa-eye"></i> Preview
+                                    </a>
+
+                                    <!-- Action Buttons -->
+                                    <div class="btn-group" role="group">
+                                        <a href="{% url 'approve_resource' resource.id %}" class="btn btn-sm btn-success" title="Approve">
+                                            <i class="fas fa-check"></i>
+                                        </a>
+                                        <a href="{% url 'reject_resource' resource.id %}" class="btn btn-sm btn-danger" title="Reject">
+                                            <i class="fas fa-times"></i>
+                                        </a>
+                                        <a href="{% url 'delete_resource' resource.id %}" class="btn btn-sm btn-outline-danger"
+                                           onclick="return confirm('Delete this resource? This cannot be undone.')" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted text-center py-3">No pending resources. Good job! 🎉</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="card">
+        <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="fas fa-history me-2 text-info"></i>Recent Approvals</h5>
+        </div>
+        <div class="card-body">
+            {% if recent_approvals %}
+                <div class="list-group">
+                    {% for resource in recent_approvals %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <strong>{{ resource.title }}</strong>
+                                    <br>
+                                    <small class="text-muted">
+                                        Approved by {{ resource.approved_by.username }} •
+                                        {{ resource.approval_date|timesince }} ago
+                                    </small>
+                                </div>
+                                <span class="badge bg-success">Approved</span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted text-center py-3">No recent activity</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends 'core/base.html' %}
+
+{% block title %}My Requests{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-list me-2 text-primary-blue"></i>My Requests</h1>
+        <a href="{% url 'create_request' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>New Request
+        </a>
+    </div>
+
+    <div class="row">
+        {% for req in requests %}
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="badge {% if req.status == 'open' %}bg-success{% elif req.status == 'in_progress' %}bg-warning{% elif req.status == 'fulfilled' %}bg-info{% else %}bg-secondary{% endif %}">
+                            {{ req.get_status_display }}
+                        </span>
+                        <small class="text-muted">{{ req.created_at|date:"M d, Y" }}</small>
+                    </div>
+
+                    <h5 class="card-title">{{ req.title }}</h5>
+                    <p class="card-text text-muted small">{{ req.description|truncatechars:100 }}</p>
+
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div>
+                            <i class="fas fa-arrow-up text-success me-1"></i>
+                            <strong>{{ req.upvotes }}</strong> votes
+
+                            {% if req.fulfilled_by %}
+                                <span class="badge bg-success ms-2">Fulfilled</span>
+                            {% endif %}
+                        </div>
+
+                        <a href="{% url 'request_detail' req.id %}" class="btn btn-sm btn-outline-primary">
+                            View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+                    <h3>You haven't made any requests</h3>
+                    <p class="text-muted">Request resources and help your community grow!</p>
+                    <a href="{% url 'create_request' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Create Your First Request
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

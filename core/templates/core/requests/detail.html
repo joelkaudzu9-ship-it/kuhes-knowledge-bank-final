@@ -1,0 +1,279 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Request Details{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'request_list' %}">Requests</a></li>
+            <li class="breadcrumb-item active">{{ request.title|truncatechars:30 }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Main Request Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">{{ request.title }}</h4>
+                    <span class="badge {% if request.status == 'open' %}bg-success{% elif request.status == 'in_progress' %}bg-warning{% else %}bg-info{% endif %} fs-6">
+                        {{ request.get_status_display }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-4">
+                        <div>
+                            <span class="badge {% if request.urgency == 'urgent' %}bg-danger{% elif request.urgency == 'high' %}bg-warning{% elif request.urgency == 'medium' %}bg-info{% else %}bg-secondary{% endif %} me-2">
+                                {{ request.get_urgency_display }}
+                            </span>
+                            <span class="text-muted">
+                                <i class="fas fa-user me-1"></i>{{ request.requester.username }}
+                            </span>
+                            <span class="text-muted ms-3">
+                                <i class="fas fa-clock me-1"></i>{{ request.created_at|timesince }} ago
+                            </span>
+                        </div>
+
+                        <!-- Upvote Button -->
+                        <a href="{% url 'upvote_request' request.id %}" class="btn {% if user_upvoted %}btn-success{% else %}btn-outline-success{% endif %}">
+                            <i class="fas fa-arrow-up me-1"></i>{{ request.upvotes }} Upvotes
+                        </a>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mb-4">
+                        <h5>Description</h5>
+                        <p class="lead">{{ request.description|linebreaks }}</p>
+                    </div>
+
+                    <!-- Details -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Details</h5>
+                            <table class="table table-sm">
+                                {% if request.level %}
+                                <tr>
+                                    <th>Level:</th>
+                                    <td>{{ request.get_level_display }}</td>
+                                </tr>
+                                {% endif %}
+
+                                {% if request.premed_subject %}
+                                <tr>
+                                    <th>Subject:</th>
+                                    <td>{{ request.get_premed_subject_display }}</td>
+                                </tr>
+                                {% endif %}
+
+                                {% if request.school %}
+                                <tr>
+                                    <th>School:</th>
+                                    <td>{{ request.get_school_display }}</td>
+                                </tr>
+                                {% endif %}
+
+                                {% if request.programme %}
+                                <tr>
+                                    <th>Programme:</th>
+                                    <td>{{ request.programme }}</td>
+                                </tr>
+                                {% endif %}
+
+                                {% if request.year_of_study %}
+                                <tr>
+                                    <th>Year:</th>
+                                    <td>{{ request.year_of_study }}</td>
+                                </tr>
+                                {% endif %}
+
+                                {% if request.course_code %}
+                                <tr>
+                                    <th>Course Code:</th>
+                                    <td>{{ request.course_code }}</td>
+                                </tr>
+                                {% endif %}
+
+                                {% if request.deadline %}
+                                <tr>
+                                    <th>Deadline:</th>
+                                    <td>{{ request.deadline|date:"F j, Y" }}</td>
+                                </tr>
+                                {% endif %}
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex gap-2">
+                        {% if request.requester == user or user.role == 'moderator' or user.role == 'admin' %}
+                            {% if request.status != 'fulfilled' and request.status != 'closed' %}
+                                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#fulfillModal">
+                                    <i class="fas fa-check-circle me-2"></i>Mark as Fulfilled
+                                </button>
+                            {% endif %}
+                        {% endif %}
+
+                        {% if request.requester == user or user.role == 'moderator' or user.role == 'admin' %}
+                            <a href="{% url 'delete_request' request.id %}" class="btn btn-outline-danger"
+                               onclick="return confirm('Delete this request? This cannot be undone.')">
+                                <i class="fas fa-trash me-2"></i>Delete
+                            </a>
+                        {% endif %}
+
+                        <a href="{% url 'request_list' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Requests
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Similar Requests -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-clone me-2 text-primary-blue"></i>Similar Requests</h5>
+                </div>
+                <div class="card-body">
+                    {% if similar_requests %}
+                        {% for similar in similar_requests %}
+                            <div class="mb-3 pb-2 border-bottom">
+                                <h6>
+                                    <a href="{% url 'request_detail' similar.id %}" class="text-decoration-none">
+                                        {{ similar.title|truncatechars:40 }}
+                                    </a>
+                                </h6>
+                                <small class="text-muted">
+                                    <i class="fas fa-arrow-up me-1"></i>{{ similar.upvotes }} votes
+                                    <span class="mx-2">•</span>
+                                    {{ similar.created_at|timesince }} ago
+                                </small>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center py-3">No similar requests found</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Moderator Panel (only visible to moderators) -->
+            {% if can_moderate %}
+            <div class="card shadow border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i>Moderator Actions</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'moderate_request' request.id %}" class="mb-3">
+                        {% csrf_token %}
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="btn-group w-100 mb-2">
+                                    <button type="submit" name="action" value="pin" class="btn {% if request.is_pinned %}btn-warning{% else %}btn-outline-warning{% endif %}">
+                                        <i class="fas fa-thumbtack me-2"></i>{% if request.is_pinned %}Unpin{% else %}Pin{% endif %}
+                                    </button>
+
+                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#priorityPanel">
+                                        <i class="fas fa-arrow-up me-2"></i>Set Priority
+                                    </button>
+                                </div>
+
+                                <div id="priorityPanel" class="collapse mb-2">
+                                    <div class="input-group">
+                                        <input type="number" name="priority" class="form-control"
+                                               value="{{ request.priority }}" min="0" max="10">
+                                        <button type="submit" name="action" value="priority" class="btn btn-primary">
+                                            Update Priority
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12 mt-2">
+                                <div class="btn-group w-100 mb-2">
+                                    <button type="button" class="btn btn-outline-info" data-bs-toggle="collapse" data-bs-target="#notesPanel">
+                                        <i class="fas fa-sticky-note me-2"></i>Add Notes
+                                    </button>
+
+                                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#mergePanel">
+                                        <i class="fas fa-code-branch me-2"></i>Merge
+                                    </button>
+
+                                    {% if user.role == 'admin' %}
+                                    <button type="submit" name="action" value="delete" class="btn btn-outline-danger"
+                                            onclick="return confirm('Delete this request? This cannot be undone.')">
+                                        <i class="fas fa-trash me-2"></i>Delete
+                                    </button>
+                                    {% endif %}
+                                </div>
+
+                                <div id="notesPanel" class="collapse mb-2">
+                                    <textarea name="notes" class="form-control mb-2" rows="2"
+                                              placeholder="Internal moderator notes...">{{ request.moderator_notes }}</textarea>
+                                    <button type="submit" name="action" value="notes" class="btn btn-sm btn-info">
+                                        Save Notes
+                                    </button>
+                                </div>
+
+                                <div id="mergePanel" class="collapse mb-2">
+                                    <div class="input-group">
+                                        <input type="number" name="duplicate_id" class="form-control"
+                                               placeholder="Request ID to merge">
+                                        <button type="submit" name="action" value="merge" class="btn btn-secondary"
+                                                onclick="return confirm('Merge upvotes from duplicate into this request?')">
+                                            Merge
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Display Moderator Notes if any -->
+                    {% if request.moderator_notes %}
+                    <div class="alert alert-info mt-3">
+                        <strong>Moderator Notes:</strong><br>
+                        {{ request.moderator_notes }}
+                    </div>
+                    {% endif %}
+
+                    <!-- Priority Badge -->
+                    {% if request.priority > 0 %}
+                    <span class="badge bg-primary">Priority: {{ request.priority }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Fulfill Modal -->
+<div class="modal fade" id="fulfillModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="fas fa-check-circle me-2"></i>Mark as Fulfilled</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'mark_fulfilled' request.id %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <p>Which resource fulfilled this request?</p>
+                    <div class="mb-3">
+                        <label for="resource_id" class="form-label">Resource ID</label>
+                        <input type="number" name="resource_id" id="resource_id" class="form-control"
+                               placeholder="Enter the resource ID" required>
+                        <small class="text-muted">You can find the resource ID in the URL when viewing the resource.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Mark as Fulfilled</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

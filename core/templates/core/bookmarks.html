@@ -1,0 +1,66 @@
+{% extends 'core/base.html' %}
+
+{% block title %}My Bookmarks{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-bookmark me-2 text-warning"></i>My Bookmarks</h1>
+        <a href="{% url 'browse_resources' %}" class="btn btn-outline-primary">
+            <i class="fas fa-search me-2"></i>Browse Resources
+        </a>
+    </div>
+
+    {% if bookmarks %}
+        <div class="row">
+            {% for bookmark in bookmarks %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="badge bg-primary">{{ bookmark.resource.get_resource_type_display }}</span>
+                                <small class="text-muted">{{ bookmark.created_at|timesince }} ago</small>
+                            </div>
+
+                            <h5 class="card-title">
+                                <a href="{% url 'resource_detail' bookmark.resource.id %}" class="text-decoration-none text-dark">
+                                    {{ bookmark.resource.title }}
+                                </a>
+                            </h5>
+
+                            <p class="card-text text-muted small">{{ bookmark.resource.description|truncatechars:80 }}</p>
+
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-user me-1"></i>{{ bookmark.resource.uploader.username }}
+                                    <i class="fas fa-download ms-2 me-1"></i>{{ bookmark.resource.download_count }}
+                                </small>
+
+                                <div>
+                                    <a href="{% url 'resource_detail' bookmark.resource.id %}" class="btn btn-sm btn-outline-primary">
+                                        View
+                                    </a>
+                                    <a href="{% url 'toggle_bookmark' bookmark.resource.id %}" class="btn btn-sm btn-outline-warning">
+                                        <i class="fas fa-bookmark"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-bookmark fa-4x text-muted mb-3"></i>
+                <h3>No bookmarks yet</h3>
+                <p class="text-muted">Start bookmarking resources you find useful!</p>
+                <a href="{% url 'browse_resources' %}" class="btn btn-primary">
+                    <i class="fas fa-search me-2"></i>Browse Resources
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

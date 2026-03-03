@@ -1,0 +1,103 @@
+{% extends 'core/base.html' %}
+
+{% block title %}My Uploads{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-file-alt me-2 text-primary-blue"></i>My Uploads</h1>
+        <a href="{% url 'upload_resource' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Upload New
+        </a>
+    </div>
+
+    {% if uploads %}
+        <div class="row">
+            {% for resource in uploads %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="badge bg-{% if resource.status == 'approved' %}success{% elif resource.status == 'pending' %}warning{% elif resource.status == 'rejected' %}danger{% else %}secondary{% endif %}">
+                                    {{ resource.get_status_display }}
+                                </span>
+                                <div>
+                                    {% if resource.status == 'pending' %}
+                                        <a href="{% url 'delete_resource' resource.id %}" class="btn btn-sm btn-danger"
+                                           onclick="return confirm('Are you sure? This cannot be undone.')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    {% endif %}
+                                    <small class="text-muted">{{ resource.upload_date|date:"M d, Y" }}</small>
+                                </div>
+                            </div>
+
+                            <h5 class="card-title">{{ resource.title }}</h5>
+                            <p class="card-text small text-muted">{{ resource.description|truncatechars:100 }}</p>
+
+                            <div class="mb-2">
+                                <span class="badge bg-light text-dark me-1">{{ resource.get_resource_type_display }}</span>
+                                {% if resource.level == 'premed' %}
+                                    <span class="badge bg-info text-white">{{ resource.get_premed_subject_display }}</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-download me-1"></i>{{ resource.download_count }}
+                                    <i class="fas fa-eye ms-2 me-1"></i>{{ resource.view_count }}
+                                </small>
+
+                                <div>
+                                    {% if resource.status == 'rejected' and resource.rejection_reason %}
+                                        <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#reasonModal{{ resource.id }}">
+                                            Reason
+                                        </button>
+                                    {% endif %}
+
+                                    {% if resource.file %}
+                                        <a href="{{ resource.file.url }}" class="btn btn-sm btn-outline-primary" download>
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rejection Reason Modal -->
+                    {% if resource.rejection_reason %}
+                        <div class="modal fade" id="reasonModal{{ resource.id }}" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-danger text-white">
+                                        <h5 class="modal-title">Rejection Reason</h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        {{ resource.rejection_reason }}
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-cloud-upload-alt fa-4x text-muted mb-3"></i>
+                <h3>No uploads yet</h3>
+                <p class="text-muted">Share your notes and help your classmates!</p>
+                <a href="{% url 'upload_resource' %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Upload Your First Resource
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

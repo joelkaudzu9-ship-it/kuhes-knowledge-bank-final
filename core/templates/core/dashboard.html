@@ -1,0 +1,144 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Student Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Welcome Banner -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-primary-blue text-white mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-user-circle fa-4x"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h1 class="mb-1">Welcome back, {{ user.username }}!</h1>
+                            <p class="mb-0">
+                                {% if user.upload_count > 0 %}
+                                    You've shared {{ user.upload_count }} resource{{ user.upload_count|pluralize }} with the community!
+                                {% else %}
+                                    Ready to share your first resource?
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-file-alt fa-3x text-primary-blue mb-3"></i>
+                    <h3>{{ user.upload_count }}</h3>
+                    <p class="text-muted mb-0">Resources Uploaded</p>
+                    {% if user.upload_count == 0 %}
+                        <a href="{% url 'upload_resource' %}" class="btn btn-sm btn-outline-primary mt-2">
+                            Upload Now
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-download fa-3x text-success mb-3"></i>
+                    <h3>{{ user.download_count }}</h3>
+                    <p class="text-muted mb-0">Downloads Received</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-bookmark fa-3x text-warning mb-3"></i>
+                    <h3>{{ user.bookmarks.count }}</h3>
+                    <p class="text-muted mb-0">Bookmarks</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity & Quick Actions -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-clock text-primary-blue me-2"></i>Recent Uploads</h5>
+                </div>
+                <div class="card-body">
+                    {% with recent_uploads=user.uploaded_resources.all|slice:":5" %}
+                        {% if recent_uploads %}
+                            <div class="list-group list-group-flush">
+                                {% for resource in recent_uploads %}
+                                    <div class="list-group-item px-0">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <span class="badge
+                                                    {% if resource.status == 'approved' %}bg-success
+                                                    {% elif resource.status == 'pending' %}bg-warning
+                                                    {% elif resource.status == 'rejected' %}bg-danger
+                                                    {% else %}bg-secondary{% endif %} mb-1">
+                                                    {{ resource.get_status_display }}
+                                                </span>
+                                                <h6 class="mb-0">
+                                                    <a href="{% url 'resource_detail' resource.id %}" class="text-decoration-none text-dark">
+                                                        {{ resource.title|truncatechars:40 }}
+                                                    </a>
+                                                </h6>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-clock me-1"></i>{{ resource.upload_date|timesince }} ago
+                                                    <i class="fas fa-download ms-2 me-1"></i>{{ resource.download_count }} downloads
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            {% if user.upload_count > 5 %}
+                                <div class="text-center mt-3">
+                                    <a href="{% url 'my_uploads' %}" class="btn btn-outline-primary btn-sm">
+                                        View All Uploads
+                                    </a>
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <p class="text-muted text-center py-3">You haven't uploaded any resources yet.</p>
+                        {% endif %}
+                    {% endwith %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-fire text-primary-blue me-2"></i>Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-3">
+                        <a href="{% url 'upload_resource' %}" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-upload me-2"></i>Upload New Resource
+                        </a>
+                        <a href="{% url 'browse_resources' %}" class="btn btn-outline-success btn-lg">
+                            <i class="fas fa-search me-2"></i>Browse Resources
+                        </a>
+                        <a href="{% url 'request_list' %}" class="btn btn-outline-info btn-lg">
+                            <i class="fas fa-hand-holding-heart me-2"></i>View Requests
+                        </a>
+                        <a href="{% url 'my_uploads' %}" class="btn btn-outline-secondary btn-lg">
+                            <i class="fas fa-file-alt me-2"></i>My Uploads
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

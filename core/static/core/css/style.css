@@ -1,0 +1,740 @@
+/* ========================================
+   KUHeS Knowledge Bank - OFFICIAL BRANDING
+   ======================================== */
+
+/* KUHeS Official Colors */
+:root {
+    --kuhes-blue: #0033A0;
+    --kuhes-gold: #FFB81C;
+    --kuhes-teal: #00A5B0;
+    --kuhes-gray: #53565A;
+    --kuhes-light-bg: #F5F5F5;
+    --kuhes-white: #FFFFFF;
+    --kuhes-success: #2E7D32;
+    --kuhes-warning: #ED6C02;
+    --kuhes-error: #D32F2F;
+    --kuhes-info: #0288D1;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, #0033A0, #00A5B0);
+    --gradient-gold: linear-gradient(135deg, #FFB81C, #FFD700);
+    --gradient-success: linear-gradient(135deg, #2E7D32, #4CAF50);
+
+    /* Shadows */
+    --shadow-sm: 0 2px 4px rgba(0,51,160,0.1);
+    --shadow-md: 0 4px 8px rgba(0,51,160,0.15);
+    --shadow-lg: 0 8px 16px rgba(0,51,160,0.2);
+    --shadow-gold: 0 4px 12px rgba(255,184,28,0.3);
+}
+
+/* ========================================
+   Typography - KUHeS Fonts
+   ======================================== */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@400;600;700&display=swap');
+
+body {
+    font-family: 'Open Sans', sans-serif;
+    color: var(--kuhes-gray);
+    background-color: var(--kuhes-light-bg);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    color: var(--kuhes-blue);
+    letter-spacing: -0.02em;
+}
+
+/* ========================================
+   Toast Notifications - KUHeS Branded
+   ======================================== */
+.toast-container {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+    align-items: center;
+    width: auto;
+    max-width: 90%;
+}
+
+.toast-message {
+    min-width: 300px;
+    max-width: 500px;
+    margin-bottom: 10px;
+    padding: 1rem 1.5rem;
+    border-radius: 50px;
+    color: white;
+    font-weight: 600;
+    font-family: 'Montserrat', sans-serif;
+    box-shadow: var(--shadow-lg);
+    animation: slideDown 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    pointer-events: auto;
+    border: 2px solid transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.toast-message::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: rgba(255,255,255,0.3);
+    animation: progress 3s linear forwards;
+}
+
+@keyframes progress {
+    0% { width: 0; }
+    100% { width: 100%; }
+}
+
+.toast-message.success {
+    background: var(--gradient-success);
+    border-color: var(--kuhes-gold);
+}
+
+.toast-message.error {
+    background: linear-gradient(135deg, #D32F2F, #B71C1C);
+    border-color: var(--kuhes-gold);
+}
+
+.toast-message.warning {
+    background: linear-gradient(135deg, #ED6C02, #F57C00);
+    border-color: var(--kuhes-gold);
+    color: white;
+}
+
+.toast-message.info {
+    background: var(--gradient-primary);
+    border-color: var(--kuhes-gold);
+}
+
+.toast-message i {
+    font-size: 1.3rem;
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));
+}
+
+.toast-close {
+    margin-left: auto;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+    background: rgba(255,255,255,0.2);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toast-close:hover {
+    opacity: 1;
+    background: rgba(255,255,255,0.3);
+    transform: scale(1.1);
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+}
+
+/* ========================================
+   Branded Navigation
+   ======================================== */
+.navbar {
+    background: var(--kuhes-white) !important;
+    border-bottom: 3px solid var(--kuhes-gold);
+    box-shadow: var(--shadow-sm);
+}
+
+.navbar-brand {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: 1.5rem;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+}
+
+.navbar-brand img {
+    filter: drop-shadow(var(--shadow-sm));
+}
+
+.nav-link {
+    font-weight: 600;
+    color: var(--kuhes-gray) !important;
+    position: relative;
+    padding: 0.5rem 1rem !important;
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 1rem;
+    right: 1rem;
+    height: 3px;
+    background: var(--gradient-gold);
+    transform: scaleX(0);
+    transition: transform 0.2s ease;
+    border-radius: 3px 3px 0 0;
+}
+
+.nav-link:hover::after,
+.nav-link.active::after {
+    transform: scaleX(1);
+}
+
+/* ========================================
+   Branded Cards
+   ======================================== */
+.card {
+    border: none;
+    border-radius: 16px;
+    background: var(--kuhes-white);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-primary);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.card:hover::before {
+    opacity: 1;
+}
+
+.card-header {
+    background: linear-gradient(135deg, rgba(0,51,160,0.03), rgba(0,165,176,0.03));
+    border-bottom: 2px solid var(--kuhes-gold);
+    font-weight: 700;
+    color: var(--kuhes-blue);
+}
+
+/* ========================================
+   Branded Buttons
+   ======================================== */
+.btn {
+    border-radius: 50px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    font-family: 'Montserrat', sans-serif;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    border: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn:active::after {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-primary {
+    background: var(--gradient-primary);
+    color: white;
+    box-shadow: var(--shadow-md);
+}
+
+.btn-primary:hover {
+    background: var(--kuhes-blue);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-gold {
+    background: var(--gradient-gold);
+    color: var(--kuhes-blue);
+    box-shadow: var(--shadow-gold);
+}
+
+.btn-gold:hover {
+    background: var(--kuhes-gold);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-outline-primary {
+    background: transparent;
+    border: 2px solid var(--kuhes-blue);
+    color: var(--kuhes-blue);
+}
+
+.btn-outline-primary:hover {
+    background: var(--kuhes-blue);
+    color: white;
+}
+
+/* ========================================
+   Badges with KUHeS Colors
+   ======================================== */
+.badge {
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge-primary {
+    background: var(--kuhes-blue);
+    color: white;
+}
+
+.badge-gold {
+    background: var(--kuhes-gold);
+    color: var(--kuhes-blue);
+}
+
+.badge-teal {
+    background: var(--kuhes-teal);
+    color: white;
+}
+
+.badge-success {
+    background: var(--kuhes-success);
+    color: white;
+}
+
+.badge-warning {
+    background: var(--kuhes-warning);
+    color: white;
+}
+
+.badge-danger {
+    background: var(--kuhes-error);
+    color: white;
+}
+
+/* Resource type badges */
+.badge-handout { background: #E3F2FD; color: #1565C0; }
+.badge-past-paper { background: #FFF3E0; color: #E65100; }
+.badge-lecture-note { background: #E8F5E9; color: #2E7D32; }
+.badge-video { background: #F3E5F5; color: #6A1B9A; }
+.badge-clinical-guide { background: #FFEBEE; color: #C62828; }
+
+/* ========================================
+   Stats Cards with Branding
+   ======================================== */
+.stat-card {
+    background: var(--gradient-primary);
+    color: white;
+    border-radius: 20px;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: var(--gradient-gold);
+    opacity: 0.1;
+    transform: rotate(30deg);
+}
+
+.stat-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: var(--kuhes-gold);
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    font-family: 'Montserrat', sans-serif;
+    line-height: 1.2;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.9;
+}
+
+/* ========================================
+   Form Elements
+   ======================================== */
+.form-control, .form-select {
+    border: 2px solid #E0E0E0;
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--kuhes-blue);
+    box-shadow: 0 0 0 4px rgba(0,51,160,0.1);
+    outline: none;
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--kuhes-blue);
+    margin-bottom: 0.5rem;
+}
+
+/* ========================================
+   Progress Bars
+   ======================================== */
+.progress {
+    height: 8px;
+    border-radius: 4px;
+    background: #E0E0E0;
+    overflow: hidden;
+}
+
+.progress-bar {
+    background: var(--gradient-primary);
+    position: relative;
+    overflow: hidden;
+}
+
+.progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* ========================================
+   Alerts with Branding
+   ======================================== */
+.alert {
+    border: none;
+    border-radius: 12px;
+    border-left: 6px solid transparent;
+    padding: 1rem 1.5rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.alert-success {
+    background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
+    border-left-color: var(--kuhes-success);
+    color: #1B5E20;
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
+    border-left-color: var(--kuhes-warning);
+    color: #E65100;
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, #FFEBEE, #FFCDD2);
+    border-left-color: var(--kuhes-error);
+    color: #B71C1C;
+}
+
+.alert-info {
+    background: linear-gradient(135deg, #E1F5FE, #B3E5FC);
+    border-left-color: var(--kuhes-info);
+    color: #01579B;
+}
+
+/* ========================================
+   Loading Spinner with Branding
+   ======================================== */
+.spinner-brand {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(0,51,160,0.1);
+    border-top-color: var(--kuhes-blue);
+    border-right-color: var(--kuhes-gold);
+    border-radius: 50%;
+    animation: spin-brand 1s linear infinite;
+}
+
+@keyframes spin-brand {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Pulse animation */
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(0,51,160,0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(0,51,160,0); }
+    100% { box-shadow: 0 0 0 0 rgba(0,51,160,0); }
+}
+
+/* ========================================
+   Footer Branding
+   ======================================== */
+footer {
+    background: var(--kuhes-blue) !important;
+    color: white;
+    border-top: 4px solid var(--kuhes-gold) !important;
+}
+
+footer a {
+    color: var(--kuhes-gold) !important;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+/* ========================================
+   KUHeS Pattern Overlay
+   ======================================== */
+.bg-pattern {
+    position: relative;
+    overflow: hidden;
+}
+
+.bg-pattern::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url("{% static 'core/images/patterns/pattern-light.svg' %}");
+    background-size: 200px;
+    background-repeat: repeat;
+    opacity: 0.05;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ========================================
+   Mobile Bottom Navigation with Branding
+   ======================================== */
+.bottom-nav {
+    background: var(--kuhes-white);
+    border-top: 3px solid var(--kuhes-gold);
+    box-shadow: var(--shadow-lg);
+}
+
+.bottom-nav-item {
+    color: var(--kuhes-gray);
+    transition: all 0.2s ease;
+}
+
+.bottom-nav-item i {
+    font-size: 1.5rem;
+    margin-bottom: 0.2rem;
+}
+
+.bottom-nav-item.active {
+    color: var(--kuhes-blue);
+    transform: translateY(-2px);
+}
+
+.bottom-nav-item.active i {
+    text-shadow: var(--shadow-gold);
+}
+
+/* ========================================
+   KUHeS Specific Components
+   ======================================== */
+
+/* KUHeS Hero Section */
+.hero-section {
+    background: var(--gradient-primary);
+    color: white;
+    position: relative;
+    overflow: hidden;
+    padding: 4rem 0;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="0,0 100,0 100,100" fill="rgba(255,184,28,0.1)"/></svg>');
+    background-size: cover;
+    opacity: 0.3;
+}
+
+.hero-title {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+
+.hero-subtitle {
+    font-size: 1.25rem;
+    opacity: 0.9;
+    max-width: 600px;
+}
+
+/* KUHeS Timeline */
+.timeline-item {
+    position: relative;
+    padding: 1.5rem;
+    border-left: 3px solid var(--kuhes-gold);
+    margin-left: 1rem;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -0.5rem;
+    top: 1.5rem;
+    width: 1rem;
+    height: 1rem;
+    background: var(--kuhes-blue);
+    border: 3px solid var(--kuhes-gold);
+    border-radius: 50%;
+}
+
+/* KUHeS Quote Block */
+.quote-block {
+    background: linear-gradient(135deg, rgba(0,51,160,0.05), rgba(255,184,28,0.05));
+    border-left: 6px solid var(--kuhes-gold);
+    padding: 1.5rem;
+    border-radius: 0 20px 20px 0;
+    font-style: italic;
+}
+
+.quote-author {
+    color: var(--kuhes-blue);
+    font-weight: 700;
+    margin-top: 1rem;
+}
+
+/* ========================================
+   Animations
+   ======================================== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+
+/* ========================================
+   Print Styles
+   ======================================== */
+@media print {
+    .navbar, footer, .btn, .toast-container {
+        display: none !important;
+    }
+
+    body {
+        background: white;
+    }
+
+    .card {
+        break-inside: avoid;
+        border: 1px solid var(--kuhes-blue);
+    }
+}
+
+/* ========================================
+   Mobile Responsive Toast
+   ======================================== */
+@media (max-width: 768px) {
+    .toast-container {
+        top: 70px;
+        width: 90%;
+        max-width: none;
+    }
+
+    .toast-message {
+        min-width: auto;
+        width: 100%;
+        padding: 0.875rem 1.25rem;
+        font-size: 0.9rem;
+    }
+}

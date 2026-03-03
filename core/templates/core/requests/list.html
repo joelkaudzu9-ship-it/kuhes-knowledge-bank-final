@@ -1,0 +1,164 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Resource Requests{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-hand-holding-heart me-2 text-primary-blue"></i>Resource Requests</h1>
+        <a href="{% url 'create_request' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>New Request
+        </a>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-0">Open</h6>
+                            <h2 class="mt-2 mb-0">{{ counts.open|default:0 }}</h2>
+                        </div>
+                        <i class="fas fa-door-open fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-0">In Progress</h6>
+                            <h2 class="mt-2 mb-0">{{ counts.in_progress|default:0 }}</h2>
+                        </div>
+                        <i class="fas fa-spinner fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-0">Fulfilled</h6>
+                            <h2 class="mt-2 mb-0">{{ counts.fulfilled|default:0 }}</h2>
+                        </div>
+                        <i class="fas fa-check-circle fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Requests List -->
+    <div class="row">
+        {% for req in requests %}
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 {% if req.urgency == 'urgent' %}border-danger{% endif %}">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap">
+                        <div class="mb-2">
+                            <span class="badge
+                                {% if req.status == 'open' %}bg-success
+                                {% elif req.status == 'in_progress' %}bg-warning
+                                {% elif req.status == 'fulfilled' %}bg-info
+                                {% else %}bg-secondary{% endif %} me-1">
+                                {{ req.get_status_display }}
+                            </span>
+                            <span class="badge
+                                {% if req.urgency == 'urgent' %}bg-danger
+                                {% elif req.urgency == 'high' %}bg-warning
+                                {% elif req.urgency == 'medium' %}bg-info
+                                {% else %}bg-secondary{% endif %} me-1">
+                                {{ req.get_urgency_display }}
+                            </span>
+
+                            <!-- Pinned Badge -->
+                            {% if req.is_pinned %}
+                                <span class="badge bg-warning me-1"><i class="fas fa-thumbtack"></i> Pinned</span>
+                            {% endif %}
+
+                            <!-- Priority Badge -->
+                            {% if req.priority > 0 %}
+                                <span class="badge bg-primary">Priority {{ req.priority }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <h5 class="card-title">
+                        <a href="{% url 'request_detail' req.id %}" class="text-decoration-none text-dark">
+                            {{ req.title }}
+                        </a>
+                    </h5>
+
+                    <p class="card-text text-muted small">{{ req.description|truncatechars:100 }}</p>
+
+                    <div class="mb-2">
+                        {% if req.level == 'premed' and req.premed_subject %}
+                            <span class="badge bg-info me-1">{{ req.get_premed_subject_display }}</span>
+                        {% endif %}
+
+                        {% if req.school %}
+                            <span class="badge bg-secondary me-1">{{ req.get_school_display|truncatechars:20 }}</span>
+                        {% endif %}
+
+                        {% if req.programme %}
+                            <span class="badge bg-secondary me-1">{{ req.programme }}</span>
+                        {% endif %}
+
+                        {% if req.year_of_study %}
+                            <span class="badge bg-secondary me-1">Year {{ req.year_of_study }}</span>
+                        {% endif %}
+
+                        {% if req.course_code %}
+                            <span class="badge bg-secondary">{{ req.course_code }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div>
+                            <i class="fas fa-arrow-up text-success me-1"></i>
+                            <strong>{{ req.upvotes }}</strong> votes
+                            <span class="text-muted mx-2">•</span>
+                            <i class="fas fa-user me-1"></i>{{ req.requester.username }}
+                            <span class="text-muted mx-2">•</span>
+                            <small class="text-muted">{{ req.created_at|timesince }} ago</small>
+                        </div>
+
+                        <a href="{% url 'request_detail' req.id %}" class="btn btn-sm btn-outline-primary">
+                            View <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+
+                {% if req.deadline %}
+                <div class="card-footer bg-transparent">
+                    <small class="text-muted">
+                        <i class="fas fa-calendar-alt me-1"></i>
+                        Deadline: {{ req.deadline|date:"M d, Y" }}
+                    </small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+                    <h3>No requests yet</h3>
+                    <p class="text-muted">Be the first to request a resource!</p>
+                    <a href="{% url 'create_request' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Create Request
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

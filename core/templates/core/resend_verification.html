@@ -1,0 +1,39 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Resend Verification{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary-blue text-white">
+                    <h4 class="mb-0"><i class="fas fa-envelope me-2"></i>Resend Verification Email</h4>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-muted mb-4">Enter your email to receive a new verification link.</p>
+
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" name="email" id="email" class="form-control" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 py-2">
+                            <i class="fas fa-paper-plane me-2"></i>Send Verification Email
+                        </button>
+                    </form>
+
+                    <hr>
+
+                    <p class="text-center mb-0">
+                        <a href="{% url 'login' %}" class="text-primary-blue">Back to Login</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

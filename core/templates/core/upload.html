@@ -1,0 +1,236 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Upload Resource{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-primary-blue text-white">
+                    <h4 class="mb-0"><i class="fas fa-upload me-2"></i>Upload Resource</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" enctype="multipart/form-data" id="uploadForm">
+                        {% csrf_token %}
+
+                        <!-- Basic Info -->
+                        <div class="mb-3">
+                            <label for="id_title" class="form-label">Title *</label>
+                            <input type="text" name="title" id="id_title" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_description" class="form-label">Description</label>
+                            <textarea name="description" id="id_description" class="form-control" rows="3"></textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="id_resource_type" class="form-label">Resource Type *</label>
+                                <select name="resource_type" id="id_resource_type" class="form-control" required>
+                                    <option value="">Select type...</option>
+                                    <option value="handout">📄 Handout</option>
+                                    <option value="past_paper">📝 Past Paper</option>
+                                    <option value="lecture_note">📚 Lecture Note</option>
+                                    <option value="research">🔬 Research Article</option>
+                                    <option value="clinical_guide">🩺 Clinical Guide</option>
+                                    <option value="video">🎥 Video</option>
+                                    <option value="study_set">📋 Study Set</option>
+                                    <option value="summary">📊 Summary Sheet</option>
+                                    <option value="lab_manual">🧪 Lab Manual</option>
+                                    <option value="case_study">🏥 Case Study</option>
+                                    <option value="formula_sheet">📐 Formula Sheet</option>
+                                    <option value="diagram">📊 Diagram</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="id_level" class="form-label">Academic Level *</label>
+                                <select name="level" id="id_level" class="form-control" required>
+                                    <option value="">Select level...</option>
+                                    <option value="premed">🎓 Pre-Med</option>
+                                    <option value="undergraduate">📘 Undergraduate</option>
+                                    <option value="postgraduate">📚 Postgraduate</option>
+                                    <option value="diploma">📖 Diploma</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Pre-Med Section -->
+                        <div id="premedSection" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-8 mb-3">
+                                    <label for="id_premed_subject" class="form-label">Pre-Med Subject *</label>
+                                    <select name="premed_subject" id="id_premed_subject" class="form-control">
+                                        <option value="">Select subject...</option>
+                                        <option value="biology">🧬 Biology</option>
+                                        <option value="chemistry">🧪 Chemistry</option>
+                                        <option value="physics">⚡ Physics</option>
+                                        <option value="mathematics">📐 Mathematics</option>
+                                        <option value="ict">💻 ICT</option>
+                                        <option value="communication">🗣️ Communication</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <label for="id_premed_semester" class="form-label">Semester</label>
+                                    <select name="semester" id="id_premed_semester" class="form-control">
+                                        <option value="">Select...</option>
+                                        <option value="1">Semester 1</option>
+                                        <option value="2">Semester 2</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Undergraduate Section -->
+                        <div id="undergradSection" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_school" class="form-label">School *</label>
+                                    <select name="school" id="id_school" class="form-control">
+                                        <option value="">Select school...</option>
+                                        <option value="medicine">Medicine and Oral Health</option>
+                                        <option value="nursing">Nursing</option>
+                                        <option value="maternal">Maternal, Neonatal and Reproductive Health</option>
+                                        <option value="life_sciences">Life Sciences and Allied Health Professions</option>
+                                        <option value="public_health">Global and Public Health</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_programme" class="form-label">Programme</label>
+                                    <input type="text" name="programme" id="id_programme" class="form-control" placeholder="e.g., MBBS, BNS, BPharm">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="id_year_of_study" class="form-label">Year of Study</label>
+                                    <input type="number" name="year_of_study" id="id_year_of_study" class="form-control" min="1" max="6">
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <label for="id_semester" class="form-label">Semester</label>
+                                    <select name="semester" id="id_semester" class="form-control">
+                                        <option value="">Select...</option>
+                                        <option value="1">Semester 1</option>
+                                        <option value="2">Semester 2</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <label for="id_academic_year" class="form-label">Academic Year</label>
+                                    <input type="text" name="academic_year" id="id_academic_year" class="form-control" placeholder="e.g., 2024/2025">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Common Fields -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="id_lecturer" class="form-label">Lecturer</label>
+                                <input type="text" name="lecturer" id="id_lecturer" class="form-control" placeholder="Dr. Banda">
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="id_course_code" class="form-label">Course Code</label>
+                                <input type="text" name="course_code" id="id_course_code" class="form-control" placeholder="e.g., PRE101">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_tags" class="form-label">Tags</label>
+                            <input type="text" name="tags" id="id_tags" class="form-control" placeholder="e.g., biology, cells, mitosis">
+                            <small class="text-muted">Separate tags with commas</small>
+                        </div>
+
+                        <!-- File Upload Section (hidden for videos) -->
+                        <div id="fileUploadSection">
+                            <div class="mb-3">
+                                <label for="id_file" class="form-label">File *</label>
+                                <input type="file" name="file" id="id_file" class="form-control">
+                                <small class="text-muted">Allowed: PDF, PPT, DOC, JPG, PNG (Max 25MB)</small>
+                            </div>
+                        </div>
+
+                        <!-- Video Link Section (hidden by default) -->
+                        <div id="videoLinkSection" style="display: none;">
+                            <div class="mb-3">
+                                <label for="id_video_link" class="form-label">Video Link *</label>
+                                <input type="url" name="video_link" id="id_video_link" class="form-control" placeholder="https://www.youtube.com/watch?v=...">
+                                <small class="text-muted">Enter YouTube, Vimeo, or other video URL</small>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-cloud-upload-alt me-2"></i>Upload Resource
+                            </button>
+                            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const levelSelect = document.getElementById('id_level');
+    const resourceTypeSelect = document.getElementById('id_resource_type');
+    const premedSection = document.getElementById('premedSection');
+    const undergradSection = document.getElementById('undergradSection');
+    const fileUploadSection = document.getElementById('fileUploadSection');
+    const videoLinkSection = document.getElementById('videoLinkSection');
+    const fileInput = document.getElementById('id_file');
+    const videoLinkInput = document.getElementById('id_video_link');
+
+    const premedSubject = document.getElementById('id_premed_subject');
+    const school = document.getElementById('id_school');
+
+    function toggleSections() {
+        const level = levelSelect.value;
+        const resourceType = resourceTypeSelect.value;
+
+        // Hide all sections first
+        premedSection.style.display = 'none';
+        undergradSection.style.display = 'none';
+
+        // Show relevant section based on level
+        if (level === 'premed') {
+            premedSection.style.display = 'block';
+            premedSubject.required = true;
+            school.required = false;
+        } else if (level === 'undergraduate') {
+            undergradSection.style.display = 'block';
+            premedSubject.required = false;
+            school.required = true;
+        } else {
+            premedSubject.required = false;
+            school.required = false;
+        }
+
+        // Toggle file vs video based on resource type
+        if (resourceType === 'video') {
+            fileUploadSection.style.display = 'none';
+            videoLinkSection.style.display = 'block';
+            fileInput.required = false;
+            videoLinkInput.required = true;
+        } else {
+            fileUploadSection.style.display = 'block';
+            videoLinkSection.style.display = 'none';
+            fileInput.required = true;
+            videoLinkInput.required = false;
+        }
+    }
+
+    levelSelect.addEventListener('change', toggleSections);
+    resourceTypeSelect.addEventListener('change', toggleSections);
+});
+</script>
+{% endblock %}

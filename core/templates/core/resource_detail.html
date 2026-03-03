@@ -1,0 +1,261 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{{ resource.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Status Banner for Rejected Resources Only (most important) -->
+    {% if resource.status == 'rejected' %}
+    <div class="alert alert-danger mb-4">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-exclamation-triangle me-3 fa-2x"></i>
+            <div>
+                <h4 class="alert-heading mb-1">❌ Resource Rejected</h4>
+                <p class="mb-0"><strong>Reason:</strong> {{ resource.rejection_reason }}</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'browse_resources' %}">Browse</a></li>
+                    <li class="breadcrumb-item active">{{ resource.title|truncatechars:30 }}</li>
+                </ol>
+            </nav>
+
+            <div class="card shadow">
+                <div class="card-header bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">{{ resource.title }}</h3>
+                        <span class="badge
+                            {% if resource.status == 'approved' %}bg-success
+                            {% elif resource.status == 'pending' %}bg-warning
+                            {% elif resource.status == 'rejected' %}bg-danger
+                            {% else %}bg-secondary{% endif %} fs-6">
+                            {{ resource.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <!-- Metadata -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <table class="table table-sm">
+                                <tr>
+                                    <th>Level:</th>
+                                    <td>{{ resource.get_level_display }}</td>
+                                </tr>
+                                {% if resource.level == 'premed' and resource.premed_subject %}
+                                <tr>
+                                    <th>Subject:</th>
+                                    <td>{{ resource.get_premed_subject_display }}</td>
+                                </tr>
+                                {% endif %}
+                                {% if resource.school %}
+                                <tr>
+                                    <th>School:</th>
+                                    <td>{{ resource.get_school_display }}</td>
+                                </tr>
+                                {% endif %}
+                                {% if resource.programme %}
+                                <tr>
+                                    <th>Programme:</th>
+                                    <td>{{ resource.programme }}</td>
+                                </tr>
+                                {% endif %}
+                                {% if resource.year_of_study %}
+                                <tr>
+                                    <th>Year:</th>
+                                    <td>{{ resource.year_of_study }}</td>
+                                </tr>
+                                {% endif %}
+                            </table>
+                        </div>
+
+                        <div class="col-md-6">
+                            <table class="table table-sm">
+                                <tr>
+                                    <th>Uploaded by:</th>
+                                    <td>{{ resource.uploader.username }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Date:</th>
+                                    <td>{{ resource.upload_date|date:"F j, Y" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Downloads:</th>
+                                    <td>{{ resource.download_count }}</td>
+                                </tr>
+                                <tr>
+                                    <th>File size:</th>
+                                    <td>{{ resource.file_size|filesizeformat }}</td>
+                                </tr>
+                                <tr>
+                                    <th>File type:</th>
+                                    <td>{{ resource.file_type|upper }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Video Embed (if video resource) -->
+                    {% if resource.resource_type == 'video' and resource.video_link %}
+                    <div class="mb-4">
+                        <h5>Video</h5>
+                        <div class="ratio ratio-16x9">
+                            {% if 'youtube.com' in resource.video_link or 'youtu.be' in resource.video_link %}
+                                <iframe src="{{ resource.video_link|cut:'watch?v='|cut:'youtu.be/'|cut:'youtube.com/watch?v=' }}?rel=0"
+                                        allowfullscreen></iframe>
+                            {% elif 'vimeo.com' in resource.video_link %}
+                                <iframe src="{{ resource.video_link }}" allowfullscreen></iframe>
+                            {% else %}
+                                <a href="{{ resource.video_link }}" target="_blank" class="btn btn-primary">
+                                    <i class="fas fa-play me-2"></i>Watch Video
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Rating Section - Only show for approved resources -->
+                    {% if resource.status == 'approved' %}
+                    <div class="mb-4">
+                        <h5>Rating</h5>
+                        <div class="d-flex align-items-center">
+                            <!-- Display average rating -->
+                            <div class="me-4">
+                                {% with ratings=resource.ratings.all %}
+                                    {% if ratings %}
+                                        {% with total=ratings|length %}
+                                            {% with sum=0 %}
+                                                {% for rating in ratings %}
+                                                    {% with sum=sum|add:rating.rating %}{% endwith %}
+                                                {% endfor %}
+                                                {% with avg=sum|divisibleby:total %}
+                                                    <span class="display-6">
+                                                        {% for i in "12345"|make_list %}
+                                                            {% if forloop.counter <= avg %}
+                                                                ⭐
+                                                            {% else %}
+                                                                ☆
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    </span>
+                                                    <small class="text-muted">({{ total }} ratings)</small>
+                                                {% endwith %}
+                                            {% endwith %}
+                                        {% endwith %}
+                                    {% else %}
+                                        <span class="text-muted">No ratings yet</span>
+                                    {% endif %}
+                                {% endwith %}
+                            </div>
+
+                            <!-- Rate this resource -->
+                            <div class="dropdown">
+                                <button class="btn btn-outline-warning dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    Rate this
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <form method="post" action="{% url 'rate_resource' resource.id %}" class="p-3">
+                                            {% csrf_token %}
+                                            <div class="rating-stars mb-2">
+                                                {% for i in "54321"|make_list %}
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" name="rating" value="{{ i }}" id="star{{ i }}">
+                                                        <label class="form-check-label" for="star{{ i }}">
+                                                            {% for s in "12345"|make_list %}
+                                                                {% if forloop.counter <= i|add:0 %}
+                                                                    ⭐
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </label>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                            <button type="submit" class="btn btn-sm btn-warning w-100">Submit Rating</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Description -->
+                    {% if resource.description %}
+                    <div class="mb-4">
+                        <h5>Description</h5>
+                        <p>{{ resource.description|linebreaks }}</p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Tags -->
+                    {% if resource.tags %}
+                    <div class="mb-4">
+                        <h5>Tags</h5>
+                        {% for tag in resource.tags.split %}
+                            <span class="badge bg-light text-dark me-1">#{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Action Buttons - Conditionally shown based on permissions -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
+
+                        <!-- DOWNLOAD BUTTON -->
+                        {% if can_download and resource.file %}
+                            <a href="{% url 'download_resource' resource.id %}" class="btn btn-primary btn-lg px-5">
+                                <i class="fas fa-download me-2"></i>Download
+                                {% if resource.status != 'approved' %}
+                                    <span class="badge bg-light text-dark ms-2">Review Copy</span>
+                                {% endif %}
+                            </a>
+                        {% elif not can_download and resource.file %}
+                            <button class="btn btn-secondary btn-lg px-5" disabled>
+                                <i class="fas fa-download me-2"></i>Download Unavailable
+                            </button>
+                        {% endif %}
+
+                        <!-- BOOKMARK BUTTON - Only for approved resources -->
+                        {% if can_interact and resource.status == 'approved' %}
+                            <a href="{% url 'toggle_bookmark' resource.id %}" class="btn btn-outline-warning btn-lg px-4">
+                                {% if request.user in resource.bookmarked_by.all %}
+                                    <i class="fas fa-bookmark me-2"></i>Bookmarked
+                                {% else %}
+                                    <i class="far fa-bookmark me-2"></i>Bookmark
+                                {% endif %}
+                            </a>
+                        {% endif %}
+
+                        <!-- BACK BUTTON -->
+                        <button class="btn btn-outline-secondary btn-lg px-4" onclick="window.history.back()">
+                            <i class="fas fa-arrow-left me-2"></i>Back
+                        </button>
+                    </div>
+
+                    <!-- Single UPLOADER MESSAGE for Pending Resources (most relevant for uploaders) -->
+                    {% if user == resource.uploader and resource.status == 'pending' %}
+                        <div class="alert alert-warning mt-4">
+                            <i class="fas fa-clock me-2"></i>
+                            <strong>Pending Review:</strong> Your resource is awaiting moderator approval.
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="card-footer bg-white text-muted">
+                    <small>
+                        <i class="fas fa-info-circle me-1"></i>
+                        Downloaded {{ resource.download_count }} times • Uploaded {{ resource.upload_date|timesince }} ago
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

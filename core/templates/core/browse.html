@@ -1,0 +1,204 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Browse Resources{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4"><i class="fas fa-search me-2 text-primary-blue"></i>Smart Search</h1>
+
+    <!-- Advanced Search Form -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" id="searchForm">
+                <!-- Main Search -->
+                <div class="input-group mb-3">
+                    <span class="input-group-text bg-white"><i class="fas fa-search text-primary-blue"></i></span>
+                    <input type="text" name="q" class="form-control form-control-lg"
+                           placeholder="Search by title, description, tags, lecturer, course code..."
+                           value="{{ query }}">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-search me-2"></i>Search
+                    </button>
+                </div>
+
+                <!-- Filters Row -->
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Resource Type</label>
+                        <select name="type" class="form-control" onchange="this.form.submit()">
+                            <option value="">All Types</option>
+                            <option value="handout" {% if selected_type == 'handout' %}selected{% endif %}>📄 Handout</option>
+                            <option value="past_paper" {% if selected_type == 'past_paper' %}selected{% endif %}>📝 Past Paper</option>
+                            <option value="lecture_note" {% if selected_type == 'lecture_note' %}selected{% endif %}>📚 Lecture Note</option>
+                            <option value="video" {% if selected_type == 'video' %}selected{% endif %}>🎥 Video</option>
+                            <option value="clinical_guide" {% if selected_type == 'clinical_guide' %}selected{% endif %}>🩺 Clinical Guide</option>
+                            <option value="lab_manual" {% if selected_type == 'lab_manual' %}selected{% endif %}>🧪 Lab Manual</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Level</label>
+                        <select name="level" class="form-control" onchange="this.form.submit()">
+                            <option value="">All Levels</option>
+                            <option value="premed" {% if selected_level == 'premed' %}selected{% endif %}>🎓 Pre-Med</option>
+                            <option value="undergraduate" {% if selected_level == 'undergraduate' %}selected{% endif %}>📘 Undergraduate</option>
+                            <option value="postgraduate" {% if selected_level == 'postgraduate' %}selected{% endif %}>📚 Postgraduate</option>
+                        </select>
+                    </div>
+
+                    <!-- Dynamic Filters based on Level -->
+                    {% if selected_level == 'premed' %}
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Subject</label>
+                        <select name="subject" class="form-control" onchange="this.form.submit()">
+                            <option value="">All Subjects</option>
+                            {% for code, name in subjects %}
+                                <option value="{{ code }}" {% if selected_subject == code %}selected{% endif %}>{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+
+                    {% if selected_level == 'undergraduate' %}
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">School</label>
+                        <select name="school" class="form-control" onchange="this.form.submit()">
+                            <option value="">All Schools</option>
+                            {% for code, name in schools %}
+                                <option value="{{ code }}" {% if selected_school == code %}selected{% endif %}>{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Year</label>
+                        <select name="year" class="form-control" onchange="this.form.submit()">
+                            <option value="">All Years</option>
+                            {% for y in years %}
+                                <option value="{{ y }}" {% if selected_year == y|stringformat:"i" %}selected{% endif %}>Year {{ y }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Sort By</label>
+                        <select name="sort" class="form-control" onchange="this.form.submit()">
+                            <option value="-upload_date" {% if selected_sort == '-upload_date' %}selected{% endif %}>Newest First</option>
+                            <option value="upload_date" {% if selected_sort == 'upload_date' %}selected{% endif %}>Oldest First</option>
+                            <option value="-download_count" {% if selected_sort == '-download_count' %}selected{% endif %}>Most Downloaded</option>
+                            <option value="title" {% if selected_sort == 'title' %}selected{% endif %}>Title A-Z</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Active Filters -->
+                {% if query or selected_type or selected_level or selected_subject or selected_school or selected_year %}
+                <div class="mt-3">
+                    <span class="text-muted me-2">Active filters:</span>
+                    <a href="{% url 'browse_resources' %}" class="btn btn-sm btn-outline-danger">
+                        <i class="fas fa-times me-1"></i>Clear All
+                    </a>
+                </div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+
+    <!-- Results Count -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <p class="text-muted mb-0">Found <strong>{{ resources|length }}</strong> resources</p>
+    </div>
+
+    <!-- Results Grid -->
+    <div class="row">
+        {% for resource in resources %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 resource-card">
+                <div class="card-body">
+                    <!-- Type Badge -->
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="badge bg-primary">{{ resource.get_resource_type_display }}</span>
+                        <small class="text-muted">{{ resource.upload_date|date:"M d, Y" }}</small>
+                    </div>
+
+                    <!-- Title -->
+                    <h5 class="card-title">
+                        <a href="{% url 'resource_detail' resource.id %}" class="text-decoration-none text-dark">
+                            {{ resource.title }}
+                        </a>
+                    </h5>
+
+                    <!-- Description -->
+                    <p class="card-text small text-muted">{{ resource.description|truncatechars:100 }}</p>
+
+                    <!-- Level/Tags -->
+                    <div class="mb-2">
+                        {% if resource.level == 'premed' %}
+                            <span class="badge bg-info text-white me-1">{{ resource.get_premed_subject_display }}</span>
+                        {% elif resource.level == 'undergraduate' %}
+                            <span class="badge bg-secondary me-1">{{ resource.get_school_display|truncatechars:20 }}</span>
+                            {% if resource.year_of_study %}
+                                <span class="badge bg-secondary">Year {{ resource.year_of_study }}</span>
+                            {% endif %}
+                        {% endif %}
+
+                        {% if resource.semester %}
+                            <span class="badge bg-secondary">Semester {{ resource.semester }}</span>
+                        {% endif %}
+
+                        {% if resource.course_code %}
+                            <span class="badge bg-secondary">{{ resource.course_code }}</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Tags -->
+                    {% if resource.tags %}
+                        <div class="mb-2">
+                            {% for tag in resource.tags.split|slice:":3" %}
+                                <span class="badge bg-light text-dark me-1">#{{ tag }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Metadata -->
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <small class="text-muted">
+                            <i class="fas fa-user me-1"></i>{{ resource.uploader.username }}
+                            <i class="fas fa-download ms-2 me-1"></i>{{ resource.download_count }}
+                        </small>
+
+                        <a href="{% url 'resource_detail' resource.id %}" class="btn btn-sm btn-outline-primary">
+                            View <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-search fa-4x text-muted mb-3"></i>
+                    <h3>No resources found</h3>
+                    <p class="text-muted">Try adjusting your search or filters</p>
+                    <a href="{% url 'upload_resource' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Upload Resource
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+.resource-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.resource-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,102,204,0.2);
+}
+</style>
+{% endblock %}

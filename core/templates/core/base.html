@@ -1,0 +1,542 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'core/images/favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'core/images/favicon-16x16.png' %}">
+    <link rel="apple-touch-icon" href="{% static 'core/images/apple-touch-icon.png' %}">
+
+    <!-- Open Graph / Social Media -->
+    <meta property="og:title" content="KUHeS Knowledge Bank">
+    <meta property="og:description" content="Your central hub for academic resources at Kamuzu University of Health Sciences">
+    <meta property="og:image" content="{% static 'core/images/og-image.jpg' %}">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <!-- Preconnect for Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Defer non-critical CSS -->
+    <link rel="preload" href="{% static 'core/css/style.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{% static 'core/css/style.css' %}"></noscript>
+
+    <title>KUHeS Knowledge Bank - {% block title %}{% endblock %}</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-blue: #0066CC;
+            --secondary-green: #00A86B;
+            --accent-orange: #FF8C42;
+            --background-light: #f8f9fa;
+            --text-dark: #333333;
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body: 'Open Sans', sans-serif;
+        }
+
+        body {
+            background-color: var(--background-light);
+            font-family: var(--font-body);
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-heading);
+            font-weight: 700;
+        }
+
+        body.fade-out {
+            opacity: 0;
+        }
+
+        .navbar-brand {
+            transition: transform 0.3s ease;
+        }
+
+        .navbar-brand:hover {
+            transform: scale(1.02);
+        }
+
+        .logo-circle {
+            width: 45px;
+            height: 45px;
+            background-color: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .logo-circle img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 2px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-blue);
+            border-color: var(--primary-blue);
+            font-family: var(--font-heading);
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            background-color: #0052a3;
+            border-color: #0052a3;
+        }
+
+        .btn-success {
+            background-color: var(--secondary-green);
+            border-color: var(--secondary-green);
+            font-family: var(--font-heading);
+            font-weight: 600;
+        }
+
+        .text-primary-blue {
+            color: var(--primary-blue);
+        }
+
+        .bg-primary-blue {
+            background-color: var(--primary-blue);
+        }
+
+        .border-primary-blue {
+            border-color: var(--primary-blue) !important;
+        }
+
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,102,204,0.2);
+        }
+
+        .alert {
+            border-radius: 8px;
+        }
+
+        footer {
+            margin-top: auto;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: 0;
+            right: -5px;
+            font-size: 0.6rem;
+            padding: 0.2rem 0.4rem;
+        }
+
+        /* Loading Overlay */
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.3s ease;
+        }
+
+        /* Spinner */
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--background-light);
+            border-top: 5px solid var(--primary-blue);
+            border-right: 5px solid var(--secondary-green);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            box-shadow: 0 4px 15px rgba(0,102,204,0.2);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Hide default Django messages */
+        .messages, .alert, [class*="alert-"] {
+            display: none;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .navbar-brand span {
+                font-size: 1rem;
+            }
+
+            .logo-circle {
+                width: 40px;
+                height: 40px;
+            }
+
+            .btn {
+                white-space: normal;
+                word-wrap: break-word;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            .spinner {
+                width: 40px;
+                height: 40px;
+                border-width: 4px;
+            }
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="page-transition">
+    <!-- Add loading spinner overlay -->
+    <div id="loading-overlay" style="display: none;">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm py-2">
+        <div class="container">
+            <!-- Logo and Brand -->
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'index' %}">
+                <!-- KUHeS Logo inside white circle -->
+                <div class="logo-circle me-2">
+                    <img src="{% static 'core/images/kuhes-logo.png' %}"
+                         alt="KUHeS Logo"
+                         onerror="this.style.display='none'; document.getElementById('fallback-circle').style.display='flex';">
+                </div>
+
+                <!-- Fallback circle with K (shown if image fails to load) -->
+                <div id="fallback-circle" class="logo-circle me-2 bg-primary-blue text-white d-none align-items-center justify-content-center fw-bold" style="font-size: 20px; background-color: var(--primary-blue);">
+                    K
+                </div>
+
+                <span class="fw-bold text-primary-blue">KUHeS</span>
+                <span class="ms-2 d-none d-sm-inline text-dark fw-normal">Knowledge Bank</span>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    {% if user.is_authenticated %}
+                        <!-- Dashboard Link -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'dashboard' %}">
+                                <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                            </a>
+                        </li>
+
+                        <!-- Moderator Link -->
+                        {% if user.role == 'moderator' or user.role == 'senior_moderator' or user.role == 'admin' %}
+                            <li class="nav-item">
+                                <a class="nav-link text-warning fw-semibold" href="{% url 'moderator_dashboard' %}">
+                                    <i class="fas fa-shield-alt me-1"></i>Moderate
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        <!-- Upload Link -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'upload_resource' %}">
+                                <i class="fas fa-upload me-1"></i>Upload
+                            </a>
+                        </li>
+
+                        <!-- Browse Link -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'browse_resources' %}">
+                                <i class="fas fa-search me-1"></i>Browse
+                            </a>
+                        </li>
+
+                        <!-- Requests Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="requestsDropdown" role="button"
+                               data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-hand-holding-heart me-1"></i>Requests
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="requestsDropdown">
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'request_list' %}">
+                                        <i class="fas fa-list me-2"></i>All Requests
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'my_requests' %}">
+                                        <i class="fas fa-user me-2"></i>My Requests
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'create_request' %}">
+                                        <i class="fas fa-plus me-2"></i>Create Request
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <!-- Analytics Link -->
+                        {% if user.role == 'moderator' or user.role == 'senior_moderator' or user.role == 'admin' %}
+                            <li class="nav-item">
+                                <a class="nav-link text-info" href="{% url 'analytics_dashboard' %}">
+                                    <i class="fas fa-chart-line me-1"></i>Analytics
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        <!-- Notifications Bell -->
+                        <li class="nav-item">
+                            <a class="nav-link position-relative" href="{% url 'notifications' %}">
+                                <i class="fas fa-bell"></i>
+                                {% if unread_notifications > 0 %}
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notification-badge">
+                                        {{ unread_notifications }}
+                                    </span>
+                                {% endif %}
+                            </a>
+                        </li>
+
+                        <!-- User Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown"
+                               role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user-circle me-1 fs-5"></i>
+                                <span class="d-none d-lg-inline">{{ user.username|truncatechars:10 }}</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'profile' %}">
+                                        <i class="fas fa-id-card me-2"></i>Profile
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'my_uploads' %}">
+                                        <i class="fas fa-file me-2"></i>My Uploads
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'my_bookmarks' %}">
+                                        <i class="fas fa-bookmark me-2 text-warning"></i>My Bookmarks
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'change_password' %}">
+                                        <i class="fas fa-key me-2"></i>Change Password
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item text-danger" href="{% url 'logout' %}">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <!-- Public Navigation -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'browse_resources' %}">
+                                <i class="fas fa-search me-1"></i>Browse
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}">
+                                <i class="fas fa-sign-in-alt me-1"></i>Login
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'register' %}">
+                                <i class="fas fa-user-plus me-1"></i>Register
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Django Messages (hidden, will be converted to toasts) -->
+    <div style="display: none;">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="messages">
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-grow-1">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white mt-5 py-4 border-top">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="mb-0 text-muted small">
+                        &copy; {% now "Y" %} KUHeS Knowledge Bank. All rights reserved.
+                    </p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <small class="text-muted">
+                        <i class="fas fa-envelope me-1"></i> support@kuhes.ac.mw
+                    </small>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Smooth page transitions
+        document.addEventListener('click', function(e) {
+            const link = e.target.closest('a');
+            if (link &&
+                link.href &&
+                !link.hasAttribute('download') &&
+                !link.target &&
+                !link.closest('.dropdown-toggle') &&
+                link.href.indexOf(window.location.origin) === 0) {
+
+                e.preventDefault();
+                document.body.classList.add('fade-out');
+
+                const overlay = document.getElementById('loading-overlay');
+                if (overlay) {
+                    overlay.style.display = 'flex';
+                }
+
+                setTimeout(() => {
+                    window.location.href = link.href;
+                }, 300);
+            }
+        });
+
+        window.addEventListener('pageshow', function(event) {
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay) {
+                overlay.style.display = 'none';
+            }
+            document.body.classList.remove('fade-out');
+        });
+    </script>
+
+    <!-- Toast Notifications Container (SINGLE INSTANCE) -->
+    <div id="toast-container" style="
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        pointer-events: none;
+    "></div>
+
+    <!-- Toast JavaScript -->
+    <script src="{% static 'core/js/toasts.js' %}"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Toast system initializing...');
+
+        function showMessageAsToast(message, tags) {
+            console.log('Showing toast:', message, tags);
+
+            let type = 'info';
+            if (tags.includes('success')) type = 'success';
+            else if (tags.includes('error')) type = 'error';
+            else if (tags.includes('warning')) type = 'warning';
+            else if (tags.includes('info')) type = 'info';
+
+            if (window.toast) {
+                window.toast[type](message, 4000);
+            } else {
+                console.error('Toast not initialized');
+            }
+        }
+
+        const messages = document.querySelectorAll('.messages .alert, .message, [class*="alert-"]');
+        console.log('Found messages:', messages.length);
+
+        messages.forEach(msg => {
+            const message = msg.textContent.trim();
+            const classes = msg.className;
+            showMessageAsToast(message, classes);
+            msg.style.display = 'none';
+        });
+
+        const messageElements = document.querySelectorAll('[data-toast-message]');
+        messageElements.forEach(el => {
+            const message = el.dataset.toastMessage;
+            const type = el.dataset.toastType || 'info';
+            if (window.toast) {
+                window.toast[type](message, 4000);
+            }
+        });
+    });
+
+    window.showToast = function(message, type = 'info', duration = 4000) {
+        if (window.toast) {
+            window.toast[type](message, duration);
+        } else {
+            console.warn('Toast not ready, showing alert:', message);
+            alert(message);
+        }
+    };
+
+    window.showSuccess = (msg) => window.showToast(msg, 'success');
+    window.showError = (msg) => window.showToast(msg, 'error');
+    window.showWarning = (msg) => window.showToast(msg, 'warning');
+    window.showInfo = (msg) => window.showToast(msg, 'info');
+    </script>
+
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
