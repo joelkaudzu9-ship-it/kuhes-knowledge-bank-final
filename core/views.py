@@ -23,6 +23,21 @@ from .forms import ResourceUploadForm, ResourceRequestForm
 from .utils import send_verification_email, send_password_reset_email
 from .notifications.smart_notify import SmartNotifier
 
+import logging
+logger = logging.getLogger(__name__)
+
+# Add this debug view temporarily
+def debug_view(request):
+    """Debug endpoint to test if Django is working"""
+    try:
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        user_count = User.objects.count()
+        return HttpResponse(f"✅ Django is working! Users: {user_count}")
+    except Exception as e:
+        return HttpResponse(f"❌ Error: {str(e)}", status=500)
+
+
 
 def index(request):
     """Home page"""
