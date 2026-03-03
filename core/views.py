@@ -144,19 +144,30 @@ def forgot_password(request):
 
     if request.method == 'POST':
         email = request.POST.get('email')
-        print(f"Email submitted: {email}")
-    if request.method == 'POST':
-        email = request.POST.get('email')
+        print(f"📧 Email submitted: {email}")
 
         try:
             user = User.objects.get(email=email, is_active=True)
-            send_password_reset_email(user, request)
-            messages.success(request, 'Password reset link sent to your email!')
+            print(f"✅ User found: {user.username}")
+
+            # Try to send email
+            try:
+                send_password_reset_email(user, request)
+                print(f"📧 Password reset email function completed")
+                messages.success(request, 'Password reset link sent to your email!')
+            except Exception as e:
+                print(f"❌ Email sending failed: {str(e)}")
+                messages.error(request, 'Error sending email. Please try again later.')
+
         except User.DoesNotExist:
+            print(f"❌ User not found: {email}")
             # Don't reveal that email doesn't exist for security
             messages.success(request, 'If an account exists with that email, a reset link has been sent.')
         except Exception as e:
-            messages.error(request, f'Error sending email: {str(e)}')
+            print(f"❌ Unexpected error: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            messages.error(request, 'An error occurred. Please try again.')
 
         return redirect('login')
 

@@ -125,12 +125,28 @@ def send_password_reset_email(user, request):
     # Create reset token
     reset = PasswordReset.objects.create(user=user)
 
+    # 🔍 DEBUG PRINT 1
+    print(f"🔐 Password reset token created for: {user.email}")
+    print(f"🔐 Token: {reset.token}")
+
     # Build reset link
     reset_link = request.build_absolute_uri(
         reverse('reset_password', args=[str(reset.token)])
     )
 
-    # Email content
+    # 🔍 DEBUG PRINT 2
+    print(f"🔗 Reset link: {reset_link}")
+
+    # 🔍 DEBUG PRINT 3 - Check email settings
+    print(f"📧 Email settings:")
+    print(f"   - FROM: {settings.DEFAULT_FROM_EMAIL}")
+    print(f"   - TO: {user.email}")
+    print(f"   - HOST: {settings.EMAIL_HOST}")
+    print(f"   - PORT: {settings.EMAIL_PORT}")
+    print(f"   - USER: {settings.EMAIL_HOST_USER}")
+    print(f"   - USE_TLS: {settings.EMAIL_USE_TLS}")
+
+    # Email content (your existing code)
     subject = '🔑 Reset your KUHeS Knowledge Bank password'
     message = f"""
 Hello {user.username},
@@ -199,14 +215,26 @@ If you didn't request this, please ignore this email and ensure your account is 
 </html>
 """
 
+    # 🔍 DEBUG PRINT 4 - Before sending
+    print(f"📤 Attempting to send email...")
+
     # Send email
-    send_mail(
-        subject,
-        message,
-        settings.DEFAULT_FROM_EMAIL,
-        [user.email],
-        html_message=html_message,
-        fail_silently=False,
-    )
+    try:
+        send_mail(
+            subject,
+            message,
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            html_message=html_message,
+            fail_silently=False,
+        )
+        # 🔍 DEBUG PRINT 5 - Success
+        print(f"✅ Email sent successfully to {user.email}")
+    except Exception as e:
+        # 🔍 DEBUG PRINT 6 - Error
+        print(f"❌ FAILED to send email: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise  # Re-raise so the view knows it failed
 
     return reset
