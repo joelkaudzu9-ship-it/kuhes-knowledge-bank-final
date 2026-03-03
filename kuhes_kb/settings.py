@@ -67,7 +67,7 @@ WSGI_APPLICATION = 'kuhes_kb.wsgi.application'
 import dj_database_url
 from decouple import config
 
-# Use environment variable for database URL on Render, otherwise local config
+# Use environment variable for database URL on Render
 if config('DATABASE_URL', default=None):
     # Production on Render
     DATABASES = {
