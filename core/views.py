@@ -135,78 +135,56 @@ def resend_verification(request):
     return render(request, 'core/resend_verification.html')
 
 
-@login_required
 def forgot_password(request):
-    """Handle forgot password request with proper error handling"""
+    """Handle forgot password request"""
     if request.method == 'POST':
         email = request.POST.get('email')
-        
-        # Validate email format
-        if not email or '@' not in email:
-            messages.error(request, 'Please enter a valid email address.')
-            return redirect('forgot_password')
-        
+
         try:
             user = User.objects.get(email=email, is_active=True)
             send_password_reset_email(user, request)
             messages.success(request, 'Password reset link sent to your email!')
-            
         except User.DoesNotExist:
             # Don't reveal that email doesn't exist for security
             messages.success(request, 'If an account exists with that email, a reset link has been sent.')
-            
         except Exception as e:
-            # Log the error but show user-friendly message
-            print(f"Password reset error: {e}")
-            messages.error(request, 'An error occurred. Please try again later.')
-        
+            messages.error(request, f'Error sending email: {str(e)}')
+
         return redirect('login')
 
     return render(request, 'core/forgot_password.html')
 
 
-@login_required
+
 def reset_password(request, token):
-    """Reset password using token - with proper form"""
-    try:
-        reset = get_object_or_404(PasswordReset, token=token)
-        
-        if not reset.is_valid():
-            messages.error(request, 'Password reset link has expired. Please request a new one.')
-            reset.delete()
-            return redirect('forgot_password')
-        
-        if request.method == 'POST':
-            password1 = request.POST.get('password1')
-            password2 = request.POST.get('password2')
-            
-            # Validation
-            if not password1 or len(password1) < 8:
-                messages.error(request, 'Password must be at least 8 characters long.')
-                return redirect('reset_password', token=token)
-            
-            if password1 != password2:
-                messages.error(request, 'Passwords do not match!')
-                return redirect('reset_password', token=token)
-            
-            # Set new password
-            user = reset.user
-            user.set_password(password1)
-            user.save()
-            
-            # Delete used token
-            reset.delete()
-            
-            messages.success(request, 'Password reset successfully! You can now log in.')
-            return redirect('login')
-        
-        # GET request - show form
-        return render(request, 'core/reset_password.html', {'token': token})
-        
-    except Exception as e:
-        print(f"Reset password error: {e}")
-        messages.error(request, 'Invalid or expired reset link.')
+    """Reset password using token"""
+    reset = get_object_or_404(PasswordReset, token=token)
+
+    if not reset.is_valid():
+        messages.error(request, 'Password reset link has expired. Please request a new one.')
+        reset.delete()
         return redirect('forgot_password')
+
+    if request.method == 'POST':
+        password1 = request.POST.get('password1')
+        password2 = request.POST.get('password2')
+
+        if password1 != password2:
+            messages.error(request, 'Passwords do not match!')
+            return redirect('reset_password', token=token)
+
+        # Set new password
+        user = reset.user
+        user.set_password(password1)
+        user.save()
+
+        # Delete used token
+        reset.delete()
+
+        messages.success(request, 'Password reset successfully! You can now log in with your new password.')
+        return redirect('login')
+
+    return render(request, 'core/reset_password.html', {'token': token})
 
 
 def custom_logout(request):
