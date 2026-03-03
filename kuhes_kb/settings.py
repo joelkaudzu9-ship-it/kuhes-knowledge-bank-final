@@ -208,3 +208,8 @@ if os.environ.get('RENDER'):
     print(f"EMAIL_HOST_USER: {os.environ.get('EMAIL_HOST_USER')}")
     print(f"EMAIL_USE_TLS: {os.environ.get('EMAIL_USE_TLS')}")
     print("=" * 50)
+
+# Port configuration for Render
+import os
+PORT = os.environ.get('PORT', 10000)
+print(f"🚀 Server will bind to port: {PORT}")
