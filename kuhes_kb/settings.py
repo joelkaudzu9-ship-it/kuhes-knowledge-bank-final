@@ -209,7 +209,18 @@ if os.environ.get('RENDER'):
     print(f"EMAIL_USE_TLS: {os.environ.get('EMAIL_USE_TLS')}")
     print("=" * 50)
 
-# Port configuration for Render
+# ========== RENDER PORT FIX ==========
 import os
-PORT = os.environ.get('PORT', 10000)
-print(f"🚀 Server will bind to port: {PORT}")
+import sys
+
+PORT = os.environ.get('PORT', '10000')
+print(f"\n{'='*50}")
+print(f"🔧 RENDER DEBUG INFO")
+print(f"{'='*50}")
+print(f"PORT env var: {os.environ.get('PORT', 'NOT SET')}")
+print(f"Using PORT: {PORT}")
+print(f"All env vars with PORT: {[k for k in os.environ.keys() if 'PORT' in k]}")
+print(f"{'='*50}\n")
+
+# Force gunicorn to use correct port
+os.environ.setdefault('PORT', PORT)
