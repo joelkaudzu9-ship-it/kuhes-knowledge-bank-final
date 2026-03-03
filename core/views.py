@@ -179,12 +179,18 @@ def custom_logout(request):
 
 
 class CustomLoginView(LoginView):
-    """Custom login view"""
     template_name = 'core/login.html'
 
     def form_valid(self, form):
-        messages.success(self.request, f'Welcome back, {form.get_user().username}!')
-        return super().form_valid(form)
+        try:
+            messages.success(self.request, f'Welcome back, {form.get_user().username}!')
+            return super().form_valid(form)
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Login error: {e}", exc_info=True)
+            messages.error(self.request, 'An error occurred during login.')
+            return redirect('login')
 
     def form_invalid(self, form):
         messages.error(self.request, 'Invalid email or password. Please try again.')

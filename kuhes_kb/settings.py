@@ -67,7 +67,11 @@ WSGI_APPLICATION = 'kuhes_kb.wsgi.application'
 import dj_database_url
 from decouple import config
 
-# Use environment variable for database URL on Render, otherwise local config
+# Database Configuration
+import dj_database_url
+from decouple import config
+
+# Use environment variable for database URL on Render
 if config('DATABASE_URL', default=None):
     # Production on Render
     DATABASES = {
@@ -160,3 +164,37 @@ if not DEBUG:
 
     # Static files storage for production
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Detailed logging for debugging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'DEBUG',  # This will show ALL request errors
+            'propagate': False,
+        },
+    },
+}
