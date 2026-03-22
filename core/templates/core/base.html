@@ -42,7 +42,7 @@
             --kuhes-white: #FFFFFF;
             --safe-area-top: env(safe-area-inset-top, 0px);
             --safe-area-bottom: env(safe-area-inset-bottom, 0px);
-            --header-height: 70px;
+            --header-height: 60px;
         }
 
         * {
@@ -130,37 +130,6 @@
             transition: width 0.3s ease;
         }
 
-        /* Skeleton Loader */
-        .skeleton {
-            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-            background-size: 200% 100%;
-            animation: skeleton-loading 1.5s infinite;
-            border-radius: 8px;
-        }
-
-        @keyframes skeleton-loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-
-        /* Page Transition */
-        .page-transition {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: white;
-            z-index: 9998;
-            transform: translateX(100%);
-            transition: transform 0.3s ease;
-            pointer-events: none;
-        }
-
-        .page-transition.active {
-            transform: translateX(0);
-        }
-
         /* Button Loading State */
         .btn-loading {
             position: relative;
@@ -187,56 +156,22 @@
             animation: spin 0.8s linear infinite;
         }
 
-        /* Card Skeleton */
-        .card-skeleton {
-            background: white;
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 16px;
-            border: 1px solid rgba(0, 51, 160, 0.1);
-        }
-
-        .skeleton-line {
-            height: 16px;
-            margin: 8px 0;
-            border-radius: 8px;
-        }
-
-        .skeleton-line.short { width: 60%; }
-        .skeleton-line.medium { width: 80%; }
-        .skeleton-line.long { width: 100%; }
-
-        .skeleton-icon {
-            width: 45px;
-            height: 45px;
-            border-radius: 12px;
-        }
-
-        /* Lazy Image Loading */
-        .lazy-image {
-            background: linear-gradient(135deg, #f0f0f0, #e0e0e0);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .lazy-image::after {
-            content: '';
-            position: absolute;
+        /* Page Transition */
+        .page-transition {
+            position: fixed;
             top: 0;
-            left: -100%;
+            left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            animation: shimmer 1.5s infinite;
+            background: white;
+            z-index: 9998;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            pointer-events: none;
         }
 
-        .lazy-image.loaded::after {
-            display: none;
-        }
-
-        @keyframes shimmer {
-            0% { left: -100%; }
-            100% { left: 100%; }
+        .page-transition.active {
+            transform: translateX(0);
         }
 
         body.fade-out {
@@ -256,11 +191,13 @@
             pointer-events: none;
         }
 
-        /* Hamburger Menu Styles */
+        /* ========== IMPROVED HAMBURGER MENU STYLES ========== */
+
+        /* Hamburger Menu Button - Top Right */
         .hamburger-menu {
             display: none;
             position: relative;
-            z-index: 1001;
+            z-index: 1002;
             cursor: pointer;
             background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
             width: 45px;
@@ -271,6 +208,12 @@
             align-items: center;
             transition: all 0.3s ease;
             margin-left: auto;
+            box-shadow: 0 2px 8px rgba(0, 51, 160, 0.2);
+        }
+
+        .hamburger-menu:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 51, 160, 0.3);
         }
 
         .hamburger-menu span {
@@ -294,7 +237,7 @@
             transform: rotate(-45deg) translate(6px, -6px);
         }
 
-        /* Overlay Navigation */
+        /* Overlay Navigation - Improved Layout */
         .nav-overlay {
             position: fixed;
             top: 0;
@@ -303,13 +246,11 @@
             height: 100%;
             background: rgba(255, 255, 255, 0.98);
             backdrop-filter: blur(20px);
-            z-index: 1000;
+            z-index: 1001;
             visibility: hidden;
             opacity: 0;
             transition: visibility 0.3s, opacity 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            overflow-y: auto;
         }
 
         .nav-overlay.active {
@@ -318,30 +259,172 @@
         }
 
         .nav-overlay-content {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 80px 24px 40px 24px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* User Profile Section in Menu */
+        .nav-user-profile {
             text-align: center;
-            padding: 2rem;
-            max-width: 90%;
-            width: 100%;
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 2px solid rgba(0, 51, 160, 0.1);
         }
 
-        .nav-overlay-content a {
-            display: block;
-            font-size: 1.5rem;
-            color: var(--kuhes-blue);
-            text-decoration: none;
-            padding: 1rem;
-            margin: 0.5rem 0;
-            transition: all 0.3s ease;
-            font-weight: 600;
-            border-radius: 12px;
-        }
-
-        .nav-overlay-content a:hover {
-            transform: translateX(10px);
+        .nav-user-avatar {
+            width: 80px;
+            height: 80px;
             background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            box-shadow: 0 8px 20px rgba(0, 51, 160, 0.2);
+        }
+
+        .nav-user-avatar i {
+            font-size: 2.5rem;
             color: white;
         }
 
+        .nav-user-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--kuhes-blue);
+            margin-bottom: 4px;
+        }
+
+        .nav-user-email {
+            font-size: 0.8rem;
+            color: var(--kuhes-gray);
+            word-break: break-all;
+        }
+
+        /* Navigation Links Container */
+        .nav-links {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 32px;
+        }
+
+        /* Individual Navigation Items */
+        .nav-link-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 20px;
+            border-radius: 16px;
+            color: var(--kuhes-gray);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: transparent;
+        }
+
+        .nav-link-item i {
+            width: 24px;
+            font-size: 1.2rem;
+            color: var(--kuhes-blue);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link-item span {
+            flex: 1;
+        }
+
+        .nav-link-item:hover {
+            background: rgba(0, 51, 160, 0.08);
+            transform: translateX(8px);
+        }
+
+        .nav-link-item:hover i {
+            transform: scale(1.1);
+            color: var(--kuhes-teal);
+        }
+
+        /* Active link style */
+        .nav-link-item.active {
+            background: linear-gradient(135deg, rgba(0, 51, 160, 0.1), rgba(0, 165, 176, 0.1));
+            color: var(--kuhes-blue);
+            font-weight: 600;
+        }
+
+        .nav-link-item.active i {
+            color: var(--kuhes-teal);
+        }
+
+        /* Divider */
+        .nav-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 51, 160, 0.2), transparent);
+            margin: 16px 0;
+        }
+
+        /* Logout Link */
+        .nav-link-item.logout {
+            color: #dc3545;
+        }
+
+        .nav-link-item.logout i {
+            color: #dc3545;
+        }
+
+        .nav-link-item.logout:hover {
+            background: rgba(220, 53, 69, 0.1);
+        }
+
+        /* Badge for notifications */
+        .nav-badge {
+            background: #dc3545;
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 30px;
+            margin-left: auto;
+        }
+
+        /* Footer Links in Menu */
+        .nav-footer {
+            padding-top: 24px;
+            border-top: 1px solid rgba(0, 51, 160, 0.1);
+            text-align: center;
+        }
+
+        .nav-footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .nav-footer-links a {
+            color: var(--kuhes-gray);
+            text-decoration: none;
+            font-size: 0.8rem;
+            transition: color 0.2s ease;
+        }
+
+        .nav-footer-links a:hover {
+            color: var(--kuhes-blue);
+        }
+
+        .nav-copyright {
+            font-size: 0.7rem;
+            color: var(--kuhes-gray);
+            margin-top: 16px;
+            opacity: 0.6;
+        }
+
+        /* Mobile Responsive */
         @media (max-width: 768px) {
             .hamburger-menu {
                 display: flex;
@@ -355,9 +438,34 @@
                 display: none !important;
             }
 
-            .nav-overlay-content a {
-                font-size: 1.2rem;
-                padding: 0.8rem;
+            .nav-overlay-content {
+                padding: 70px 20px 30px 20px;
+            }
+
+            .nav-user-avatar {
+                width: 70px;
+                height: 70px;
+            }
+
+            .nav-user-avatar i {
+                font-size: 2rem;
+            }
+
+            .nav-link-item {
+                padding: 12px 16px;
+                font-size: 0.95rem;
+            }
+
+            .nav-link-item i {
+                width: 22px;
+                font-size: 1.1rem;
+            }
+        }
+
+        /* Desktop - Hide hamburger */
+        @media (min-width: 769px) {
+            .hamburger-menu {
+                display: none !important;
             }
         }
 
@@ -410,46 +518,6 @@
             transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(255,184,28,0.4);
         }
-
-        /* ========== FROZEN NAVBAR ENHANCEMENT ========== */
-        /* Ensure navbar stays perfectly frozen at top with all its styling */
-        .navbar {
-            position: sticky !important;
-            top: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
-            z-index: 1030 !important;
-            background: white !important;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08) !important;
-            width: 100% !important;
-            backdrop-filter: blur(0px) !important;
-            transform: translateZ(0);
-            will-change: transform;
-        }
-
-        /* Additional reinforcement for mobile */
-        @supports (position: sticky) {
-            .navbar {
-                position: sticky !important;
-                top: 0 !important;
-            }
-        }
-
-        /* Prevent any content from peeking behind the frozen navbar */
-        main {
-            scroll-margin-top: var(--header-height);
-        }
-
-        /* Ensure the safe-area padding is preserved while frozen */
-        .navbar .container {
-            padding-top: 0;
-            padding-bottom: 0;
-        }
-
-        /* Make sure the navbar content is properly aligned with safe area */
-        .navbar {
-            padding-top: max(0.5rem, var(--safe-area-top)) !important;
-        }
     </style>
 
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
@@ -480,43 +548,143 @@
     <!-- Page Transition Element -->
     <div class="page-transition"></div>
 
-    <!-- Overlay Navigation Menu -->
+    <!-- Improved Hamburger Overlay Navigation -->
     <div class="nav-overlay" id="navOverlay">
         <div class="nav-overlay-content">
             {% if user.is_authenticated %}
-                <div class="mb-4 pb-2 border-bottom">
-                    <div class="d-flex align-items-center justify-content-center gap-3 mb-2">
-                        <div class="bg-primary bg-opacity-10 rounded-circle p-3">
-                            <i class="fas fa-user fa-2x" style="color: var(--kuhes-blue);"></i>
-                        </div>
+                <!-- User Profile Section -->
+                <div class="nav-user-profile">
+                    <div class="nav-user-avatar">
+                        <i class="fas fa-user-circle"></i>
                     </div>
-                    <div class="fw-bold">{{ user.get_full_name|default:user.username }}</div>
-                    <small class="text-muted">{{ user.email|truncatechars:30 }}</small>
+                    <div class="nav-user-name">{{ user.get_full_name|default:user.username }}</div>
+                    <div class="nav-user-email">{{ user.email }}</div>
                 </div>
-                <a href="{% url 'dashboard' %}" data-replace="true"><i class="fas fa-tachometer-alt me-3"></i>Dashboard</a>
-                {% if user.role == 'moderator' or user.role == 'senior_moderator' or user.role == 'admin' %}
-                    <a href="{% url 'moderator_dashboard' %}" data-replace="true"><i class="fas fa-shield-alt me-3"></i>Moderate</a>
-                {% endif %}
-                <a href="{% url 'upload_resource' %}" data-replace="true"><i class="fas fa-upload me-3"></i>Upload</a>
-                <a href="{% url 'browse_resources' %}" data-replace="true"><i class="fas fa-search me-3"></i>Browse</a>
-                <a href="{% url 'request_list' %}" data-replace="true"><i class="fas fa-list me-3"></i>All Requests</a>
-                <a href="{% url 'my_requests' %}" data-replace="true"><i class="fas fa-user me-3"></i>My Requests</a>
-                <a href="{% url 'create_request' %}" data-replace="true"><i class="fas fa-plus-circle me-3"></i>Create Request</a>
-                <a href="{% url 'my_bookmarks' %}" data-replace="true"><i class="fas fa-bookmark me-3"></i>Bookmarks</a>
-                <a href="{% url 'profile' %}" data-replace="true"><i class="fas fa-id-card me-3"></i>Profile</a>
-                <a href="{% url 'my_uploads' %}" data-replace="true"><i class="fas fa-cloud-upload-alt me-3"></i>My Uploads</a>
-                <a href="{% url 'change_password' %}" data-replace="true"><i class="fas fa-key me-3"></i>Security</a>
-                <hr class="my-3">
-                <a href="{% url 'logout' %}" data-replace="true" class="text-danger"><i class="fas fa-sign-out-alt me-3"></i>Logout</a>
+
+                <!-- Navigation Links -->
+                <div class="nav-links">
+                    <a href="{% url 'dashboard' %}" class="nav-link-item" data-replace="true">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+
+                    {% if user.role == 'moderator' or user.role == 'senior_moderator' or user.role == 'admin' %}
+                        <a href="{% url 'moderator_dashboard' %}" class="nav-link-item" data-replace="true">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Moderator Dashboard</span>
+                        </a>
+                    {% endif %}
+
+                    <a href="{% url 'upload_resource' %}" class="nav-link-item" data-replace="true">
+                        <i class="fas fa-upload"></i>
+                        <span>Upload Resource</span>
+                    </a>
+
+                    <a href="{% url 'browse_resources' %}" class="nav-link-item" data-replace="true">
+                        <i class="fas fa-search"></i>
+                        <span>Browse Resources</span>
+                    </a>
+
+                    <div class="nav-divider"></div>
+
+                    <a href="{% url 'request_list' %}" class="nav-link-item" data-replace="true">
+                        <i class="fas fa-list"></i>
+                        <span>All Requests</span>
+                    </a>
+
+                    <a href="{% url 'my_requests' %}" class="nav-link-item" data-replace="true">
+                        <i class="fas fa-user"></i>
+                        <span>My Requests</span>
+                    </a>
+
+                    <a href="{% url 'create_request' %}" class="nav-link-item" data-replace="true">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Create Request</span>
+                    </a>
+
+                    <div class="nav-divider"></div>
+
+                    <a href="{% url 'my_bookmarks' %}" class="nav-link-item" data-replace="true">
+                        <i class="fas fa-bookmark"></i>
+                        <span>Bookmarks</span>
+                    </a>
+
+                    <a href="{% url 'my_uploads' %}" class="nav-link-item" data-replace="true">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <span>My Uploads</span>
+                    </a>
+
+                    <a href="{% url 'profile' %}" class="nav-link-item" data-replace="true">
+                        <i class="fas fa-id-card"></i>
+                        <span>Profile</span>
+                    </a>
+
+                    <a href="{% url 'notifications' %}" class="nav-link-item" data-replace="true">
+                        <i class="fas fa-bell"></i>
+                        <span>Notifications</span>
+                        {% if unread_notifications > 0 %}
+                            <span class="nav-badge">{{ unread_notifications }}</span>
+                        {% endif %}
+                    </a>
+
+                    <a href="{% url 'change_password' %}" class="nav-link-item" data-replace="true">
+                        <i class="fas fa-key"></i>
+                        <span>Change Password</span>
+                    </a>
+
+                    <div class="nav-divider"></div>
+
+                    <a href="{% url 'logout' %}" class="nav-link-item logout" data-replace="true">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
+                </div>
+
+                <!-- Footer Links -->
+                <div class="nav-footer">
+                    <div class="nav-footer-links">
+                        <a href="#">Help & Support</a>
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Terms of Use</a>
+                    </div>
+                    <div class="nav-copyright">
+                        © {% now "Y" %} KUHeS Knowledge Bank
+                    </div>
+                </div>
+
             {% else %}
-                <a href="{% url 'browse_resources' %}" data-replace="true"><i class="fas fa-search me-3"></i>Browse</a>
-                <a href="{% url 'login' %}" data-replace="true"><i class="fas fa-sign-in-alt me-3"></i>Login</a>
-                <a href="{% url 'register' %}" data-replace="true"><i class="fas fa-user-plus me-3"></i>Register</a>
+                <!-- Non-authenticated user menu -->
+                <div class="nav-links">
+                    <a href="{% url 'browse_resources' %}" class="nav-link-item" data-replace="true">
+                        <i class="fas fa-search"></i>
+                        <span>Browse Resources</span>
+                    </a>
+
+                    <a href="{% url 'login' %}" class="nav-link-item" data-replace="true">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span>Login</span>
+                    </a>
+
+                    <a href="{% url 'register' %}" class="nav-link-item" data-replace="true">
+                        <i class="fas fa-user-plus"></i>
+                        <span>Register</span>
+                    </a>
+                </div>
+
+                <div class="nav-footer">
+                    <div class="nav-footer-links">
+                        <a href="#">Help & Support</a>
+                        <a href="#">Privacy Policy</a>
+                    </div>
+                    <div class="nav-copyright">
+                        © {% now "Y" %} KUHeS Knowledge Bank
+                    </div>
+                </div>
             {% endif %}
         </div>
     </div>
 
-    <!-- Navigation - FROZEN AT TOP with enhanced sticky behavior -->
+    <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm py-2 sticky-top" style="padding-top: calc(0.5rem + var(--safe-area-top)) !important;">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="{% url 'index' %}" style="gap: 12px;">
@@ -534,6 +702,7 @@
                 </div>
             </a>
 
+            <!-- Hamburger Menu Button -->
             <div class="hamburger-menu" id="hamburgerBtn">
                 <span></span>
                 <span></span>
@@ -677,28 +846,6 @@
             }
         };
 
-        window.showSkeleton = function(container, count = 3) {
-            if (!container) return;
-            let html = '';
-            for (let i = 0; i < count; i++) {
-                html += `
-                    <div class="card-skeleton skeleton">
-                        <div class="d-flex gap-3 mb-3">
-                            <div class="skeleton-icon skeleton"></div>
-                            <div class="flex-grow-1">
-                                <div class="skeleton-line medium skeleton"></div>
-                                <div class="skeleton-line short skeleton mt-2"></div>
-                            </div>
-                        </div>
-                        <div class="skeleton-line long skeleton"></div>
-                        <div class="skeleton-line long skeleton mt-2"></div>
-                        <div class="skeleton-line short skeleton mt-2"></div>
-                    </div>
-                `;
-            }
-            container.innerHTML = html;
-        };
-
         // Data-replace handling
         document.addEventListener('click', function(e) {
             const link = e.target.closest('a');
@@ -788,31 +935,6 @@
         window.showError = (msg) => window.showToast(msg, 'error');
         window.showWarning = (msg) => window.showToast(msg, 'warning');
         window.showInfo = (msg) => window.showToast(msg, 'info');
-
-        // Lazy image loading
-        const lazyImages = document.querySelectorAll('.lazy-image');
-        const imageObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const img = entry.target;
-                    const dataSrc = img.getAttribute('data-src');
-                    if (dataSrc) {
-                        img.src = dataSrc;
-                        img.classList.add('loaded');
-                        imageObserver.unobserve(img);
-                    }
-                }
-            });
-        });
-        lazyImages.forEach(img => imageObserver.observe(img));
-
-        // Additional scroll reinforcement to ensure navbar stays frozen
-        window.addEventListener('scroll', function() {
-            const navbar = document.querySelector('.navbar');
-            if (navbar && window.scrollY >= 0) {
-                navbar.style.transform = 'translateZ(0)';
-            }
-        });
     </script>
 
     {% block extra_js %}{% endblock %}
