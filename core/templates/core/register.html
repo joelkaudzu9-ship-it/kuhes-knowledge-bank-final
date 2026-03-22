@@ -86,17 +86,12 @@
 
     .form-control.is-valid {
         border-color: #28a745;
+        background-image: none;
     }
 
     .form-control.is-invalid {
         border-color: #dc3545;
-        animation: shake 0.5s ease;
-    }
-
-    @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        25% { transform: translateX(-5px); }
-        75% { transform: translateX(5px); }
+        background-image: none;
     }
 
     /* Password strength meter */
@@ -112,12 +107,28 @@
         height: 100%;
         width: 0;
         transition: width 0.3s ease;
+        border-radius: 2px;
     }
 
-    .strength-bar.weak { width: 25%; background: #dc3545; }
-    .strength-bar.fair { width: 50%; background: #ffc107; }
-    .strength-bar.good { width: 75%; background: #17a2b8; }
-    .strength-bar.strong { width: 100%; background: #28a745; }
+    .strength-bar.weak {
+        width: 25%;
+        background: #dc3545;
+    }
+
+    .strength-bar.fair {
+        width: 50%;
+        background: #ffc107;
+    }
+
+    .strength-bar.good {
+        width: 75%;
+        background: #17a2b8;
+    }
+
+    .strength-bar.strong {
+        width: 100%;
+        background: #28a745;
+    }
 
     .strength-text {
         font-size: 0.75rem;
@@ -139,6 +150,12 @@
         display: flex;
         align-items: center;
         gap: 8px;
+        transition: all 0.2s ease;
+    }
+
+    .requirement-item i {
+        width: 16px;
+        font-size: 0.7rem;
         transition: all 0.2s ease;
     }
 
@@ -185,7 +202,48 @@
         padding-right: 40px;
     }
 
-    /* Button loading */
+    /* Button styling */
+    .btn-primary {
+        background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
+        border: none;
+        border-radius: 12px;
+        padding: 12px 24px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-primary:active::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 51, 160, 0.3);
+    }
+
+    .btn-primary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* Loading state */
     .btn-loading {
         position: relative;
         pointer-events: none;
@@ -234,57 +292,11 @@
         }
 
         .btn {
-            width: 100%;
+            padding: 10px 20px;
         }
 
         .d-flex.gap-2 {
             flex-direction: column;
-        }
-    }
-
-    /* Skeleton loader */
-    .skeleton-circle {
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-        background-size: 200% 100%;
-        animation: skeleton-loading 1.5s infinite;
-    }
-
-    .skeleton-line {
-        height: 16px;
-        border-radius: 8px;
-        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-        background-size: 200% 100%;
-        animation: skeleton-loading 1.5s infinite;
-    }
-
-    .skeleton-card {
-        padding: 24px;
-    }
-
-    @keyframes skeleton-loading {
-        0% { background-position: 200% 0; }
-        100% { background-position: -200% 0; }
-    }
-
-    /* Alert animations */
-    .alert {
-        backdrop-filter: blur(10px);
-        border: none;
-        border-radius: 12px;
-        animation: slideDown 0.4s ease-out;
-    }
-
-    @keyframes slideDown {
-        from {
-            opacity: 0;
-            transform: translateY(-20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
         }
     }
 </style>
@@ -298,171 +310,153 @@
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-md-8 col-lg-6">
-            <!-- Skeleton Loader -->
-            <div id="registerSkeleton" style="display: none;">
-                <div class="text-center mb-4">
-                    <div class="skeleton-circle mx-auto"></div>
-                    <div class="skeleton-line mx-auto mt-3" style="width: 150px; height: 28px;"></div>
+            <div class="register-card card shadow-lg">
+                <div class="card-header text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-plus me-2"></i>
+                        Create Account
+                    </h4>
                 </div>
-                <div class="card skeleton-card">
-                    <div class="skeleton-line" style="height: 50px; margin-bottom: 16px;"></div>
-                    <div class="skeleton-line" style="height: 50px; margin-bottom: 16px;"></div>
-                    <div class="skeleton-line" style="height: 50px; margin-bottom: 16px;"></div>
-                    <div class="skeleton-line" style="height: 50px; margin-bottom: 16px;"></div>
-                    <div class="skeleton-line" style="height: 45px;"></div>
-                </div>
-            </div>
+                <div class="card-body p-4">
+                    <p class="text-muted mb-4">
+                        <i class="fas fa-graduation-cap me-2"></i>
+                        Join the KUHeS Knowledge Bank community
+                    </p>
 
-            <!-- Actual Content -->
-            <div id="registerContent">
-                <div class="register-card card shadow-lg">
-                    <div class="card-header text-white">
-                        <h4 class="mb-0">
-                            <i class="fas fa-user-plus me-2"></i>
-                            Create Account
-                        </h4>
-                    </div>
-                    <div class="card-body p-4">
-                        <p class="text-muted mb-4">
-                            <i class="fas fa-graduation-cap me-2"></i>
-                            Join the KUHeS Knowledge Bank community
-                        </p>
-
-                        <!-- Error Messages -->
-                        {% if form.errors %}
+                    <!-- Error Messages -->
+                    {% if form.errors %}
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
                             <i class="fas fa-exclamation-circle me-2"></i>
                             Please correct the errors below.
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
-                        {% endif %}
+                    {% endif %}
 
-                        <form method="post" id="registerForm" novalidate>
-                            {% csrf_token %}
+                    <form method="post" id="registerForm" novalidate>
+                        {% csrf_token %}
 
-                            <!-- Username Field -->
-                            <div class="mb-3">
-                                <label for="id_username" class="form-label fw-semibold">
-                                    <i class="fas fa-user me-2" style="color: var(--kuhes-blue);"></i>
-                                    Username
-                                </label>
-                                <input type="text"
-                                       name="username"
-                                       id="id_username"
+                        <!-- Username Field -->
+                        <div class="mb-3">
+                            <label for="id_username" class="form-label fw-semibold">
+                                <i class="fas fa-user me-2" style="color: var(--kuhes-blue);"></i>
+                                Username
+                            </label>
+                            <input type="text"
+                                   name="username"
+                                   id="id_username"
+                                   class="form-control"
+                                   placeholder="e.g., johndoe"
+                                   autocomplete="username"
+                                   required>
+                            <div class="invalid-feedback" id="usernameFeedback"></div>
+                            <small class="text-muted" id="usernameHint">3-30 characters, letters, numbers, and underscores only</small>
+                        </div>
+
+                        <!-- Email Field -->
+                        <div class="mb-3">
+                            <label for="id_email" class="form-label fw-semibold">
+                                <i class="fas fa-envelope me-2" style="color: var(--kuhes-blue);"></i>
+                                Email Address
+                            </label>
+                            <input type="email"
+                                   name="email"
+                                   id="id_email"
+                                   class="form-control"
+                                   placeholder="your.name@kuhes.ac.mw"
+                                   autocomplete="email"
+                                   required>
+                            <div class="invalid-feedback" id="emailFeedback"></div>
+                            <div class="valid-feedback" id="emailSuccess"></div>
+                            <small class="text-muted" id="emailHint">Must be @kuhes.ac.mw</small>
+                        </div>
+
+                        <!-- Password Field -->
+                        <div class="mb-3">
+                            <label for="id_password1" class="form-label fw-semibold">
+                                <i class="fas fa-lock me-2" style="color: var(--kuhes-blue);"></i>
+                                Password
+                            </label>
+                            <div class="input-group">
+                                <input type="password"
+                                       name="password1"
+                                       id="id_password1"
                                        class="form-control"
-                                       placeholder="e.g., johndoe"
-                                       autocomplete="username"
+                                       placeholder="Create a strong password"
+                                       autocomplete="new-password"
                                        required>
-                                <div class="invalid-feedback" id="usernameFeedback"></div>
-                                <small class="text-muted" id="usernameHint">3-30 characters, letters, numbers, and underscores only</small>
+                                <button type="button" class="password-toggle" onclick="togglePassword('id_password1')">
+                                    <i class="fas fa-eye" id="toggleIcon1"></i>
+                                </button>
                             </div>
 
-                            <!-- Email Field -->
-                            <div class="mb-3">
-                                <label for="id_email" class="form-label fw-semibold">
-                                    <i class="fas fa-envelope me-2" style="color: var(--kuhes-blue);"></i>
-                                    Email Address
-                                </label>
-                                <input type="email"
-                                       name="email"
-                                       id="id_email"
+                            <div class="strength-meter">
+                                <div class="strength-bar" id="strengthBar"></div>
+                            </div>
+                            <div class="strength-text" id="strengthText"></div>
+
+                            <div class="password-requirements">
+                                <small class="fw-semibold d-block mb-2">Password must contain:</small>
+                                <div class="requirement-item" id="reqLength">
+                                    <i class="fas fa-circle"></i>
+                                    <span>At least 8 characters</span>
+                                </div>
+                                <div class="requirement-item" id="reqUppercase">
+                                    <i class="fas fa-circle"></i>
+                                    <span>At least 1 uppercase letter</span>
+                                </div>
+                                <div class="requirement-item" id="reqLowercase">
+                                    <i class="fas fa-circle"></i>
+                                    <span>At least 1 lowercase letter</span>
+                                </div>
+                                <div class="requirement-item" id="reqNumber">
+                                    <i class="fas fa-circle"></i>
+                                    <span>At least 1 number</span>
+                                </div>
+                                <div class="requirement-item" id="reqSpecial">
+                                    <i class="fas fa-circle"></i>
+                                    <span>At least 1 special character (!@#$%^&*)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Confirm Password Field -->
+                        <div class="mb-4">
+                            <label for="id_password2" class="form-label fw-semibold">
+                                <i class="fas fa-check-circle me-2" style="color: var(--kuhes-blue);"></i>
+                                Confirm Password
+                            </label>
+                            <div class="input-group">
+                                <input type="password"
+                                       name="password2"
+                                       id="id_password2"
                                        class="form-control"
-                                       placeholder="your.name@kuhes.ac.mw"
-                                       autocomplete="email"
+                                       placeholder="Confirm your password"
+                                       autocomplete="new-password"
                                        required>
-                                <div class="invalid-feedback" id="emailFeedback"></div>
-                                <div class="valid-feedback" id="emailSuccess"></div>
-                                <small class="text-muted" id="emailHint">Must be @kuhes.ac.mw</small>
+                                <button type="button" class="password-toggle" onclick="togglePassword('id_password2')">
+                                    <i class="fas fa-eye" id="toggleIcon2"></i>
+                                </button>
                             </div>
+                            <div class="invalid-feedback" id="matchFeedback">Passwords do not match</div>
+                            <div class="valid-feedback" id="matchSuccess">Passwords match ✓</div>
+                        </div>
 
-                            <!-- Password Field -->
-                            <div class="mb-3">
-                                <label for="id_password1" class="form-label fw-semibold">
-                                    <i class="fas fa-lock me-2" style="color: var(--kuhes-blue);"></i>
-                                    Password
-                                </label>
-                                <div class="input-group">
-                                    <input type="password"
-                                           name="password1"
-                                           id="id_password1"
-                                           class="form-control"
-                                           placeholder="Create a strong password"
-                                           autocomplete="new-password"
-                                           required>
-                                    <button type="button" class="password-toggle" onclick="togglePassword('id_password1')">
-                                        <i class="fas fa-eye" id="toggleIcon1"></i>
-                                    </button>
-                                </div>
+                        <button type="submit" class="btn btn-primary w-100 py-3" id="registerBtn">
+                            <span class="btn-text">
+                                <i class="fas fa-user-plus me-2"></i>
+                                Create Account
+                            </span>
+                        </button>
+                    </form>
 
-                                <div class="strength-meter">
-                                    <div class="strength-bar" id="strengthBar"></div>
-                                </div>
-                                <div class="strength-text" id="strengthText"></div>
+                    <hr class="my-4">
 
-                                <div class="password-requirements">
-                                    <small class="fw-semibold d-block mb-2">Password must contain:</small>
-                                    <div class="requirement-item" id="reqLength">
-                                        <i class="fas fa-circle"></i>
-                                        <span>At least 8 characters</span>
-                                    </div>
-                                    <div class="requirement-item" id="reqUppercase">
-                                        <i class="fas fa-circle"></i>
-                                        <span>At least 1 uppercase letter</span>
-                                    </div>
-                                    <div class="requirement-item" id="reqLowercase">
-                                        <i class="fas fa-circle"></i>
-                                        <span>At least 1 lowercase letter</span>
-                                    </div>
-                                    <div class="requirement-item" id="reqNumber">
-                                        <i class="fas fa-circle"></i>
-                                        <span>At least 1 number</span>
-                                    </div>
-                                    <div class="requirement-item" id="reqSpecial">
-                                        <i class="fas fa-circle"></i>
-                                        <span>At least 1 special character (!@#$%^&*)</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Confirm Password Field -->
-                            <div class="mb-4">
-                                <label for="id_password2" class="form-label fw-semibold">
-                                    <i class="fas fa-check-circle me-2" style="color: var(--kuhes-blue);"></i>
-                                    Confirm Password
-                                </label>
-                                <div class="input-group">
-                                    <input type="password"
-                                           name="password2"
-                                           id="id_password2"
-                                           class="form-control"
-                                           placeholder="Confirm your password"
-                                           autocomplete="new-password"
-                                           required>
-                                    <button type="button" class="password-toggle" onclick="togglePassword('id_password2')">
-                                        <i class="fas fa-eye" id="toggleIcon2"></i>
-                                    </button>
-                                </div>
-                                <div class="invalid-feedback" id="matchFeedback">Passwords do not match</div>
-                                <div class="valid-feedback" id="matchSuccess">Passwords match ✓</div>
-                            </div>
-
-                            <button type="submit" class="btn btn-primary w-100 py-3" id="registerBtn">
-                                <span class="btn-text">
-                                    <i class="fas fa-user-plus me-2"></i>
-                                    Create Account
-                                </span>
-                            </button>
-                        </form>
-
-                        <hr class="my-4">
-
-                        <p class="text-center mb-0">
-                            Already have an account?
-                            <a href="{% url 'login' %}" data-replace="true" class="text-decoration-none" style="color: var(--kuhes-blue); font-weight: 600;">
-                                Login here
-                            </a>
-                        </p>
-                    </div>
+                    <p class="text-center mb-0">
+                        Already have an account?
+                        <a href="{% url 'login' %}" data-replace="true" class="text-decoration-none" style="color: var(--kuhes-blue); font-weight: 600;">
+                            Login here
+                        </a>
+                    </p>
                 </div>
             </div>
         </div>
@@ -470,7 +464,7 @@
 </div>
 
 <script>
-    // Password toggle
+    // Toggle password visibility
     function togglePassword(fieldId) {
         const input = document.getElementById(fieldId);
         const icon = document.getElementById(`toggleIcon${fieldId.slice(-1)}`);
@@ -490,6 +484,7 @@
     const usernameInput = document.getElementById('id_username');
     const usernameFeedback = document.getElementById('usernameFeedback');
     const usernameHint = document.getElementById('usernameHint');
+    let isUsernameValid = false;
 
     function validateUsername() {
         const username = usernameInput.value;
@@ -499,6 +494,7 @@
             usernameInput.classList.remove('is-valid', 'is-invalid');
             usernameFeedback.textContent = '';
             usernameHint.innerHTML = '3-30 characters, letters, numbers, and underscores only';
+            isUsernameValid = false;
             return false;
         }
 
@@ -507,12 +503,14 @@
             usernameInput.classList.remove('is-invalid');
             usernameFeedback.textContent = '';
             usernameHint.innerHTML = '<i class="fas fa-check-circle text-success"></i> Username available';
+            isUsernameValid = true;
             return true;
         } else {
             usernameInput.classList.add('is-invalid');
             usernameInput.classList.remove('is-valid');
             usernameFeedback.textContent = 'Username must be 3-30 characters using letters, numbers, and underscores only';
             usernameHint.innerHTML = '<i class="fas fa-exclamation-circle text-danger"></i> Invalid format';
+            isUsernameValid = false;
             return false;
         }
     }
@@ -522,6 +520,7 @@
     const emailFeedback = document.getElementById('emailFeedback');
     const emailSuccess = document.getElementById('emailSuccess');
     const emailHintEl = document.getElementById('emailHint');
+    let isEmailValid = false;
 
     function validateEmail() {
         const email = emailInput.value;
@@ -531,30 +530,39 @@
             emailInput.classList.remove('is-valid', 'is-invalid');
             emailFeedback.textContent = '';
             emailHintEl.innerHTML = 'Must be @kuhes.ac.mw';
+            isEmailValid = false;
             return false;
         }
 
-        if (isValidDomain) {
+        if (isValidDomain && email.includes('@') && email.length > 10) {
             emailInput.classList.add('is-valid');
             emailInput.classList.remove('is-invalid');
             emailFeedback.textContent = '';
             emailHintEl.innerHTML = '<i class="fas fa-check-circle text-success"></i> Valid KUHeS email address';
+            isEmailValid = true;
             return true;
         } else if (email.includes('@')) {
             emailInput.classList.add('is-invalid');
             emailInput.classList.remove('is-valid');
             emailFeedback.textContent = 'Please use your @kuhes.ac.mw email address';
             emailHintEl.innerHTML = '<i class="fas fa-exclamation-circle text-danger"></i> Must be @kuhes.ac.mw';
+            isEmailValid = false;
             return false;
         } else {
             emailInput.classList.remove('is-valid', 'is-invalid');
             emailFeedback.textContent = '';
             emailHintEl.innerHTML = 'Must be @kuhes.ac.mw';
+            isEmailValid = false;
             return false;
         }
     }
 
     // Password strength checker
+    const password1 = document.getElementById('id_password1');
+    const password2 = document.getElementById('id_password2');
+    let isPasswordStrong = false;
+    let doPasswordsMatch = false;
+
     function checkPasswordStrength(password) {
         let strength = 0;
         if (password.length >= 8) strength++;
@@ -631,13 +639,13 @@
         updateRequirement(reqLowercase, requirements.lowercase);
         updateRequirement(reqNumber, requirements.number);
         updateRequirement(reqSpecial, requirements.special);
-    }
 
-    // Check passwords match
-    const password1 = document.getElementById('id_password1');
-    const password2 = document.getElementById('id_password2');
-    const matchFeedback = document.getElementById('matchFeedback');
-    const matchSuccess = document.getElementById('matchSuccess');
+        // Check if all requirements are met
+        isPasswordStrong = requirements.length && requirements.uppercase &&
+                          requirements.lowercase && requirements.number && requirements.special;
+
+        return isPasswordStrong;
+    }
 
     function checkPasswordsMatch() {
         const p1 = password1.value;
@@ -645,51 +653,71 @@
 
         if (p2.length === 0) {
             password2.classList.remove('is-valid', 'is-invalid');
-            matchFeedback.style.display = 'none';
-            matchSuccess.style.display = 'none';
+            document.getElementById('matchFeedback').style.display = 'none';
+            document.getElementById('matchSuccess').style.display = 'none';
+            doPasswordsMatch = false;
             return false;
         }
 
         if (p1 === p2) {
             password2.classList.add('is-valid');
             password2.classList.remove('is-invalid');
-            matchFeedback.style.display = 'none';
-            matchSuccess.style.display = 'block';
+            document.getElementById('matchFeedback').style.display = 'none';
+            document.getElementById('matchSuccess').style.display = 'block';
+            doPasswordsMatch = true;
             return true;
         } else {
             password2.classList.add('is-invalid');
             password2.classList.remove('is-valid');
-            matchFeedback.style.display = 'block';
-            matchSuccess.style.display = 'none';
+            document.getElementById('matchFeedback').style.display = 'block';
+            document.getElementById('matchSuccess').style.display = 'none';
+            doPasswordsMatch = false;
             return false;
         }
     }
 
+    // Validate entire form and enable/disable register button
+    function validateFormAndEnableButton() {
+        const registerBtn = document.getElementById('registerBtn');
+
+        // Check if all validations pass
+        const allValid = isUsernameValid && isEmailValid && isPasswordStrong && doPasswordsMatch;
+
+        if (allValid) {
+            registerBtn.disabled = false;
+            registerBtn.style.opacity = '1';
+            registerBtn.style.cursor = 'pointer';
+        } else {
+            registerBtn.disabled = true;
+            registerBtn.style.opacity = '0.5';
+            registerBtn.style.cursor = 'not-allowed';
+        }
+
+        return allValid;
+    }
+
     // Event listeners
-    usernameInput.addEventListener('input', validateUsername);
-    emailInput.addEventListener('input', validateEmail);
+    usernameInput.addEventListener('input', function() {
+        validateUsername();
+        validateFormAndEnableButton();
+    });
+
+    emailInput.addEventListener('input', function() {
+        validateEmail();
+        validateFormAndEnableButton();
+    });
+
     password1.addEventListener('input', function() {
         updateStrengthMeter(this.value);
         updateRequirements(this.value);
         checkPasswordsMatch();
-        validateForm();
+        validateFormAndEnableButton();
     });
-    password2.addEventListener('input', checkPasswordsMatch);
 
-    // Form validation
-    function validateForm() {
-        const isUsernameValid = validateUsername();
-        const isEmailValid = validateEmail();
-        const isPasswordStrong = password1.value.length >= 8 &&
-                                 /[A-Z]/.test(password1.value) &&
-                                 /[a-z]/.test(password1.value) &&
-                                 /[0-9]/.test(password1.value) &&
-                                 /[!@#$%^&*]/.test(password1.value);
-        const doPasswordsMatch = checkPasswordsMatch();
-
-        const registerBtn = document.getElementById('registerBtn');
-        registerBtn.disabled = !(isUsernameValid && isEmailValid && isPasswordStrong && doPasswordsMatch);
-    }
+    password2.addEventListener('input', function() {
+        checkPasswordsMatch();
+        validateFormAndEnableButton();
+    });
 
     // Email domain auto-suggestion
     emailInput.addEventListener('blur', function() {
@@ -698,6 +726,7 @@
             if (confirm(`Did you mean: ${suggested}?`)) {
                 this.value = suggested;
                 validateEmail();
+                validateFormAndEnableButton();
             }
         }
     });
@@ -706,55 +735,52 @@
     document.getElementById('registerForm').addEventListener('submit', function(e) {
         const registerBtn = document.getElementById('registerBtn');
 
-        if (!validateUsername() || !validateEmail() || !checkPasswordsMatch()) {
+        // Final validation check
+        if (!validateUsername() || !validateEmail() || !isPasswordStrong || !checkPasswordsMatch()) {
             e.preventDefault();
             showToast('Please fill in all fields correctly', 'error');
             return;
         }
 
-        const allMet = password1.value.length >= 8 &&
-                       /[A-Z]/.test(password1.value) &&
-                       /[a-z]/.test(password1.value) &&
-                       /[0-9]/.test(password1.value) &&
-                       /[!@#$%^&*]/.test(password1.value);
-
-        if (!allMet) {
-            e.preventDefault();
-            showToast('Please create a stronger password', 'error');
-            return;
-        }
-
+        // Add loading state
         registerBtn.classList.add('btn-loading');
+        registerBtn.disabled = true;
     });
 
+    // Show toast function
     function showToast(message, type) {
-        if (window.toast) window.toast[type](message);
+        if (window.toast) {
+            window.toast[type](message);
+        } else if (window.showToast) {
+            window.showToast(message, type);
+        }
     }
 
     // Auto-dismiss alerts
     document.querySelectorAll('.alert').forEach(alert => {
         setTimeout(() => {
-            alert.style.opacity = '0';
-            alert.style.transition = 'opacity 0.3s';
-            setTimeout(() => alert.remove(), 300);
+            if (alert && alert.parentElement) {
+                alert.style.opacity = '0';
+                alert.style.transition = 'opacity 0.3s';
+                setTimeout(() => alert.remove(), 300);
+            }
         }, 5000);
     });
 
-    // Show skeleton on slow connections
+    // Initial validation to disable button
+    validateFormAndEnableButton();
+
+    // Show skeleton loader on slow connections
     if (document.readyState === 'loading') {
-        const skeleton = document.getElementById('registerSkeleton');
-        const content = document.getElementById('registerContent');
-        if (skeleton && content) {
-            skeleton.style.display = 'block';
-            content.style.opacity = '0';
-            setTimeout(() => {
-                skeleton.style.display = 'none';
-                content.style.opacity = '1';
-            }, 500);
-        }
+        // Skeleton loader code here if needed
     }
 
-    // Initial button state
-    document.getElementById('registerBtn').disabled = true;
+    // Add loading state to data-replace links
+    document.querySelectorAll('a[data-replace="true"]').forEach(link => {
+        link.addEventListener('click', function(e) {
+            if (!this.getAttribute('href') || this.getAttribute('href') === '#') return;
+            if (window.showLoading) window.showLoading('Loading...');
+        });
+    });
 </script>
 {% endblock %}
