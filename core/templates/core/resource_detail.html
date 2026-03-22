@@ -369,6 +369,79 @@
     .bookmark-animation {
         animation: bookmarkPop 0.3s ease;
     }
+
+    /* Request card styling */
+    .request-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 16px;
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0, 51, 160, 0.1);
+    }
+
+    .request-card:hover {
+        transform: translateX(5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        border-color: var(--kuhes-blue);
+    }
+
+    .badge-urgency {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.35rem 0.75rem;
+        border-radius: 30px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .badge-urgency.urgent {
+        background: #dc3545;
+        color: white;
+    }
+
+    .badge-urgency.high {
+        background: #fd7e14;
+        color: white;
+    }
+
+    .badge-urgency.medium {
+        background: #ffc107;
+        color: #856404;
+    }
+
+    .badge-urgency.low {
+        background: #28a745;
+        color: white;
+    }
+
+    .upvote-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 30px;
+        color: #6c757d;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .upvote-btn:hover {
+        background: var(--kuhes-blue);
+        color: white;
+        border-color: var(--kuhes-blue);
+        transform: translateY(-2px);
+    }
+
+    .upvote-btn.upvoted {
+        background: var(--kuhes-blue);
+        color: white;
+        border-color: var(--kuhes-blue);
+    }
 </style>
 {% endblock %}
 
@@ -685,6 +758,63 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Resource Requests Section -->
+                {% if resource.requests.exists %}
+                <div class="card resource-card mt-4">
+                    <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+                        <h5 class="fw-bold mb-0">
+                            <i class="fas fa-hands-helping me-2" style="color: var(--kuhes-blue);"></i>
+                            Resource Requests ({{ resource.requests.count }})
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        {% for resource_request in resource.requests.all %}
+                        <div class="request-card">
+                            <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
+                                <span class="badge-urgency {{ resource_request.urgency }}">
+                                    <i class="fas
+                                        {% if resource_request.urgency == 'urgent' %}fa-exclamation-circle
+                                        {% elif resource_request.urgency == 'high' %}fa-arrow-up
+                                        {% elif resource_request.urgency == 'medium' %}fa-minus
+                                        {% else %}fa-arrow-down{% endif %} me-1">
+                                    </i>
+                                    {{ resource_request.get_urgency_display }}
+                                </span>
+                                <span class="text-muted small">
+                                    <i class="far fa-user me-1"></i>{{ resource_request.requester.get_full_name|default:resource_request.requester.username }}
+                                </span>
+                                <span class="text-muted small">
+                                    <i class="far fa-clock me-1"></i>{{ resource_request.created_at|timesince }} ago
+                                </span>
+                            </div>
+                            <p class="mb-2">{{ resource_request.message|truncatechars:200 }}</p>
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                <div class="d-flex gap-2">
+                                    <button class="upvote-btn {% if user.is_authenticated and resource_request in user_upvoted_requests %}upvoted{% endif %}"
+                                            data-request-id="{{ resource_request.id }}">
+                                        <i class="fas fa-arrow-up"></i>
+                                        <span class="upvote-count">{{ resource_request.upvotes.count }}</span>
+                                    </button>
+                                    {% if user.is_authenticated and user == resource_request.requester %}
+                                        <a href="{% url 'edit_request' resource_request.id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </a>
+                                        <a href="{% url 'delete_request' resource_request.id %}" class="btn btn-sm btn-outline-danger"
+                                           onclick="return confirm('Delete this request?')">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </a>
+                                    {% endif %}
+                                </div>
+                                <small class="text-muted">
+                                    <i class="fas fa-comment me-1"></i>{{ resource_request.comments.count }} comments
+                                </small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -733,6 +863,35 @@
             }
         });
     }
+
+    // Upvote functionality
+    document.querySelectorAll('.upvote-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const requestId = this.dataset.requestId;
+            const url = `/upvote-request/${requestId}/`;
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.upvoted) {
+                    btn.classList.add('upvoted');
+                } else {
+                    btn.classList.remove('upvoted');
+                }
+                const countSpan = btn.querySelector('.upvote-count');
+                if (countSpan) {
+                    countSpan.textContent = data.count;
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
 
     // Add loading state to all data-replace links
     document.querySelectorAll('a[data-replace="true"]').forEach(link => {

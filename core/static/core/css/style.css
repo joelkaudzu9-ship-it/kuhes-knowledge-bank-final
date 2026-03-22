@@ -631,3 +631,30 @@ h6 { font-size: 1rem; }
         transition-duration: 0.01ms !important;
     }
 }
+
+
+
+/* Ensure buttons stay above document viewer */
+.resource-actions {
+    position: relative;
+    z-index: 10;
+}
+
+.document-preview {
+    position: relative;
+    z-index: 1;
+}
+
+/* Mobile specific fix */
+@media (max-width: 768px) {
+    .resource-actions .btn {
+        margin-bottom: 8px;
+        width: 100%;
+        display: block;
+    }
+
+    .document-preview embed,
+    .document-preview iframe {
+        height: 400px;
+    }
+}
