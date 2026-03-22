@@ -5,46 +5,56 @@
 
 {% block extra_css %}
 <style>
-    /* Ensure full height container */
-    body {
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-    }
-
-    main {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: calc(100vh - var(--header-height) - 80px);
-    }
-
-    /* Login container full centering */
+    /* Modern Login Page - Glass Morphism */
     .login-container {
-        width: 100%;
         min-height: calc(100vh - var(--header-height) - 80px);
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 20px;
+        padding: 2rem;
         position: relative;
+        overflow: hidden;
     }
 
-    /* Page-specific animations with glass morphism */
+    /* Animated Background */
+    .login-container::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(0,51,160,0.03) 0%, transparent 70%);
+        animation: rotateBg 60s linear infinite;
+        z-index: 0;
+    }
+
+    @keyframes rotateBg {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    /* Main Login Card - Glass Morphism */
     .login-card {
-        animation: slideUpFade 0.5s ease-out;
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border-radius: 24px;
-        border: 1px solid rgba(255, 184, 28, 0.2);
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(20px);
+        border-radius: 32px;
+        border: 1px solid rgba(255, 255, 255, 0.4);
         width: 100%;
-        max-width: 500px;
-        margin: 0 auto;
+        max-width: 460px;
+        position: relative;
+        z-index: 1;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-    @keyframes slideUpFade {
+    .login-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 30px 60px -12px rgba(0, 51, 160, 0.2);
+    }
+
+    @keyframes fadeInUp {
         from {
             opacity: 0;
             transform: translateY(30px);
@@ -55,137 +65,238 @@
         }
     }
 
-    /* Floating shapes - fixed positioning so they don't affect layout */
-    .floating-shape {
-        position: fixed;
-        background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
-        border-radius: 50%;
-        filter: blur(60px);
-        opacity: 0.15;
-        z-index: 0;
-        animation: floatShape 8s ease-in-out infinite;
+    /* Form Fields - Modern Design */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #475569;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .input-group-modern {
+        position: relative;
+        display: flex;
+        align-items: stretch;
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, rgba(0,51,160,0.08), rgba(0,51,160,0.03));
+        border-radius: 14px 0 0 14px;
+        color: var(--kuhes-blue);
+        z-index: 1;
         pointer-events: none;
     }
 
-    .floating-shape:nth-child(2) {
-        animation-delay: -4s;
-        background: linear-gradient(135deg, var(--kuhes-gold), var(--kuhes-teal));
-    }
-
-    @keyframes floatShape {
-        0%, 100% {
-            transform: translate(0, 0) scale(1);
-        }
-        50% {
-            transform: translate(20px, -20px) scale(1.1);
-        }
-    }
-
-    /* Glass morphism input groups */
-    .input-group-animated {
+    .form-control-modern {
+        width: 100%;
+        padding: 12px 16px 12px 48px;
+        border: 1.5px solid rgba(0, 51, 160, 0.15);
+        border-radius: 14px;
+        font-size: 0.9rem;
         transition: all 0.3s ease;
         background: rgba(255, 255, 255, 0.9);
-        border-radius: 12px;
-        overflow: hidden;
+        font-family: inherit;
     }
 
-    .input-group-animated:focus-within {
-        transform: translateX(5px);
-        box-shadow: 0 4px 20px rgba(0, 51, 160, 0.15);
+    .form-control-modern:focus {
+        outline: none;
+        border-color: var(--kuhes-blue);
+        box-shadow: 0 0 0 4px rgba(0, 51, 160, 0.1);
+        background: white;
     }
 
-    .input-group-animated .input-group-text {
-        background: rgba(0, 51, 160, 0.05);
-        border: none;
-        transition: all 0.3s ease;
+    .form-control-modern.is-valid {
+        border-color: #10b981;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2310b981' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 16px;
+        padding-right: 40px;
     }
 
-    .input-group-animated:focus-within .input-group-text {
-        background: rgba(0, 51, 160, 0.1);
-        color: var(--kuhes-blue);
+    .form-control-modern.is-invalid {
+        border-color: #ef4444;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23ef4444'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linecap='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23ef4444' stroke='none'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 16px;
+        padding-right: 40px;
     }
 
-    .input-group-animated .form-control {
-        background: transparent;
-        border: none;
-        padding: 12px 0 12px 12px;
-        transition: all 0.3s ease;
-    }
-
-    .input-group-animated .form-control:focus {
-        box-shadow: none;
-        background: transparent;
-    }
-
-    /* Password toggle */
+    /* Password Toggle Button */
     .password-toggle {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #94a3b8;
         cursor: pointer;
+        z-index: 10;
+        padding: 0;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
         transition: all 0.2s ease;
     }
 
     .password-toggle:hover {
         color: var(--kuhes-blue);
-        transform: scale(1.1);
+        background: rgba(0, 51, 160, 0.05);
     }
 
-    /* Brand icon */
-    .brand-icon {
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.8));
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(0, 51, 160, 0.1);
+    /* Modern Button */
+    .btn-login {
+        background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
+        border: none;
+        border-radius: 14px;
+        padding: 12px 24px;
+        font-weight: 600;
+        font-size: 1rem;
+        color: white;
+        width: 100%;
+        cursor: pointer;
         transition: all 0.3s ease;
-    }
-
-    .brand-icon:hover {
-        transform: scale(1.05);
-        box-shadow: 0 10px 30px rgba(0, 51, 160, 0.2);
-    }
-
-    /* Button loading state */
-    .btn-loading {
         position: relative;
-        pointer-events: none;
-        opacity: 0.8;
+        overflow: hidden;
     }
 
-    .btn-loading .btn-text {
-        visibility: hidden;
-    }
-
-    .btn-loading::after {
+    .btn-login::before {
         content: '';
         position: absolute;
-        width: 24px;
-        height: 24px;
         top: 50%;
         left: 50%;
-        margin-left: -12px;
-        margin-top: -12px;
-        border: 3px solid rgba(255,255,255,0.3);
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-login:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 51, 160, 0.3);
+    }
+
+    .btn-login:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* Button Loading State */
+    .btn-login.loading {
+        pointer-events: none;
+    }
+
+    .btn-login.loading .btn-text {
+        visibility: visible;
+    }
+
+    .btn-login .spinner-small {
+        display: none;
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
         border-top-color: white;
         border-radius: 50%;
-        animation: spin 0.8s linear infinite;
+        animation: spin 0.6s linear infinite;
+        margin-right: 8px;
+    }
+
+    .btn-login.loading .spinner-small {
+        display: inline-block;
     }
 
     @keyframes spin {
         to { transform: rotate(360deg); }
     }
 
-    /* Input validation animations */
-    .form-control.is-valid {
-        border-left: 3px solid var(--kuhes-teal);
-        animation: validPulse 0.5s ease;
+    /* Badge */
+    .badge-gold {
+        background: linear-gradient(135deg, rgba(255, 184, 28, 0.2), rgba(255, 184, 28, 0.08));
+        color: var(--kuhes-blue);
+        padding: 8px 18px;
+        border-radius: 40px;
+        font-weight: 600;
+        font-size: 0.75rem;
+        border: 1px solid rgba(255, 184, 28, 0.4);
+        backdrop-filter: blur(4px);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
     }
 
-    .form-control.is-invalid {
-        border-left: 3px solid #dc3545;
-        animation: shake 0.5s ease;
+    /* Links */
+    .text-link {
+        color: var(--kuhes-blue);
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
     }
 
-    @keyframes validPulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.02); }
-        100% { transform: scale(1); }
+    .text-link:hover {
+        color: var(--kuhes-teal);
+        text-decoration: underline;
+    }
+
+    /* Checkbox */
+    .checkbox-modern {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+    }
+
+    .checkbox-modern input {
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+        accent-color: var(--kuhes-blue);
+    }
+
+    .checkbox-modern label {
+        font-size: 0.8rem;
+        color: #64748b;
+        cursor: pointer;
+        margin: 0;
+    }
+
+    /* Alert */
+    .alert-modern {
+        border-radius: 14px;
+        padding: 12px 16px;
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        animation: shake 0.4s ease;
     }
 
     @keyframes shake {
@@ -194,324 +305,212 @@
         75% { transform: translateX(5px); }
     }
 
-    /* Alert animations */
-    .alert {
-        backdrop-filter: blur(10px);
-        border: none;
-        border-radius: 12px;
-        animation: slideDown 0.4s ease-out;
+    .alert-danger {
+        background: rgba(239, 68, 68, 0.1);
+        border-left: 3px solid #ef4444;
+        color: #dc2626;
     }
 
-    @keyframes slideDown {
-        from {
-            opacity: 0;
-            transform: translateY(-20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    /* Badge animation */
-    .badge.bg-gold {
-        background: linear-gradient(135deg, var(--kuhes-gold), #ffcd4a);
-        color: var(--kuhes-blue);
-        padding: 8px 16px;
-        border-radius: 50px;
-        font-weight: 600;
-        animation: pulse 2s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-        0%, 100% {
-            transform: scale(1);
-            box-shadow: 0 0 0 0 rgba(255, 184, 28, 0.4);
-        }
-        50% {
-            transform: scale(1.02);
-            box-shadow: 0 0 0 10px rgba(255, 184, 28, 0);
-        }
-    }
-
-    /* Link hover effects */
-    .text-decoration-none {
-        transition: all 0.2s ease;
+    /* Divider */
+    .divider {
+        text-align: center;
         position: relative;
+        margin: 24px 0;
     }
 
-    .text-decoration-none::after {
+    .divider::before,
+    .divider::after {
         content: '';
         position: absolute;
-        bottom: -2px;
-        left: 0;
-        width: 0;
-        height: 2px;
-        background: currentColor;
-        transition: width 0.3s ease;
+        top: 50%;
+        width: calc(50% - 60px);
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(0,51,160,0.2), transparent);
     }
 
-    .text-decoration-none:hover::after {
-        width: 100%;
+    .divider::before { left: 0; }
+    .divider::after { right: 0; }
+
+    .divider span {
+        background: rgba(255, 255, 255, 0.8);
+        padding: 0 12px;
+        font-size: 0.7rem;
+        color: #94a3b8;
     }
 
-    /* Mobile optimizations */
+    /* Mobile */
     @media (max-width: 768px) {
         .login-container {
-            padding: 16px;
-            min-height: calc(100vh - var(--header-height) - 60px);
+            padding: 1rem;
         }
-
-        .card-body {
-            padding: 24px 20px !important;
-        }
-
         .login-card {
-            border-radius: 20px;
+            border-radius: 24px;
         }
-
-        .brand-icon {
-            width: 70px;
-            height: 70px;
+        .card-body {
+            padding: 1.5rem !important;
         }
-
-        .brand-icon i {
-            font-size: 2rem;
+        .form-control-modern {
+            padding: 10px 12px 10px 44px;
+            font-size: 0.85rem;
         }
-
-        .floating-shape {
-            filter: blur(40px);
-        }
-    }
-
-    /* Skeleton loader */
-    .skeleton-circle {
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-        background-size: 200% 100%;
-        animation: skeleton-loading 1.5s infinite;
-        margin: 0 auto;
-    }
-
-    .skeleton-line {
-        height: 16px;
-        border-radius: 8px;
-        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-        background-size: 200% 100%;
-        animation: skeleton-loading 1.5s infinite;
-        margin: 12px auto;
-    }
-
-    @keyframes skeleton-loading {
-        0% { background-position: 200% 0; }
-        100% { background-position: -200% 0; }
-    }
-
-    /* Ensure loading overlay covers everything */
-    #loading-overlay {
-        position: fixed !important;
-        inset: 0 !important;
-        width: 100% !important;
-        height: 100% !important;
-        z-index: 9999 !important;
-        background: rgba(255, 255, 255, 0.98) !important;
-        backdrop-filter: blur(8px) !important;
-        display: flex;
-        justify-content: center;
-        align-items: center;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- Background decorative elements - fixed positioning -->
-<div class="floating-shape" style="width: 350px; height: 350px; top: -120px; right: -120px;"></div>
-<div class="floating-shape" style="width: 250px; height: 250px; bottom: -80px; left: -80px; background: linear-gradient(135deg, var(--kuhes-gold), var(--kuhes-teal));"></div>
-<div class="floating-shape" style="width: 150px; height: 150px; top: 50%; left: 10%; background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-gold)); animation-delay: -2s;"></div>
-
 <div class="login-container">
-    <div class="container position-relative" style="z-index: 1; width: 100%; max-width: 500px;">
-        <!-- Skeleton Loader -->
-        <div id="loginSkeleton" style="display: none;">
+    <div class="login-card">
+        <div class="card-body p-4 p-md-5">
+            <!-- Logo & Title -->
             <div class="text-center mb-4">
-                <div class="skeleton-circle mx-auto"></div>
-                <div class="skeleton-line mx-auto mt-3" style="width: 200px; height: 32px;"></div>
-                <div class="skeleton-line mx-auto mt-2" style="width: 150px; height: 20px;"></div>
-            </div>
-            <div class="card skeleton-card p-4">
-                <div class="skeleton-line" style="height: 50px; margin-bottom: 20px;"></div>
-                <div class="skeleton-line" style="height: 50px; margin-bottom: 20px;"></div>
-                <div class="skeleton-line" style="height: 45px; margin-bottom: 20px;"></div>
-            </div>
-        </div>
-
-        <!-- Actual Content -->
-        <div id="loginContent">
-            <!-- Brand Header -->
-            <div class="text-center mb-4">
-                <div class="d-inline-block p-3 brand-icon rounded-circle shadow-sm mb-3" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);">
-                    <i class="fas fa-university fa-3x" style="color: var(--kuhes-blue);"></i>
+                <div class="mb-3">
+                    <div class="d-inline-flex align-items-center justify-content-center" style="width: 64px; height: 64px; background: linear-gradient(135deg, rgba(0,51,160,0.1), rgba(0,165,176,0.1)); border-radius: 20px;">
+                        <i class="fas fa-university fa-2x" style="color: var(--kuhes-blue);"></i>
+                    </div>
                 </div>
-                <h2 class="fw-bold" style="color: var(--kuhes-blue);">Welcome Back</h2>
-                <p class="text-muted">Sign in to access your academic resources</p>
+                <h2 class="h3 fw-bold mb-1" style="color: #1e293b;">Welcome Back</h2>
+                <p class="small text-muted mb-3">Sign in to access your resources</p>
+                <span class="badge-gold">
+                    <i class="fas fa-graduation-cap me-2"></i>
+                    KUHeS Students & Staff Only
+                </span>
             </div>
 
-            <!-- Login Card -->
-            <div class="card login-card border-0 shadow-lg">
-                <div class="card-body p-4 p-lg-5">
-                    <!-- Institution Badge -->
-                    <div class="d-flex align-items-center justify-content-center mb-4">
-                        <span class="badge bg-gold text-blue px-3 py-2">
-                            <i class="fas fa-graduation-cap me-2"></i>
-                            KUHeS Students & Staff Only
+            <!-- Error Alert -->
+            {% if form.errors %}
+            <div class="alert-modern alert-danger mb-4">
+                <i class="fas fa-exclamation-circle"></i>
+                <span>Invalid email or password. Please try again.</span>
+            </div>
+            {% endif %}
+
+            <!-- Login Form -->
+            <form method="post" id="loginForm" novalidate>
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label class="form-label">EMAIL ADDRESS</label>
+                    <div class="input-group-modern">
+                        <span class="input-icon">
+                            <i class="fas fa-envelope"></i>
                         </span>
+                        <input type="email"
+                               name="username"
+                               id="id_username"
+                               class="form-control-modern"
+                               placeholder="j.doe@kuhes.ac.mw"
+                               value="{{ form.username.value|default:'' }}"
+                               autocomplete="email"
+                               required
+                               autofocus>
                     </div>
-
-                    <!-- Error Messages -->
-                    {% if form.errors %}
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert" id="errorAlert">
-                        <i class="fas fa-exclamation-circle me-2"></i>
-                        Invalid email or password. Please try again.
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    <div class="form-text mt-1">
+                        <small class="text-muted">Use your institutional @kuhes.ac.mw email</small>
                     </div>
-                    {% endif %}
-
-                    <!-- Login Form -->
-                    <form method="post" id="loginForm" novalidate>
-                        {% csrf_token %}
-
-                        <!-- Email Field -->
-                        <div class="mb-4">
-                            <label for="id_username" class="form-label fw-semibold">
-                                <i class="fas fa-envelope me-2" style="color: var(--kuhes-blue);"></i>
-                                Email Address
-                            </label>
-                            <div class="input-group input-group-animated">
-                                <span class="input-group-text bg-light border-0">
-                                    <i class="fas fa-user text-muted"></i>
-                                </span>
-                                <input type="email"
-                                       name="username"
-                                       id="id_username"
-                                       class="form-control"
-                                       placeholder="j.doe@kuhes.ac.mw"
-                                       value="{{ form.username.value|default:'' }}"
-                                       autocomplete="email"
-                                       required
-                                       autofocus>
-                            </div>
-                            <div class="invalid-feedback" id="emailFeedback"></div>
-                            <small class="text-muted mt-1 d-block" id="emailHint">
-                                <i class="fas fa-info-circle me-1"></i>
-                                Use your institutional email (@kuhes.ac.mw)
-                            </small>
-                        </div>
-
-                        <!-- Password Field -->
-                        <div class="mb-3">
-                            <label for="id_password" class="form-label fw-semibold">
-                                <i class="fas fa-lock me-2" style="color: var(--kuhes-blue);"></i>
-                                Password
-                            </label>
-                            <div class="input-group input-group-animated">
-                                <span class="input-group-text bg-light border-0">
-                                    <i class="fas fa-key text-muted"></i>
-                                </span>
-                                <input type="password"
-                                       name="password"
-                                       id="id_password"
-                                       class="form-control"
-                                       placeholder="Enter your password"
-                                       autocomplete="current-password"
-                                       required>
-                                <span class="input-group-text bg-light password-toggle"
-                                      onclick="togglePasswordVisibility()">
-                                    <i class="fas fa-eye" id="togglePasswordIcon"></i>
-                                </span>
-                            </div>
-                            <div class="invalid-feedback" id="passwordFeedback"></div>
-                        </div>
-
-                        <!-- Remember Me & Forgot Password -->
-                        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" id="rememberMe">
-                                <label class="form-check-label small" for="rememberMe">
-                                    Remember me
-                                </label>
-                            </div>
-                            <a href="{% url 'forgot_password' %}" data-replace="true" class="text-decoration-none small" style="color: var(--kuhes-blue);">
-                                <i class="fas fa-question-circle me-1"></i>
-                                Forgot Password?
-                            </a>
-                        </div>
-
-                        <!-- Login Button with Loading State -->
-                        <button type="submit" class="btn btn-primary w-100 py-3 mb-3" id="loginBtn">
-                            <span class="btn-text">
-                                <i class="fas fa-sign-in-alt me-2"></i>
-                                Sign In to Knowledge Bank
-                            </span>
-                        </button>
-
-                        <!-- Security Note -->
-                        <div class="alert alert-light small p-2 mb-4" role="alert" style="background: linear-gradient(135deg, rgba(0,51,160,0.05), rgba(0,165,176,0.05)); border: none;">
-                            <i class="fas fa-shield-alt me-2" style="color: var(--kuhes-blue);"></i>
-                            This is a secure area. Your credentials are encrypted.
-                        </div>
-
-                        <!-- Additional Links -->
-                        <div class="text-center">
-                            <p class="mb-2">
-                                <a href="{% url 'resend_verification' %}" data-replace="true" class="text-decoration-none small" style="color: var(--kuhes-teal);">
-                                    <i class="fas fa-envelope-open-text me-1"></i>
-                                    Resend verification email
-                                </a>
-                            </p>
-
-                            <div class="position-relative my-4">
-                                <hr>
-                                <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small">
-                                    New here?
-                                </span>
-                            </div>
-
-                            <a href="{% url 'register' %}" data-replace="true" class="btn btn-outline-primary w-100 py-3">
-                                <i class="fas fa-user-plus me-2"></i>
-                                Create an Account
-                            </a>
-
-                            <p class="mt-3 mb-0 small text-muted">
-                                <i class="fas fa-clock me-1"></i>
-                                First time? Registration takes less than 2 minutes
-                            </p>
-                        </div>
-                    </form>
                 </div>
-            </div>
 
-            <!-- Help Footer -->
-            <div class="text-center mt-4">
-                <p class="small text-muted">
-                    <i class="fas fa-question-circle me-1"></i>
-                    Need help?
-                    <a href="#" data-replace="true" class="text-decoration-none" style="color: var(--kuhes-blue);">Contact Support</a>
-                    or visit the
-                    <a href="#" data-replace="true" class="text-decoration-none" style="color: var(--kuhes-teal);">IT Help Desk</a>
-                </p>
-            </div>
+                <div class="form-group">
+                    <label class="form-label">PASSWORD</label>
+                    <div class="input-group-modern">
+                        <span class="input-icon">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                        <input type="password"
+                               name="password"
+                               id="id_password"
+                               class="form-control-modern"
+                               placeholder="Enter your password"
+                               autocomplete="current-password"
+                               required>
+                        <button type="button" class="password-toggle" onclick="togglePasswordVisibility()">
+                            <i class="fas fa-eye" id="togglePasswordIcon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <label class="checkbox-modern">
+                        <input type="checkbox" id="rememberMe">
+                        <label for="rememberMe">Remember me</label>
+                    </label>
+                    <a href="{% url 'forgot_password' %}" class="text-link">Forgot Password?</a>
+                </div>
+
+                <button type="submit" class="btn-login" id="loginBtn">
+                    <span class="spinner-small"></span>
+                    <span class="btn-text">Sign In</span>
+                </button>
+
+                <div class="divider">
+                    <span>New to KUHeS KB?</span>
+                </div>
+
+                <div class="text-center">
+                    <a href="{% url 'register' %}" class="text-link">
+                        <i class="fas fa-user-plus me-2"></i>Create an account
+                    </a>
+                </div>
+                <div class="text-center mt-2">
+                    <a href="{% url 'resend_verification' %}" class="text-link small">
+                        <i class="fas fa-envelope me-1"></i>Resend verification email
+                    </a>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
 <script>
+    // ============================================
+    // MODERN LOGIN INTERACTIONS
+    // ============================================
+
+    const emailInput = document.getElementById('id_username');
+    const passwordInput = document.getElementById('id_password');
+    const loginForm = document.getElementById('loginForm');
+    const loginBtn = document.getElementById('loginBtn');
+    const rememberCheckbox = document.getElementById('rememberMe');
+
+    // Email validation
+    function validateEmail() {
+        const email = emailInput.value.trim();
+        const isValidDomain = email.endsWith('@kuhes.ac.mw');
+        const isValidFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+        if (email.length === 0) {
+            emailInput.classList.remove('is-valid', 'is-invalid');
+            return false;
+        }
+
+        if (isValidDomain && isValidFormat) {
+            emailInput.classList.add('is-valid');
+            emailInput.classList.remove('is-invalid');
+            return true;
+        } else if (email.includes('@')) {
+            emailInput.classList.add('is-invalid');
+            emailInput.classList.remove('is-valid');
+            return false;
+        } else {
+            emailInput.classList.remove('is-valid', 'is-invalid');
+            return false;
+        }
+    }
+
+    // Auto-suggest email domain
+    function suggestEmailDomain() {
+        const value = emailInput.value.trim();
+        if (value && !value.includes('@') && !value.includes(' ') && value.length > 2) {
+            const suggested = value + '@kuhes.ac.mw';
+            if (confirm(`💡 Did you mean: ${suggested}? Click OK to use this email.`)) {
+                emailInput.value = suggested;
+                validateEmail();
+            }
+        }
+    }
+
     // Toggle password visibility
     function togglePasswordVisibility() {
-        const passwordInput = document.getElementById('id_password');
         const toggleIcon = document.getElementById('togglePasswordIcon');
-
         if (passwordInput.type === 'password') {
             passwordInput.type = 'text';
             toggleIcon.classList.remove('fa-eye');
@@ -523,190 +522,95 @@
         }
     }
 
-    // Email validation
-    const emailInput = document.getElementById('id_username');
-    const emailFeedback = document.getElementById('emailFeedback');
-    const emailHint = document.getElementById('emailHint');
-
-    function validateEmail() {
-        const email = emailInput.value;
-        const isValidDomain = email.includes('@kuhes.ac.mw');
-
-        if (email.length === 0) {
-            emailInput.classList.remove('is-valid', 'is-invalid');
-            emailFeedback.textContent = '';
-            emailHint.innerHTML = '<i class="fas fa-info-circle me-1"></i> Use your institutional email (@kuhes.ac.mw)';
-            return false;
-        }
-
-        if (isValidDomain) {
-            emailInput.classList.add('is-valid');
-            emailInput.classList.remove('is-invalid');
-            emailFeedback.textContent = '';
-            emailHint.innerHTML = '<i class="fas fa-check-circle me-1 text-success"></i> Valid KUHeS email address';
-            return true;
-        } else if (email.includes('@')) {
-            emailInput.classList.add('is-invalid');
-            emailInput.classList.remove('is-valid');
-            emailFeedback.textContent = 'Please use your @kuhes.ac.mw email address';
-            emailHint.innerHTML = '<i class="fas fa-exclamation-circle me-1 text-danger"></i> Must be @kuhes.ac.mw';
-            return false;
-        } else {
-            emailInput.classList.remove('is-valid', 'is-invalid');
-            emailFeedback.textContent = '';
-            emailHint.innerHTML = '<i class="fas fa-info-circle me-1"></i> Use your institutional email (@kuhes.ac.mw)';
-            return false;
+    // Remember Me functionality
+    function loadRememberedEmail() {
+        const savedEmail = localStorage.getItem('rememberedEmail');
+        if (savedEmail && emailInput) {
+            emailInput.value = savedEmail;
+            rememberCheckbox.checked = true;
+            validateEmail();
         }
     }
 
-    // Password validation
-    const passwordInput = document.getElementById('id_password');
-    const passwordFeedback = document.getElementById('passwordFeedback');
-
-    function validatePassword() {
-        const password = passwordInput.value;
-
-        if (password.length === 0) {
-            passwordInput.classList.remove('is-valid', 'is-invalid');
-            passwordFeedback.textContent = '';
-            return false;
-        }
-
-        if (password.length >= 8) {
-            passwordInput.classList.add('is-valid');
-            passwordInput.classList.remove('is-invalid');
-            passwordFeedback.textContent = '';
-            return true;
-        } else {
-            passwordInput.classList.add('is-invalid');
-            passwordInput.classList.remove('is-valid');
-            passwordFeedback.textContent = 'Password must be at least 8 characters';
-            return false;
-        }
-    }
-
-    // Real-time validation
-    emailInput.addEventListener('input', validateEmail);
-    passwordInput.addEventListener('input', validatePassword);
-
-    // Email domain auto-suggestion
-    emailInput.addEventListener('blur', function() {
-        if (this.value && !this.value.includes('@') && !this.value.includes(' ')) {
-            const suggested = this.value + '@kuhes.ac.mw';
-            if (confirm(`Did you mean: ${suggested}?`)) {
-                this.value = suggested;
-                validateEmail();
-            }
-        }
-    });
-
-    // Form submission with loading state
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
-        const loginBtn = document.getElementById('loginBtn');
-        const isValidEmail = validateEmail();
-        const isValidPassword = validatePassword();
-
-        if (!isValidEmail || !isValidPassword) {
-            e.preventDefault();
-
-            if (!isValidEmail) {
-                emailInput.classList.add('is-invalid');
-                emailInput.focus();
-                showToast('Please enter a valid @kuhes.ac.mw email address', 'error');
-            } else if (!isValidPassword) {
-                passwordInput.classList.add('is-invalid');
-                passwordInput.focus();
-                showToast('Please enter your password', 'error');
-            }
-            return;
-        }
-
-        // Add loading state
-        loginBtn.classList.add('btn-loading');
-
-        // Set flag for post-login redirect
-        sessionStorage.setItem('justLoggedIn', 'true');
-    });
-
-    // Remember me functionality
-    const rememberMe = document.getElementById('rememberMe');
-    const savedEmail = localStorage.getItem('rememberedEmail');
-
-    if (savedEmail) {
-        emailInput.value = savedEmail;
-        rememberMe.checked = true;
-        validateEmail();
-    }
-
-    document.getElementById('loginForm').addEventListener('submit', function() {
-        if (rememberMe.checked) {
+    function saveRememberedEmail() {
+        if (rememberCheckbox.checked && emailInput.value) {
             localStorage.setItem('rememberedEmail', emailInput.value);
         } else {
             localStorage.removeItem('rememberedEmail');
         }
-    });
+    }
 
-    // Keyboard shortcut (Ctrl+Enter to submit)
-    document.addEventListener('keydown', function(e) {
-        if (e.ctrlKey && e.key === 'Enter') {
+    // Form submission with proper loading state
+    loginForm.addEventListener('submit', function(e) {
+        // Validate email first
+        if (!validateEmail()) {
             e.preventDefault();
-            document.getElementById('loginForm').submit();
-        }
-    });
+            emailInput.classList.add('is-invalid');
+            emailInput.focus();
 
-    // Auto-dismiss alerts after 5 seconds
-    const alerts = document.querySelectorAll('.alert');
-    alerts.forEach(alert => {
-        setTimeout(() => {
-            if (alert && alert.parentElement) {
-                alert.style.opacity = '0';
-                alert.style.transition = 'opacity 0.3s';
-                setTimeout(() => alert.remove(), 300);
+            // Show error toast
+            if (window.toast) {
+                window.toast.error('Please enter a valid @kuhes.ac.mw email address');
             }
-        }, 5000);
-    });
-
-    // Smooth focus effects
-    document.querySelectorAll('.form-control').forEach(input => {
-        input.addEventListener('focus', function() {
-            this.closest('.input-group').style.transform = 'scale(1.01)';
-        });
-
-        input.addEventListener('blur', function() {
-            this.closest('.input-group').style.transform = 'scale(1)';
-        });
-    });
-
-    // Show toast function
-    function showToast(message, type = 'info') {
-        if (window.toast) {
-            window.toast[type](message);
+            return;
         }
+
+        // Validate password
+        if (!passwordInput.value.trim()) {
+            e.preventDefault();
+            passwordInput.classList.add('is-invalid');
+            passwordInput.focus();
+
+            if (window.toast) {
+                window.toast.warning('Please enter your password');
+            }
+            return;
+        }
+
+        // Add loading state to button
+        loginBtn.classList.add('loading');
+        loginBtn.disabled = true;
+
+        // Save remember me
+        saveRememberedEmail();
+
+        // Store login flag
+        sessionStorage.setItem('justLoggedIn', 'true');
+
+        // Form will submit normally - base template will handle global loading
+    });
+
+    // Remove invalid class on input
+    passwordInput.addEventListener('input', function() {
+        this.classList.remove('is-invalid');
+    });
+
+    // Email validation on input
+    emailInput.addEventListener('input', validateEmail);
+
+    // Email domain suggestion on blur
+    emailInput.addEventListener('blur', suggestEmailDomain);
+
+    // Load remembered email on page load
+    loadRememberedEmail();
+
+    // Animate card on load
+    document.querySelector('.login-card').style.opacity = '0';
+    document.querySelector('.login-card').style.transform = 'translateY(20px)';
+    setTimeout(() => {
+        document.querySelector('.login-card').style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+        document.querySelector('.login-card').style.opacity = '1';
+        document.querySelector('.login-card').style.transform = 'translateY(0)';
+    }, 100);
+
+    // Focus email if empty, else password
+    if (!emailInput.value) {
+        emailInput.focus();
+    } else {
+        passwordInput.focus();
     }
 
-    // Show skeleton loader on slow connections
-    if (document.readyState === 'loading') {
-        const skeleton = document.getElementById('loginSkeleton');
-        const content = document.getElementById('loginContent');
-
-        if (skeleton && content) {
-            skeleton.style.display = 'block';
-            content.style.opacity = '0';
-
-            setTimeout(() => {
-                skeleton.style.display = 'none';
-                content.style.opacity = '1';
-                content.style.transition = 'opacity 0.3s ease';
-            }, 500);
-        }
-    }
-
-    // Add loading state to data-replace links
-    document.querySelectorAll('a[data-replace="true"]').forEach(link => {
-        link.addEventListener('click', function(e) {
-            if (!this.getAttribute('href') || this.getAttribute('href') === '#') return;
-            if (window.showLoading) window.showLoading('Loading...');
-        });
-    });
+    // Expose toggle function globally
+    window.togglePasswordVisibility = togglePasswordVisibility;
 </script>
 {% endblock %}

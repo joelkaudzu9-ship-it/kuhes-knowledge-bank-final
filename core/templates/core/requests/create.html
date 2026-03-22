@@ -1,210 +1,603 @@
 {% extends 'core/base.html' %}
+{% load static %}
 
-{% block title %}Create Request{% endblock %}
+{% block title %}Create Resource Request - KUHeS Knowledge Bank{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Glass morphism effects */
+    .request-card {
+        animation: slideUpFade 0.5s ease-out;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 24px;
+        border: 1px solid rgba(255, 184, 28, 0.2);
+        overflow: hidden;
+    }
+
+    @keyframes slideUpFade {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Floating shapes */
+    .floating-shape {
+        position: fixed;
+        background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
+        border-radius: 50%;
+        filter: blur(60px);
+        opacity: 0.08;
+        z-index: 0;
+        animation: floatShape 8s ease-in-out infinite;
+        pointer-events: none;
+    }
+
+    @keyframes floatShape {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        50% { transform: translate(20px, -20px) scale(1.1); }
+    }
+
+    /* Card header */
+    .card-header {
+        background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
+        border: none;
+        padding: 1.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .card-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: rotate 20s linear infinite;
+    }
+
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    /* Form controls */
+    .form-control, .form-select {
+        border: 2px solid rgba(0, 51, 160, 0.1);
+        border-radius: 12px;
+        padding: 12px 16px;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--kuhes-blue);
+        box-shadow: 0 0 0 4px rgba(0, 51, 160, 0.1);
+        transform: translateX(5px);
+        background: white;
+    }
+
+    .form-control.is-invalid, .form-select.is-invalid {
+        border-color: #dc3545;
+        animation: shake 0.5s ease;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+
+    /* Alert styling */
+    .alert {
+        backdrop-filter: blur(10px);
+        border: none;
+        border-radius: 16px;
+        animation: slideDown 0.4s ease-out;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .alert-info {
+        background: linear-gradient(135deg, rgba(23, 162, 184, 0.95), rgba(19, 132, 150, 0.95));
+        color: white;
+    }
+
+    .alert-info a {
+        color: var(--kuhes-gold);
+        font-weight: 600;
+    }
+
+    /* Urgency badges */
+    .urgency-select {
+        border: 2px solid rgba(0, 51, 160, 0.1);
+        border-radius: 12px;
+        padding: 12px 16px;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.9);
+        cursor: pointer;
+    }
+
+    /* Character counter */
+    .char-counter {
+        font-size: 0.7rem;
+        color: var(--kuhes-gray);
+        text-align: right;
+        margin-top: 4px;
+    }
+
+    .char-counter.warning {
+        color: #ffc107;
+    }
+
+    .char-counter.danger {
+        color: #dc3545;
+    }
+
+    /* Button styling */
+    .btn-primary {
+        background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
+        border: none;
+        border-radius: 12px;
+        padding: 12px 24px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-primary:active::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 51, 160, 0.3);
+    }
+
+    .btn-outline-secondary {
+        border: 2px solid #6c757d;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-secondary:hover {
+        transform: translateY(-2px);
+        background: linear-gradient(135deg, #6c757d, #5a6268);
+        border-color: transparent;
+        color: white;
+    }
+
+    /* Loading state */
+    .btn-loading {
+        position: relative;
+        pointer-events: none;
+        opacity: 0.8;
+    }
+
+    .btn-loading .btn-text {
+        visibility: hidden;
+    }
+
+    .btn-loading::after {
+        content: '';
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        top: 50%;
+        left: 50%;
+        margin-left: -10px;
+        margin-top: -10px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Skeleton loader */
+    .skeleton-line {
+        height: 16px;
+        border-radius: 8px;
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: skeleton-loading 1.5s infinite;
+        margin: 12px 0;
+    }
+
+    .skeleton-title {
+        height: 28px;
+        width: 60%;
+    }
+
+    @keyframes skeleton-loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+
+    /* Mobile optimizations */
+    @media (max-width: 768px) {
+        .container {
+            padding: 16px;
+        }
+
+        .card-header {
+            padding: 1rem;
+        }
+
+        .card-header h4 {
+            font-size: 1.25rem;
+        }
+
+        .card-body {
+            padding: 24px 20px !important;
+        }
+
+        .btn {
+            padding: 10px 20px;
+        }
+
+        .d-grid.gap-2 {
+            gap: 8px;
+        }
+    }
+
+    /* Lock icon styling */
+    .lock-icon {
+        font-size: 0.75rem;
+        margin-left: 8px;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
+<!-- Background decorative elements -->
+<div class="floating-shape" style="width: 500px; height: 500px; top: -200px; right: -200px;"></div>
+<div class="floating-shape" style="width: 350px; height: 350px; bottom: -150px; left: -150px;"></div>
+
 <div class="container mt-4">
-    <div class="row">
-        <div class="col-md-8 mx-auto">
-            <div class="card shadow">
-                <div class="card-header bg-primary-blue text-white">
-                    <h4 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Request a Resource</h4>
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-7">
+            <!-- Skeleton Loader -->
+            <div id="skeletonLoader" style="display: none;">
+                <div class="card request-card p-4">
+                    <div class="skeleton-title mb-4"></div>
+                    <div class="skeleton-line"></div>
+                    <div class="skeleton-line"></div>
+                    <div class="skeleton-line" style="width: 80%;"></div>
+                    <div class="skeleton-line mt-4"></div>
+                    <div class="skeleton-line"></div>
                 </div>
-                <div class="card-body p-4">
-                    <!-- Auto-fill info message -->
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-2"></i>
-                        Your request will automatically be posted to your class:
-                        <strong>
-                            {% if user.level == 'premed' %}
-                                Pre-Med
-                            {% elif user.level == 'undergraduate' %}
-                                {{ user.get_school_display|default:"Your School" }} - {{ user.programme|default:"Your Programme" }} Year {{ user.year_of_study|default:"X" }}
-                            {% elif user.level == 'postgraduate' %}
-                                {{ user.programme|default:"Your Programme" }} Year {{ user.year_of_study|default:"X" }}
-                            {% elif user.level == 'diploma' %}
-                                {{ user.programme|default:"Your Programme" }} Year {{ user.year_of_study|default:"X" }}
-                            {% else %}
-                                Please complete your profile to auto-fill your details
-                            {% endif %}
-                        </strong>
-                        {% if not user.level %}
-                            <br>
-                            <a href="{% url 'profile' %}" class="alert-link">Complete your profile</a> to auto-fill your academic details.
-                        {% endif %}
+            </div>
+
+            <!-- Actual Content -->
+            <div id="requestContent">
+                <div class="card request-card shadow-lg">
+                    <div class="card-header text-white">
+                        <h4 class="mb-0">
+                            <i class="fas fa-plus-circle me-2"></i>
+                            Request a Resource
+                        </h4>
                     </div>
-
-                    <form method="post">
-                        {% csrf_token %}
-
-                        <!-- Basic Info -->
-                        <div class="mb-3">
-                            <label for="id_title" class="form-label">Title *</label>
-                            <input type="text" name="title" id="id_title" class="form-control"
-                                   placeholder="e.g., MBBS Year 2 Pathology Past Papers 2023" required>
-                            <small class="text-muted">Be specific about what you need</small>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="id_description" class="form-label">Description *</label>
-                            <textarea name="description" id="id_description" class="form-control" rows="4"
-                                      placeholder="Describe exactly what you're looking for..." required></textarea>
-                        </div>
-
-                        <!-- Classification with Auto-fill -->
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="id_level" class="form-label">Academic Level *</label>
-                                <select name="level" id="id_level" class="form-control"
-                                    {% if user.level %}disabled{% endif %} required>
-                                    <option value="">Select level...</option>
-                                    <option value="premed" {% if user.level == 'premed' %}selected{% endif %}>🎓 Pre-Med</option>
-                                    <option value="undergraduate" {% if user.level == 'undergraduate' %}selected{% endif %}>📘 Undergraduate</option>
-                                    <option value="postgraduate" {% if user.level == 'postgraduate' %}selected{% endif %}>📚 Postgraduate</option>
-                                    <option value="diploma" {% if user.level == 'diploma' %}selected{% endif %}>📖 Diploma</option>
-                                </select>
-                                {% if user.level %}
-                                    <input type="hidden" name="level" value="{{ user.level }}">
-                                    <small class="text-success">
-                                        <i class="fas fa-lock me-1"></i>Auto-filled from your profile
-                                    </small>
-                                {% endif %}
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label for="id_urgency" class="form-label">Urgency *</label>
-                                <select name="urgency" id="id_urgency" class="form-control" required>
-                                    <option value="low">🟢 Low - When you have time</option>
-                                    <option value="medium" selected>🟡 Medium - This week</option>
-                                    <option value="high">🟠 High - Within days</option>
-                                    <option value="urgent">🔴 Urgent - Need immediately</option>
-                                </select>
+                    <div class="card-body p-4">
+                        <!-- Auto-fill info message -->
+                        <div class="alert alert-info mb-4">
+                            <div class="d-flex align-items-start gap-3">
+                                <i class="fas fa-info-circle fa-2x"></i>
+                                <div>
+                                    <strong class="d-block mb-1">Your request will be posted to your class:</strong>
+                                    <span>
+                                        {% if user.level == 'premed' %}
+                                            🎓 Pre-Med
+                                        {% elif user.level == 'undergraduate' %}
+                                            📘 {{ user.get_school_display|default:"Your School" }} - {{ user.programme|default:"Your Programme" }} Year {{ user.year_of_study|default:"X" }}
+                                        {% elif user.level == 'postgraduate' %}
+                                            📚 {{ user.programme|default:"Your Programme" }} Year {{ user.year_of_study|default:"X" }}
+                                        {% elif user.level == 'diploma' %}
+                                            📖 {{ user.programme|default:"Your Programme" }} Year {{ user.year_of_study|default:"X" }}
+                                        {% else %}
+                                            ⚠️ Please complete your profile to auto-fill your details
+                                        {% endif %}
+                                    </span>
+                                    {% if not user.level %}
+                                        <br>
+                                        <a href="{% url 'profile' %}" class="text-warning fw-semibold mt-2 d-inline-block">
+                                            <i class="fas fa-edit me-1"></i>Complete your profile
+                                        </a>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Dynamic Fields based on Level -->
-                        <div id="premed_fields" {% if user.level == 'premed' %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+                        <form method="post" id="requestForm" novalidate>
+                            {% csrf_token %}
+
+                            <!-- Title -->
                             <div class="mb-3">
-                                <label for="id_premed_subject" class="form-label">Pre-Med Subject</label>
-                                <select name="premed_subject" id="id_premed_subject" class="form-control">
-                                    <option value="">Select subject...</option>
-                                    <option value="biology">🧬 Biology</option>
-                                    <option value="chemistry">🧪 Chemistry</option>
-                                    <option value="physics">⚡ Physics</option>
-                                    <option value="mathematics">📐 Mathematics</option>
-                                    <option value="ict">💻 ICT</option>
-                                    <option value="communication">🗣️ Communication</option>
-                                </select>
+                                <label for="id_title" class="form-label fw-semibold">
+                                    <i class="fas fa-heading me-2" style="color: var(--kuhes-blue);"></i>
+                                    Title *
+                                </label>
+                                <input type="text"
+                                       name="title"
+                                       id="id_title"
+                                       class="form-control"
+                                       placeholder="e.g., MBBS Year 2 Pathology Past Papers 2023"
+                                       maxlength="200"
+                                       required>
+                                <div class="char-counter" id="titleCounter">0/200</div>
+                                <small class="text-muted">Be specific about what you need</small>
                             </div>
-                        </div>
 
-                        <div id="undergrad_fields" {% if user.level == 'undergraduate' %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+                            <!-- Description -->
+                            <div class="mb-3">
+                                <label for="id_description" class="form-label fw-semibold">
+                                    <i class="fas fa-align-left me-2" style="color: var(--kuhes-blue);"></i>
+                                    Description *
+                                </label>
+                                <textarea name="description"
+                                          id="id_description"
+                                          class="form-control"
+                                          rows="4"
+                                          placeholder="Describe exactly what you're looking for..."
+                                          maxlength="1000"
+                                          required></textarea>
+                                <div class="char-counter" id="descCounter">0/1000</div>
+                            </div>
+
+                            <!-- Classification -->
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label for="id_school" class="form-label">School</label>
-                                    <select name="school" id="id_school" class="form-control"
-                                        {% if user.school %}disabled{% endif %}>
-                                        <option value="">Select school...</option>
-                                        <option value="medicine" {% if user.school == 'medicine' %}selected{% endif %}>Medicine and Oral Health</option>
-                                        <option value="nursing" {% if user.school == 'nursing' %}selected{% endif %}>Nursing</option>
-                                        <option value="maternal" {% if user.school == 'maternal' %}selected{% endif %}>Maternal, Neonatal and Reproductive Health</option>
-                                        <option value="life_sciences" {% if user.school == 'life_sciences' %}selected{% endif %}>Life Sciences and Allied Health Professions</option>
-                                        <option value="public_health" {% if user.school == 'public_health' %}selected{% endif %}>Global and Public Health</option>
+                                    <label for="id_level" class="form-label fw-semibold">
+                                        <i class="fas fa-graduation-cap me-2" style="color: var(--kuhes-blue);"></i>
+                                        Academic Level *
+                                    </label>
+                                    <select name="level" id="id_level" class="form-select"
+                                        {% if user.level %}disabled{% endif %} required>
+                                        <option value="">Select level...</option>
+                                        <option value="premed" {% if user.level == 'premed' %}selected{% endif %}>🎓 Pre-Med</option>
+                                        <option value="undergraduate" {% if user.level == 'undergraduate' %}selected{% endif %}>📘 Undergraduate</option>
+                                        <option value="postgraduate" {% if user.level == 'postgraduate' %}selected{% endif %}>📚 Postgraduate</option>
+                                        <option value="diploma" {% if user.level == 'diploma' %}selected{% endif %}>📖 Diploma</option>
                                     </select>
-                                    {% if user.school %}
-                                        <input type="hidden" name="school" value="{{ user.school }}">
-                                    {% endif %}
-                                </div>
-
-                                <div class="col-md-6 mb-3">
-                                    <label for="id_programme" class="form-label">Programme</label>
-                                    <input type="text" name="programme" id="id_programme" class="form-control"
-                                           placeholder="e.g., MBBS, BNS, BPharm"
-                                           value="{% if user.programme %}{{ user.programme }}{% endif %}"
-                                           {% if user.programme %}readonly{% endif %}>
-                                    {% if user.programme %}
+                                    {% if user.level %}
+                                        <input type="hidden" name="level" value="{{ user.level }}">
                                         <small class="text-success">
-                                            <i class="fas fa-lock me-1"></i>From profile
-                                        </small>
-                                    {% endif %}
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="id_year_of_study" class="form-label">Year of Study</label>
-                                    <input type="number" name="year_of_study" id="id_year_of_study" class="form-control"
-                                           min="1" max="6" placeholder="e.g., 2"
-                                           value="{% if user.year_of_study %}{{ user.year_of_study }}{% endif %}"
-                                           {% if user.year_of_study %}readonly{% endif %}>
-                                    {% if user.year_of_study %}
-                                        <small class="text-success">
-                                            <i class="fas fa-lock me-1"></i>From profile
+                                            <i class="fas fa-lock me-1"></i>Auto-filled from your profile
                                         </small>
                                     {% endif %}
                                 </div>
 
                                 <div class="col-md-6 mb-3">
-                                    <label for="id_course_code" class="form-label">Course Code</label>
-                                    <input type="text" name="course_code" id="id_course_code" class="form-control"
-                                           placeholder="e.g., PATH201">
+                                    <label for="id_urgency" class="form-label fw-semibold">
+                                        <i class="fas fa-bolt me-2" style="color: var(--kuhes-blue);"></i>
+                                        Urgency *
+                                    </label>
+                                    <select name="urgency" id="id_urgency" class="form-select" required>
+                                        <option value="low">🟢 Low - When you have time</option>
+                                        <option value="medium" selected>🟡 Medium - This week</option>
+                                        <option value="high">🟠 High - Within days</option>
+                                        <option value="urgent">🔴 Urgent - Need immediately</option>
+                                    </select>
                                 </div>
                             </div>
-                        </div>
 
-                        <div id="postgrad_fields" {% if user.level == 'postgraduate' %}style="display: block;"{% else %}style="display: none;"{% endif %}>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="id_programme_postgrad" class="form-label">Programme</label>
-                                    <input type="text" name="programme" id="id_programme_postgrad" class="form-control"
-                                           placeholder="e.g., MMed, MSc"
-                                           value="{% if user.programme %}{{ user.programme }}{% endif %}"
-                                           {% if user.programme %}readonly{% endif %}>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="id_year_postgrad" class="form-label">Year of Study</label>
-                                    <input type="number" name="year_of_study" id="id_year_postgrad" class="form-control"
-                                           min="1" max="6" placeholder="e.g., 1"
-                                           value="{% if user.year_of_study %}{{ user.year_of_study }}{% endif %}"
-                                           {% if user.year_of_study %}readonly{% endif %}>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div id="diploma_fields" {% if user.level == 'diploma' %}style="display: block;"{% else %}style="display: none;"{% endif %}>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="id_programme_diploma" class="form-label">Programme</label>
-                                    <input type="text" name="programme" id="id_programme_diploma" class="form-control"
-                                           placeholder="e.g., Diploma in Clinical Medicine"
-                                           value="{% if user.programme %}{{ user.programme }}{% endif %}"
-                                           {% if user.programme %}readonly{% endif %}>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="id_year_diploma" class="form-label">Year of Study</label>
-                                    <input type="number" name="year_of_study" id="id_year_diploma" class="form-control"
-                                           min="1" max="3" placeholder="e.g., 2"
-                                           value="{% if user.year_of_study %}{{ user.year_of_study }}{% endif %}"
-                                           {% if user.year_of_study %}readonly{% endif %}>
+                            <!-- Dynamic Fields based on Level -->
+                            <div id="premed_fields" {% if user.level == 'premed' %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+                                <div class="mb-3">
+                                    <label for="id_premed_subject" class="form-label fw-semibold">
+                                        <i class="fas fa-microscope me-2" style="color: var(--kuhes-blue);"></i>
+                                        Pre-Med Subject
+                                    </label>
+                                    <select name="premed_subject" id="id_premed_subject" class="form-select">
+                                        <option value="">Select subject...</option>
+                                        <option value="biology">🧬 Biology</option>
+                                        <option value="chemistry">🧪 Chemistry</option>
+                                        <option value="physics">⚡ Physics</option>
+                                        <option value="mathematics">📐 Mathematics</option>
+                                        <option value="ict">💻 ICT</option>
+                                        <option value="communication">🗣️ Communication</option>
+                                    </select>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Deadline (Optional) -->
-                        <div class="mb-3">
-                            <label for="id_deadline" class="form-label">Deadline (Optional)</label>
-                            <input type="date" name="deadline" id="id_deadline" class="form-control">
-                        </div>
+                            <div id="undergrad_fields" {% if user.level == 'undergraduate' %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="id_school" class="form-label fw-semibold">
+                                            <i class="fas fa-university me-2" style="color: var(--kuhes-blue);"></i>
+                                            School
+                                        </label>
+                                        <select name="school" id="id_school" class="form-select"
+                                            {% if user.school %}disabled{% endif %}>
+                                            <option value="">Select school...</option>
+                                            <option value="medicine" {% if user.school == 'medicine' %}selected{% endif %}>Medicine and Oral Health</option>
+                                            <option value="nursing" {% if user.school == 'nursing' %}selected{% endif %}>Nursing</option>
+                                            <option value="maternal" {% if user.school == 'maternal' %}selected{% endif %}>Maternal, Neonatal and Reproductive Health</option>
+                                            <option value="life_sciences" {% if user.school == 'life_sciences' %}selected{% endif %}>Life Sciences and Allied Health Professions</option>
+                                            <option value="public_health" {% if user.school == 'public_health' %}selected{% endif %}>Global and Public Health</option>
+                                        </select>
+                                        {% if user.school %}
+                                            <input type="hidden" name="school" value="{{ user.school }}">
+                                            <small class="text-success">
+                                                <i class="fas fa-lock me-1"></i>From profile
+                                            </small>
+                                        {% endif %}
+                                    </div>
 
-                        <hr>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="id_programme" class="form-label fw-semibold">
+                                            <i class="fas fa-certificate me-2" style="color: var(--kuhes-blue);"></i>
+                                            Programme
+                                        </label>
+                                        <input type="text" name="programme" id="id_programme" class="form-control"
+                                               placeholder="e.g., MBBS, BNS, BPharm"
+                                               value="{% if user.programme %}{{ user.programme }}{% endif %}"
+                                               {% if user.programme %}readonly{% endif %}>
+                                        {% if user.programme %}
+                                            <small class="text-success">
+                                                <i class="fas fa-lock me-1"></i>From profile
+                                            </small>
+                                        {% endif %}
+                                    </div>
+                                </div>
 
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fas fa-paper-plane me-2"></i>Submit Request
-                            </button>
-                            <a href="{% url 'request_list' %}" class="btn btn-outline-secondary">Cancel</a>
-                        </div>
-                    </form>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="id_year_of_study" class="form-label fw-semibold">
+                                            <i class="fas fa-calendar-alt me-2" style="color: var(--kuhes-blue);"></i>
+                                            Year of Study
+                                        </label>
+                                        <input type="number" name="year_of_study" id="id_year_of_study" class="form-control"
+                                               min="1" max="6" placeholder="e.g., 2"
+                                               value="{% if user.year_of_study %}{{ user.year_of_study }}{% endif %}"
+                                               {% if user.year_of_study %}readonly{% endif %}>
+                                        {% if user.year_of_study %}
+                                            <small class="text-success">
+                                                <i class="fas fa-lock me-1"></i>From profile
+                                            </small>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label for="id_course_code" class="form-label fw-semibold">
+                                            <i class="fas fa-code me-2" style="color: var(--kuhes-blue);"></i>
+                                            Course Code
+                                        </label>
+                                        <input type="text" name="course_code" id="id_course_code" class="form-control"
+                                               placeholder="e.g., PATH201">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="postgrad_fields" {% if user.level == 'postgraduate' %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="id_programme_postgrad" class="form-label fw-semibold">
+                                            <i class="fas fa-graduation-cap me-2" style="color: var(--kuhes-blue);"></i>
+                                            Programme
+                                        </label>
+                                        <input type="text" name="programme" id="id_programme_postgrad" class="form-control"
+                                               placeholder="e.g., MMed, MSc"
+                                               value="{% if user.programme %}{{ user.programme }}{% endif %}"
+                                               {% if user.programme %}readonly{% endif %}>
+                                        {% if user.programme %}
+                                            <small class="text-success">
+                                                <i class="fas fa-lock me-1"></i>From profile
+                                            </small>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="id_year_postgrad" class="form-label fw-semibold">
+                                            <i class="fas fa-calendar-alt me-2" style="color: var(--kuhes-blue);"></i>
+                                            Year of Study
+                                        </label>
+                                        <input type="number" name="year_of_study" id="id_year_postgrad" class="form-control"
+                                               min="1" max="6" placeholder="e.g., 1"
+                                               value="{% if user.year_of_study %}{{ user.year_of_study }}{% endif %}"
+                                               {% if user.year_of_study %}readonly{% endif %}>
+                                        {% if user.year_of_study %}
+                                            <small class="text-success">
+                                                <i class="fas fa-lock me-1"></i>From profile
+                                            </small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="diploma_fields" {% if user.level == 'diploma' %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="id_programme_diploma" class="form-label fw-semibold">
+                                            <i class="fas fa-certificate me-2" style="color: var(--kuhes-blue);"></i>
+                                            Programme
+                                        </label>
+                                        <input type="text" name="programme" id="id_programme_diploma" class="form-control"
+                                               placeholder="e.g., Diploma in Clinical Medicine"
+                                               value="{% if user.programme %}{{ user.programme }}{% endif %}"
+                                               {% if user.programme %}readonly{% endif %}>
+                                        {% if user.programme %}
+                                            <small class="text-success">
+                                                <i class="fas fa-lock me-1"></i>From profile
+                                            </small>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="id_year_diploma" class="form-label fw-semibold">
+                                            <i class="fas fa-calendar-alt me-2" style="color: var(--kuhes-blue);"></i>
+                                            Year of Study
+                                        </label>
+                                        <input type="number" name="year_of_study" id="id_year_diploma" class="form-control"
+                                               min="1" max="3" placeholder="e.g., 2"
+                                               value="{% if user.year_of_study %}{{ user.year_of_study }}{% endif %}"
+                                               {% if user.year_of_study %}readonly{% endif %}>
+                                        {% if user.year_of_study %}
+                                            <small class="text-success">
+                                                <i class="fas fa-lock me-1"></i>From profile
+                                            </small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Deadline (Optional) -->
+                            <div class="mb-4">
+                                <label for="id_deadline" class="form-label fw-semibold">
+                                    <i class="fas fa-calendar-alt me-2" style="color: var(--kuhes-blue);"></i>
+                                    Deadline (Optional)
+                                </label>
+                                <input type="date" name="deadline" id="id_deadline" class="form-control" min="{{ today }}">
+                                <small class="text-muted">When do you need this resource by?</small>
+                            </div>
+
+                            <hr>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                                    <span class="btn-text">
+                                        <i class="fas fa-paper-plane me-2"></i>
+                                        Submit Request
+                                    </span>
+                                </button>
+                                <a href="{% url 'request_list' %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times me-2"></i>Cancel
+                                </a>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -212,7 +605,35 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+    // Character counters
+    const titleInput = document.getElementById('id_title');
+    const descInput = document.getElementById('id_description');
+    const titleCounter = document.getElementById('titleCounter');
+    const descCounter = document.getElementById('descCounter');
+
+    function updateCounter(input, counter, max) {
+        const length = input.value.length;
+        counter.textContent = `${length}/${max}`;
+
+        if (length > max * 0.9) {
+            counter.classList.add('danger');
+            counter.classList.remove('warning');
+        } else if (length > max * 0.75) {
+            counter.classList.add('warning');
+            counter.classList.remove('danger');
+        } else {
+            counter.classList.remove('warning', 'danger');
+        }
+    }
+
+    titleInput.addEventListener('input', () => updateCounter(titleInput, titleCounter, 200));
+    descInput.addEventListener('input', () => updateCounter(descInput, descCounter, 1000));
+
+    // Initialize counters
+    updateCounter(titleInput, titleCounter, 200);
+    updateCounter(descInput, descCounter, 1000);
+
+    // Dynamic field toggling
     const levelSelect = document.getElementById('id_level');
     const premedFields = document.getElementById('premed_fields');
     const undergradFields = document.getElementById('undergrad_fields');
@@ -241,9 +662,73 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Only attach event listener if level select is not disabled
-    if (!levelSelect.disabled) {
+    if (levelSelect && !levelSelect.disabled) {
         levelSelect.addEventListener('change', toggleFields);
     }
-});
+
+    // Form validation and submission
+    const requestForm = document.getElementById('requestForm');
+    const submitBtn = document.getElementById('submitBtn');
+
+    requestForm.addEventListener('submit', function(e) {
+        // Validate title
+        if (!titleInput.value.trim()) {
+            e.preventDefault();
+            titleInput.classList.add('is-invalid');
+            titleInput.focus();
+            showToast('Please enter a title for your request', 'error');
+            return;
+        }
+
+        // Validate description
+        if (!descInput.value.trim()) {
+            e.preventDefault();
+            descInput.classList.add('is-invalid');
+            descInput.focus();
+            showToast('Please describe what you need', 'error');
+            return;
+        }
+
+        // Add loading state
+        submitBtn.classList.add('btn-loading');
+        submitBtn.disabled = true;
+    });
+
+    // Remove invalid class on input
+    titleInput.addEventListener('input', () => titleInput.classList.remove('is-invalid'));
+    descInput.addEventListener('input', () => descInput.classList.remove('is-invalid'));
+
+    // Toast function
+    function showToast(message, type) {
+        if (window.showToast) {
+            window.showToast(message, type);
+        } else if (window.toast) {
+            window.toast[type](message);
+        }
+    }
+
+    // Show skeleton loader on slow connections
+    if (document.readyState === 'loading') {
+        const skeleton = document.getElementById('skeletonLoader');
+        const content = document.getElementById('requestContent');
+
+        if (skeleton && content) {
+            skeleton.style.display = 'block';
+            content.style.opacity = '0';
+
+            setTimeout(() => {
+                skeleton.style.display = 'none';
+                content.style.opacity = '1';
+                content.style.transition = 'opacity 0.3s ease';
+            }, 500);
+        }
+    }
+
+    // Set min date for deadline to today
+    const today = new Date().toISOString().split('T')[0];
+    const deadlineInput = document.getElementById('id_deadline');
+    if (deadlineInput) {
+        deadlineInput.min = today;
+    }
 </script>
 {% endblock %}

@@ -258,21 +258,39 @@ def profile(request):
     if request.method == 'POST':
         # Update user fields
         user = request.user
+
+        # Handle text fields
         user.level = request.POST.get('level')
         user.school = request.POST.get('school')
         user.programme = request.POST.get('programme')
-        user.year_of_study = request.POST.get('year_of_study')
-        user.graduation_year = request.POST.get('graduation_year')
         user.premed_cohort = request.POST.get('premed_cohort')
         user.intended_programme = request.POST.get('intended_programme')
+
+        # Handle number fields - convert empty strings to None
+        year_of_study = request.POST.get('year_of_study')
+        if year_of_study and year_of_study.strip():
+            try:
+                user.year_of_study = int(year_of_study)
+            except ValueError:
+                user.year_of_study = None
+        else:
+            user.year_of_study = None
+
+        graduation_year = request.POST.get('graduation_year')
+        if graduation_year and graduation_year.strip():
+            try:
+                user.graduation_year = int(graduation_year)
+            except ValueError:
+                user.graduation_year = None
+        else:
+            user.graduation_year = None
+
         user.save()
 
         messages.success(request, 'Profile updated successfully!')
         return redirect('profile')
 
     return render(request, 'core/profile.html', {'user': request.user})
-
-
 @login_required
 def upload_resource(request):
     """Upload a resource"""

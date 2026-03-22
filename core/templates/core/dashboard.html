@@ -1,24 +1,28 @@
 {% extends 'core/base.html' %}
 {% load static %}
 
-{% block title %}Student Dashboard - KUHeS Knowledge Bank{% endblock %}
+{% block title %}Dashboard - KUHeS Knowledge Bank{% endblock %}
 
 {% block extra_css %}
 <style>
-    /* Page-specific animations with glass morphism */
+    /* ============================================
+       DASHBOARD MODERN STYLES WITH GLASS MORPHISM
+    ============================================ */
+
+    /* Welcome Banner - Glass Effect */
     .welcome-banner {
         background: linear-gradient(135deg, var(--kuhes-blue) 0%, var(--kuhes-teal) 100%);
         position: relative;
         overflow: hidden;
-        border-radius: 24px;
-        animation: slideInDown 0.5s ease;
-        box-shadow: 0 10px 30px rgba(0, 51, 160, 0.2);
+        border-radius: 28px;
+        animation: slideInDown 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 20px 40px rgba(0, 51, 160, 0.25);
     }
 
     @keyframes slideInDown {
         from {
             opacity: 0;
-            transform: translateY(-30px);
+            transform: translateY(-40px);
         }
         to {
             opacity: 1;
@@ -33,8 +37,8 @@
         right: -50%;
         width: 200%;
         height: 200%;
-        background: radial-gradient(circle, rgba(255,184,28,0.2) 0%, transparent 70%);
-        animation: rotate 20s linear infinite;
+        background: radial-gradient(circle, rgba(255,184,28,0.15) 0%, transparent 70%);
+        animation: rotate 30s linear infinite;
     }
 
     @keyframes rotate {
@@ -42,19 +46,20 @@
         to { transform: rotate(360deg); }
     }
 
-    /* Stat cards with glass morphism */
+    /* Modern Stat Cards with Glass */
     .stat-card {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         border: none;
-        border-radius: 20px;
+        border-radius: 24px;
         overflow: hidden;
         position: relative;
-        animation: fadeInUp 0.5s ease forwards;
+        animation: fadeInUp 0.6s ease forwards;
         opacity: 0;
-        transform: translateY(20px);
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        transform: translateY(30px);
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(12px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.3);
     }
 
     .stat-card:nth-child(1) { animation-delay: 0.1s; }
@@ -71,45 +76,92 @@
 
     .stat-card:hover {
         transform: translateY(-8px);
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+        background: rgba(255, 255, 255, 0.95);
     }
 
     .stat-icon {
-        width: 60px;
-        height: 60px;
-        border-radius: 30px;
+        width: 64px;
+        height: 64px;
+        border-radius: 20px;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 15px;
-        transition: all 0.3s ease;
+        margin: 0 auto 16px;
+        transition: all 0.4s cubic-bezier(0.34, 1.2, 0.64, 1);
     }
 
     .stat-card:hover .stat-icon {
         transform: scale(1.1) rotate(5deg);
     }
 
-    /* Activity timeline with glass effect - FIXED STYLES */
+    /* Modern Progress Bar */
+    .contribution-progress {
+        height: 6px;
+        background: rgba(0, 0, 0, 0.08);
+        border-radius: 3px;
+        overflow: hidden;
+        margin: 12px 0;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--kuhes-blue), var(--kuhes-teal));
+        border-radius: 3px;
+        transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        width: 0%;
+    }
+
+    .progress-fill::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+        animation: shimmer 1.5s infinite;
+    }
+
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+
+    /* Timeline Container - Glass Effect */
     .timeline-container {
         position: relative;
-        padding-left: 20px;
+        padding-left: 0;
     }
 
     .timeline-item {
         position: relative;
-        padding-left: 30px;
+        padding-left: 32px;
         padding-bottom: 24px;
         margin-bottom: 0;
+        animation: fadeInRight 0.5s ease forwards;
+        opacity: 0;
+        transform: translateX(-20px);
     }
 
-    .timeline-item:last-child {
-        padding-bottom: 0;
+    .timeline-item:nth-child(1) { animation-delay: 0.05s; }
+    .timeline-item:nth-child(2) { animation-delay: 0.1s; }
+    .timeline-item:nth-child(3) { animation-delay: 0.15s; }
+    .timeline-item:nth-child(4) { animation-delay: 0.2s; }
+    .timeline-item:nth-child(5) { animation-delay: 0.25s; }
+
+    @keyframes fadeInRight {
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
     }
 
     .timeline-item::before {
         content: '';
         position: absolute;
-        left: 0;
+        left: 8px;
         top: 8px;
         width: 12px;
         height: 12px;
@@ -118,108 +170,56 @@
         border: 2px solid var(--kuhes-gold);
         z-index: 2;
         transition: all 0.3s ease;
-    }
-
-    .timeline-item::after {
-        content: '';
-        position: absolute;
-        left: 5px;
-        top: 24px;
-        bottom: -8px;
-        width: 2px;
-        background: linear-gradient(to bottom, rgba(0, 51, 160, 0.3), rgba(0, 51, 160, 0.1));
-    }
-
-    .timeline-item:last-child::after {
-        display: none;
+        box-shadow: 0 0 0 0 rgba(0, 51, 160, 0.4);
     }
 
     .timeline-item:hover::before {
         transform: scale(1.3);
         background: var(--kuhes-gold);
         border-color: var(--kuhes-blue);
+        box-shadow: 0 0 0 4px rgba(0, 51, 160, 0.2);
+    }
+
+    .timeline-item::after {
+        content: '';
+        position: absolute;
+        left: 13px;
+        top: 24px;
+        bottom: -8px;
+        width: 2px;
+        background: linear-gradient(to bottom, rgba(0, 51, 160, 0.3), rgba(0, 51, 160, 0.05));
+    }
+
+    .timeline-item:last-child::after {
+        display: none;
     }
 
     .timeline-content {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(5px);
-        padding: 16px 20px;
-        border-radius: 16px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(8px);
+        padding: 18px 20px;
+        border-radius: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         transition: all 0.3s ease;
         border: 1px solid rgba(0, 51, 160, 0.08);
     }
 
     .timeline-content:hover {
-        transform: translateX(5px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        transform: translateX(6px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
         border-color: rgba(255, 184, 28, 0.3);
     }
 
-    .timeline-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-bottom: 12px;
-    }
-
-    .timeline-badges {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-
-    .timeline-title {
-        font-size: 1rem;
-        font-weight: 600;
-        margin-bottom: 8px;
-        color: var(--kuhes-blue);
-    }
-
-    .timeline-title a {
-        color: inherit;
-        text-decoration: none;
-        transition: color 0.2s ease;
-    }
-
-    .timeline-title a:hover {
-        color: var(--kuhes-teal);
-    }
-
-    .timeline-meta {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 16px;
-        margin-top: 12px;
-        padding-top: 8px;
-        border-top: 1px solid rgba(0, 0, 0, 0.05);
-    }
-
-    .timeline-meta-item {
-        font-size: 0.75rem;
-        color: var(--kuhes-gray);
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-    }
-
-    .timeline-actions {
-        display: flex;
-        gap: 12px;
-        margin-top: 12px;
-    }
-
-    /* Status badges */
+    /* Status Badges */
     .status-badge {
-        padding: 4px 10px;
+        padding: 5px 12px;
         border-radius: 30px;
         font-size: 0.7rem;
         font-weight: 600;
         display: inline-flex;
         align-items: center;
-        gap: 5px;
+        gap: 6px;
+        backdrop-filter: blur(4px);
     }
 
     .status-approved {
@@ -239,22 +239,29 @@
 
     .resource-type-badge {
         background: rgba(0, 51, 160, 0.1);
+        backdrop-filter: blur(4px);
         color: var(--kuhes-blue);
-        padding: 4px 10px;
+        padding: 5px 12px;
         border-radius: 30px;
         font-size: 0.7rem;
         font-weight: 500;
     }
 
-    /* Quick action cards with glass morphism */
+    /* Action Cards - Glass Morphism */
+    .action-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
     .action-card {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(5px);
-        border-radius: 16px;
-        padding: 20px;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(8px);
+        border-radius: 20px;
+        padding: 20px 12px;
         text-align: center;
-        transition: all 0.3s ease;
-        border: 2px solid transparent;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(255, 255, 255, 0.5);
         text-decoration: none;
         display: block;
         color: inherit;
@@ -268,16 +275,16 @@
         top: 0;
         left: 0;
         right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, var(--kuhes-blue), var(--kuhes-gold));
+        height: 3px;
+        background: linear-gradient(90deg, var(--kuhes-blue), var(--kuhes-gold), var(--kuhes-teal));
         transform: translateX(-100%);
-        transition: transform 0.3s ease;
+        transition: transform 0.4s ease;
     }
 
     .action-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-        border-color: rgba(255, 184, 28, 0.3);
+        transform: translateY(-6px);
+        box-shadow: 0 20px 30px rgba(0, 0, 0, 0.1);
+        background: rgba(255, 255, 255, 0.95);
     }
 
     .action-card:hover::before {
@@ -285,167 +292,136 @@
     }
 
     .action-icon {
-        width: 70px;
-        height: 70px;
-        border-radius: 35px;
-        background: linear-gradient(135deg, rgba(0,51,160,0.1), rgba(0,165,176,0.1));
+        width: 64px;
+        height: 64px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, rgba(0, 51, 160, 0.1), rgba(0, 165, 176, 0.1));
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 15px;
-        font-size: 2rem;
-        transition: all 0.3s ease;
+        margin: 0 auto 12px;
+        font-size: 1.8rem;
+        transition: all 0.4s cubic-bezier(0.34, 1.2, 0.64, 1);
     }
 
     .action-card:hover .action-icon {
-        transform: scale(1.1) rotate(360deg);
+        transform: scale(1.1) rotate(5deg);
     }
 
-    /* Progress bars with shimmer */
-    .contribution-progress {
-        height: 8px;
-        background: rgba(0, 0, 0, 0.1);
-        border-radius: 4px;
-        overflow: hidden;
-        margin: 15px 0;
+    /* Achievement Badges */
+    .achievement-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        background: linear-gradient(135deg, #FFB81C, #FFD700);
+        color: var(--kuhes-blue);
+        border-radius: 40px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        animation: pulse 2s infinite;
+        box-shadow: 0 4px 12px rgba(255, 184, 28, 0.3);
     }
 
-    .progress-fill {
-        height: 100%;
-        background: linear-gradient(90deg, var(--kuhes-blue), var(--kuhes-teal));
-        border-radius: 4px;
-        transition: width 1s ease;
-        position: relative;
-        overflow: hidden;
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); box-shadow: 0 4px 12px rgba(255, 184, 28, 0.3); }
+        50% { transform: scale(1.05); box-shadow: 0 6px 20px rgba(255, 184, 28, 0.5); }
     }
 
-    .progress-fill::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-        animation: shimmer 1.5s infinite;
-    }
-
-    @keyframes shimmer {
-        0% { transform: translateX(-100%); }
-        100% { transform: translateX(100%); }
-    }
-
-    /* Empty state */
+    /* Empty State */
     .empty-state {
         text-align: center;
-        padding: 40px 20px;
-        background: rgba(248, 249, 250, 0.8);
-        backdrop-filter: blur(5px);
-        border-radius: 16px;
+        padding: 48px 24px;
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(8px);
+        border-radius: 24px;
+        border: 1px solid rgba(0, 51, 160, 0.1);
     }
 
     .empty-state-icon {
         width: 80px;
         height: 80px;
-        background: white;
-        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(0, 51, 160, 0.1), rgba(0, 165, 176, 0.1));
+        border-radius: 40px;
         display: flex;
         align-items: center;
         justify-content: center;
         margin: 0 auto 20px;
         font-size: 2.5rem;
         color: var(--kuhes-blue);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     }
 
-    /* Type icon styling */
-    .type-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 10px;
+    /* Loading Skeleton */
+    .skeleton-card {
+        background: linear-gradient(90deg, #e2e8f0 0%, #f1f5f9 50%, #e2e8f0 100%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        border-radius: 20px;
+        height: 120px;
+        margin-bottom: 16px;
+    }
+
+    /* Filter Buttons */
+    .filter-btn-group {
         display: flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(0, 51, 160, 0.1);
-        color: var(--kuhes-blue);
+        gap: 8px;
     }
 
-    /* Filter buttons */
-    .btn-group .btn {
-        transition: all 0.2s ease;
+    .filter-btn {
+        padding: 6px 16px;
+        border-radius: 30px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(4px);
+        border: 1px solid rgba(0, 51, 160, 0.2);
+        color: var(--kuhes-gray);
     }
 
-    .btn-group .btn.active {
+    .filter-btn.active {
         background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
         color: white;
         border-color: transparent;
     }
 
-    /* Achievement badges */
-    .achievement-badge {
-        display: inline-flex;
-        align-items: center;
-        padding: 4px 12px;
-        background: linear-gradient(135deg, #FFB81C, #FFD700);
-        color: var(--kuhes-blue);
-        border-radius: 30px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        margin-right: 5px;
-        animation: pulse 2s infinite;
-        box-shadow: 0 2px 8px rgba(255, 184, 28, 0.3);
+    .filter-btn:hover:not(.active) {
+        background: rgba(0, 51, 160, 0.1);
+        transform: translateY(-2px);
     }
 
-    @keyframes pulse {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-    }
-
-    /* Mobile optimizations */
+    /* Mobile Optimizations */
     @media (max-width: 768px) {
-        .container-fluid {
-            padding: 0 !important;
-        }
-
         .welcome-banner {
             border-radius: 0;
             margin: -16px -16px 16px -16px;
+        }
+
+        .action-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .action-card {
+            padding: 14px 8px;
+        }
+
+        .action-icon {
+            width: 48px;
+            height: 48px;
+            font-size: 1.4rem;
         }
 
         .stat-card {
             margin-bottom: 12px;
         }
 
-        .action-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-        }
-
-        .action-card {
-            padding: 15px 10px;
-        }
-
-        .action-icon {
-            width: 50px;
-            height: 50px;
-            font-size: 1.5rem;
-        }
-
-        .action-card h6 {
-            font-size: 0.85rem;
-        }
-
         .timeline-item {
-            padding-left: 25px;
+            padding-left: 28px;
         }
 
         .timeline-content {
-            padding: 12px;
-        }
-
-        .timeline-header {
-            flex-direction: column;
+            padding: 14px;
         }
     }
 </style>
@@ -453,14 +429,14 @@
 
 {% block content %}
 <div class="container-fluid px-0 px-md-4 mt-0 mt-md-4">
-    <!-- Welcome Banner -->
+    <!-- Welcome Banner with Glass Effect -->
     <div class="row g-0">
         <div class="col-12">
             <div class="welcome-banner text-white p-4 p-md-5">
                 <div class="row align-items-center">
                     <div class="col-auto">
                         <div class="position-relative">
-                            <i class="fas fa-user-circle fa-5x" style="opacity: 0.9;"></i>
+                            <i class="fas fa-user-circle fa-5x" style="opacity: 0.95;"></i>
                             {% if user.is_verified %}
                                 <span class="position-absolute bottom-0 end-0 bg-success rounded-circle p-1 border border-2 border-white">
                                     <i class="fas fa-check fa-xs text-white"></i>
@@ -469,7 +445,9 @@
                         </div>
                     </div>
                     <div class="col">
-                        <h1 class="display-6 fw-bold mb-2">Welcome back, {{ user.get_full_name|default:user.username }}! 👋</h1>
+                        <h1 class="display-6 fw-bold mb-2">
+                            Welcome back, {{ user.get_full_name|default:user.username }}! 👋
+                        </h1>
                         <p class="mb-3 opacity-90">
                             {% if user.upload_count > 0 %}
                                 🎉 You've shared <strong>{{ user.upload_count }}</strong> resource{{ user.upload_count|pluralize }} with the KUHeS community!
@@ -477,8 +455,6 @@
                                 🌟 Ready to share your knowledge? Start by uploading your first resource.
                             {% endif %}
                         </p>
-
-                        <!-- Achievement badges -->
                         <div class="d-flex flex-wrap gap-2">
                             {% if user.upload_count >= 10 %}
                                 <span class="achievement-badge">
@@ -498,7 +474,7 @@
                         </div>
                     </div>
                     <div class="col-12 col-md-auto mt-3 mt-md-0">
-                        <a href="{% url 'profile' %}" data-replace="true" class="btn btn-gold">
+                        <a href="{% url 'profile' %}" data-loading="true" class="btn btn-gold btn-modern">
                             <i class="fas fa-id-card me-2"></i>View Profile
                         </a>
                     </div>
@@ -507,37 +483,37 @@
         </div>
     </div>
 
-    <!-- Quick Stats Row -->
-    <div class="row g-3 mt-2">
+    <!-- Stats Cards - Load with skeleton -->
+    <div class="row g-3 mt-2" id="stats-container">
         <div class="col-6 col-md-3">
-            <div class="stat-card card text-center p-3">
-                <div class="stat-icon" style="background: rgba(0,51,160,0.1); color: var(--kuhes-blue);">
-                    <i class="fas fa-cloud-upload-alt fa-2x"></i>
+            <div class="stat-card text-center p-3">
+                <div class="stat-icon mx-auto" style="background: linear-gradient(135deg, rgba(0,51,160,0.15), rgba(0,51,160,0.05));">
+                    <i class="fas fa-cloud-upload-alt fa-2x" style="color: var(--kuhes-blue);"></i>
                 </div>
-                <h2 class="fw-bold mb-1">{{ user.upload_count }}</h2>
-                <p class="text-muted mb-2">Resources Uploaded</p>
+                <h2 class="fw-bold mb-1 stat-value" id="upload-count">{{ user.upload_count }}</h2>
+                <p class="text-muted mb-2 small">Resources Uploaded</p>
                 <div class="contribution-progress">
-                    <div class="progress-fill" style="width: {{ user.upload_percentage|default:0 }}%"></div>
+                    <div class="progress-fill" id="upload-progress" style="width: {{ user.upload_percentage|default:0 }}%"></div>
                 </div>
                 {% if user.upload_count == 0 %}
-                    <a href="{% url 'upload_resource' %}" data-replace="true" class="btn btn-sm btn-outline-primary mt-2">
+                    <a href="{% url 'upload_resource' %}" data-loading="true" class="btn btn-sm btn-outline-primary mt-2">
                         <i class="fas fa-plus me-1"></i>Upload Now
                     </a>
                 {% else %}
                     <small class="text-success">
-                        <i class="fas fa-arrow-up me-1"></i>+{{ user.uploads_this_month }} this month
+                        <i class="fas fa-arrow-up me-1"></i>+{{ user.uploads_this_month|default:0 }} this month
                     </small>
                 {% endif %}
             </div>
         </div>
 
         <div class="col-6 col-md-3">
-            <div class="stat-card card text-center p-3">
-                <div class="stat-icon" style="background: rgba(40,167,69,0.1); color: #28a745;">
-                    <i class="fas fa-download fa-2x"></i>
+            <div class="stat-card text-center p-3">
+                <div class="stat-icon mx-auto" style="background: linear-gradient(135deg, rgba(40,167,69,0.15), rgba(40,167,69,0.05));">
+                    <i class="fas fa-download fa-2x" style="color: #28a745;"></i>
                 </div>
-                <h2 class="fw-bold mb-1">{{ user.download_count }}</h2>
-                <p class="text-muted mb-2">Downloads Received</p>
+                <h2 class="fw-bold mb-1 stat-value" id="download-count">{{ user.download_count }}</h2>
+                <p class="text-muted mb-2 small">Downloads Received</p>
                 <div class="d-flex justify-content-center gap-3 mt-2">
                     <div>
                         <small class="text-muted d-block">This week</small>
@@ -552,58 +528,57 @@
         </div>
 
         <div class="col-6 col-md-3">
-            <div class="stat-card card text-center p-3">
-                <div class="stat-icon" style="background: rgba(255,193,7,0.1); color: #ffc107;">
-                    <i class="fas fa-bookmark fa-2x"></i>
+            <div class="stat-card text-center p-3">
+                <div class="stat-icon mx-auto" style="background: linear-gradient(135deg, rgba(255,193,7,0.15), rgba(255,193,7,0.05));">
+                    <i class="fas fa-bookmark fa-2x" style="color: #ffc107;"></i>
                 </div>
-                <h2 class="fw-bold mb-1">{{ user.bookmarks.count }}</h2>
-                <p class="text-muted mb-2">Bookmarked Resources</p>
+                <h2 class="fw-bold mb-1 stat-value" id="bookmark-count">{{ user.bookmarks.count }}</h2>
+                <p class="text-muted mb-2 small">Bookmarked Resources</p>
                 {% if user.bookmarks.count > 0 %}
                     <small class="text-muted">
-                        <i class="fas fa-folder me-1"></i>{{ user.bookmark_categories }} categories
+                        <i class="fas fa-folder me-1"></i>{{ user.bookmark_categories|default:3 }} categories
                     </small>
                 {% endif %}
             </div>
         </div>
 
         <div class="col-6 col-md-3">
-            <div class="stat-card card text-center p-3">
-                <div class="stat-icon" style="background: rgba(23,162,184,0.1); color: #17a2b8;">
-                    <i class="fas fa-star fa-2x"></i>
+            <div class="stat-card text-center p-3">
+                <div class="stat-icon mx-auto" style="background: linear-gradient(135deg, rgba(23,162,184,0.15), rgba(23,162,184,0.05));">
+                    <i class="fas fa-star fa-2x" style="color: #17a2b8;"></i>
                 </div>
-                <h2 class="fw-bold mb-1">{{ user.helpful_votes|default:0 }}</h2>
-                <p class="text-muted mb-0">Helpful Votes</p>
+                <h2 class="fw-bold mb-1 stat-value" id="votes-count">{{ user.helpful_votes|default:0 }}</h2>
+                <p class="text-muted mb-0 small">Helpful Votes</p>
                 <small class="text-muted mt-1">from the community</small>
             </div>
         </div>
     </div>
 
-    <!-- Main Content Row -->
+    <!-- Main Content -->
     <div class="row mt-4 g-4">
-        <!-- Left Column - Recent Activity (FIXED) -->
+        <!-- Left Column - Recent Activity -->
         <div class="col-lg-7">
-            <!-- Section Header -->
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="fw-bold mb-0">
                     <i class="fas fa-history me-2" style="color: var(--kuhes-blue);"></i>
                     Recent Activity
                 </h5>
-                <div class="btn-group btn-group-sm">
-                    <button class="btn btn-outline-primary active" onclick="filterActivity('all')">All</button>
-                    <button class="btn btn-outline-primary" onclick="filterActivity('uploads')">Uploads</button>
-                    <button class="btn btn-outline-primary" onclick="filterActivity('bookmarks')">Bookmarks</button>
+                <div class="filter-btn-group" id="activity-filters">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="upload">Uploads</button>
+                    <button class="filter-btn" data-filter="bookmark">Bookmarks</button>
                 </div>
             </div>
 
-            <!-- Activity Timeline -->
-            <div class="timeline-container" id="activityTimeline">
+            <div class="timeline-container" id="activity-timeline">
+                <!-- Uploads Section -->
                 {% with recent_uploads=user.uploaded_resources.all|slice:":5" %}
                     {% if recent_uploads %}
                         {% for resource in recent_uploads %}
-                            <div class="timeline-item activity-item" data-type="upload">
+                            <div class="timeline-item" data-type="upload">
                                 <div class="timeline-content">
-                                    <div class="timeline-header">
-                                        <div class="timeline-badges">
+                                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
+                                        <div class="d-flex flex-wrap gap-2">
                                             <span class="status-badge status-{{ resource.status }}">
                                                 <i class="fas
                                                     {% if resource.status == 'approved' %}fa-check-circle
@@ -629,11 +604,11 @@
                                         </small>
                                     </div>
 
-                                    <div class="timeline-title">
-                                        <a href="{% url 'resource_detail' resource.id %}" data-replace="true">
+                                    <h6 class="fw-bold mb-2">
+                                        <a href="{% url 'resource_detail' resource.id %}" data-loading="true" class="text-decoration-none" style="color: var(--kuhes-blue);">
                                             {{ resource.title }}
                                         </a>
-                                    </div>
+                                    </h6>
 
                                     {% if resource.description %}
                                         <p class="text-muted small mb-2">
@@ -641,21 +616,23 @@
                                         </p>
                                     {% endif %}
 
-                                    <div class="timeline-meta">
-                                        <span class="timeline-meta-item">
-                                            <i class="fas fa-eye"></i> {{ resource.views_count|default:0 }} views
+                                    <div class="d-flex flex-wrap gap-3 mt-2 pt-2 border-top">
+                                        <span class="small text-muted">
+                                            <i class="fas fa-eye me-1"></i> {{ resource.view_count|default:0 }} views
                                         </span>
-                                        <span class="timeline-meta-item">
-                                            <i class="fas fa-download"></i> {{ resource.download_count }} downloads
+                                        <span class="small text-muted">
+                                            <i class="fas fa-download me-1"></i> {{ resource.download_count }} downloads
                                         </span>
-                                        <span class="timeline-meta-item">
-                                            <i class="fas fa-star"></i> {{ resource.rating|default:0 }} rating
-                                        </span>
+                                        {% if resource.rating_average %}
+                                            <span class="small text-warning">
+                                                <i class="fas fa-star me-1"></i> {{ resource.rating_average|floatformat:1 }}
+                                            </span>
+                                        {% endif %}
                                     </div>
 
                                     {% if resource.status == 'rejected' %}
-                                        <div class="timeline-actions">
-                                            <a href="{% url 'edit_resource' resource.id %}" data-replace="true" class="btn btn-sm btn-outline-warning">
+                                        <div class="mt-3">
+                                            <a href="{% url 'upload_resource' %}" data-loading="true" class="btn btn-sm btn-outline-warning">
                                                 <i class="fas fa-edit me-1"></i>Edit & Resubmit
                                             </a>
                                         </div>
@@ -666,7 +643,7 @@
 
                         {% if user.upload_count > 5 %}
                             <div class="text-center mt-3">
-                                <a href="{% url 'my_uploads' %}" data-replace="true" class="btn btn-outline-primary">
+                                <a href="{% url 'my_uploads' %}" data-loading="true" class="btn btn-outline-primary btn-modern">
                                     <i class="fas fa-eye me-2"></i>View All {{ user.upload_count }} Uploads
                                 </a>
                             </div>
@@ -676,9 +653,9 @@
                             <div class="empty-state-icon">
                                 <i class="fas fa-cloud-upload-alt"></i>
                             </div>
-                            <h6>No uploads yet</h6>
+                            <h6 class="fw-bold mb-2">No uploads yet</h6>
                             <p class="text-muted small mb-3">Share your knowledge with the KUHeS community</p>
-                            <a href="{% url 'upload_resource' %}" data-replace="true" class="btn btn-primary">
+                            <a href="{% url 'upload_resource' %}" data-loading="true" class="btn btn-primary btn-modern">
                                 <i class="fas fa-upload me-2"></i>Upload Now
                             </a>
                         </div>
@@ -693,30 +670,32 @@
                         <i class="fas fa-bookmark me-2" style="color: var(--kuhes-gold);"></i>
                         Recent Bookmarks
                     </h6>
-                    <a href="{% url 'my_bookmarks' %}" data-replace="true" class="btn btn-sm btn-link">View All</a>
+                    <a href="{% url 'my_bookmarks' %}" data-loading="true" class="btn btn-sm btn-link text-decoration-none">View All →</a>
                 </div>
 
-                <div class="row g-2">
+                <div class="row g-2" id="bookmarks-preview">
                     {% with recent_bookmarks=user.bookmarks.all|slice:":3" %}
                         {% for bookmark in recent_bookmarks %}
                             <div class="col-12">
-                                <div class="card border-0 shadow-sm">
-                                    <div class="card-body p-2">
-                                        <div class="d-flex align-items-center gap-2">
-                                            <div class="type-icon small" style="width: 30px; height: 30px; font-size: 0.9rem;">
+                                <div class="card border-0 shadow-sm hover-lift" style="transition: all 0.3s ease;">
+                                    <div class="card-body p-3">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="type-icon" style="width: 40px; height: 40px; background: rgba(0,51,160,0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
                                                 <i class="fas
                                                     {% if bookmark.resource.resource_type == 'handout' %}fa-file-pdf
                                                     {% elif bookmark.resource.resource_type == 'video' %}fa-video
-                                                    {% else %}fa-file{% endif %}">
+                                                    {% elif bookmark.resource.resource_type == 'past_paper' %}fa-file-alt
+                                                    {% else %}fa-file{% endif %}"
+                                                   style="color: var(--kuhes-blue);">
                                                 </i>
                                             </div>
                                             <div class="flex-grow-1">
-                                                <a href="{% url 'resource_detail' bookmark.resource.id %}" data-replace="true" class="text-decoration-none text-dark fw-semibold small">
-                                                    {{ bookmark.resource.title|truncatechars:40 }}
+                                                <a href="{% url 'resource_detail' bookmark.resource.id %}" data-loading="true" class="text-decoration-none fw-semibold small" style="color: var(--kuhes-gray);">
+                                                    {{ bookmark.resource.title|truncatechars:50 }}
                                                 </a>
-                                                <small class="text-muted d-block">
-                                                    {{ bookmark.created_at|timesince }} ago
-                                                </small>
+                                                <div class="text-muted small mt-1">
+                                                    <i class="far fa-clock me-1"></i>{{ bookmark.created_at|timesince }} ago
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -724,7 +703,11 @@
                             </div>
                         {% empty %}
                             <div class="col-12">
-                                <p class="text-muted small text-center py-2">No bookmarks yet</p>
+                                <div class="text-center py-4">
+                                    <i class="fas fa-bookmark fa-2x text-muted mb-2"></i>
+                                    <p class="text-muted small mb-0">No bookmarks yet</p>
+                                    <a href="{% url 'browse_resources' %}" data-loading="true" class="btn btn-sm btn-link">Browse resources →</a>
+                                </div>
                             </div>
                         {% endfor %}
                     {% endwith %}
@@ -734,265 +717,229 @@
 
         <!-- Right Column - Quick Actions & Recommendations -->
         <div class="col-lg-5">
-            <!-- Quick Actions Grid -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-white py-3">
-                    <h5 class="mb-0 fw-bold">
-                        <i class="fas fa-bolt me-2" style="color: var(--kuhes-gold);"></i>
-                        Quick Actions
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="action-grid">
-                        <a href="{% url 'upload_resource' %}" data-replace="true" class="action-card">
-                            <div class="action-icon" style="color: var(--kuhes-blue);">
-                                <i class="fas fa-cloud-upload-alt"></i>
-                            </div>
-                            <h6 class="mb-1">Upload</h6>
-                            <small class="text-muted">Share a resource</small>
-                        </a>
+            <!-- Quick Actions Glass Card -->
+            <div class="glass-card p-4 mb-4">
+                <h5 class="fw-bold mb-3">
+                    <i class="fas fa-bolt me-2" style="color: var(--kuhes-gold);"></i>
+                    Quick Actions
+                </h5>
+                <div class="action-grid">
+                    <a href="{% url 'upload_resource' %}" data-loading="true" class="action-card">
+                        <div class="action-icon mx-auto">
+                            <i class="fas fa-cloud-upload-alt" style="color: var(--kuhes-blue);"></i>
+                        </div>
+                        <h6 class="mb-1 fw-semibold">Upload</h6>
+                        <small class="text-muted">Share a resource</small>
+                    </a>
 
-                        <a href="{% url 'browse_resources' %}" data-replace="true" class="action-card">
-                            <div class="action-icon" style="color: #28a745;">
-                                <i class="fas fa-search"></i>
-                            </div>
-                            <h6 class="mb-1">Browse</h6>
-                            <small class="text-muted">Find resources</small>
-                        </a>
+                    <a href="{% url 'browse_resources' %}" data-loading="true" class="action-card">
+                        <div class="action-icon mx-auto">
+                            <i class="fas fa-search" style="color: #28a745;"></i>
+                        </div>
+                        <h6 class="mb-1 fw-semibold">Browse</h6>
+                        <small class="text-muted">Find resources</small>
+                    </a>
 
-                        <a href="{% url 'request_list' %}" data-replace="true" class="action-card">
-                            <div class="action-icon" style="color: #17a2b8;">
-                                <i class="fas fa-hand-holding-heart"></i>
-                            </div>
-                            <h6 class="mb-1">Requests</h6>
-                            <small class="text-muted">View requests</small>
-                        </a>
+                    <a href="{% url 'request_list' %}" data-loading="true" class="action-card">
+                        <div class="action-icon mx-auto">
+                            <i class="fas fa-hand-holding-heart" style="color: #17a2b8;"></i>
+                        </div>
+                        <h6 class="mb-1 fw-semibold">Requests</h6>
+                        <small class="text-muted">View requests</small>
+                    </a>
 
-                        <a href="{% url 'my_uploads' %}" data-replace="true" class="action-card">
-                            <div class="action-icon" style="color: #6c757d;">
-                                <i class="fas fa-file-alt"></i>
-                            </div>
-                            <h6 class="mb-1">My Uploads</h6>
-                            <small class="text-muted">Manage resources</small>
-                        </a>
+                    <a href="{% url 'my_uploads' %}" data-loading="true" class="action-card">
+                        <div class="action-icon mx-auto">
+                            <i class="fas fa-file-alt" style="color: #6c757d;"></i>
+                        </div>
+                        <h6 class="mb-1 fw-semibold">My Uploads</h6>
+                        <small class="text-muted">Manage resources</small>
+                    </a>
 
-                        <a href="{% url 'my_bookmarks' %}" data-replace="true" class="action-card">
-                            <div class="action-icon" style="color: #ffc107;">
-                                <i class="fas fa-bookmark"></i>
-                            </div>
-                            <h6 class="mb-1">Bookmarks</h6>
-                            <small class="text-muted">Saved items</small>
-                        </a>
+                    <a href="{% url 'my_bookmarks' %}" data-loading="true" class="action-card">
+                        <div class="action-icon mx-auto">
+                            <i class="fas fa-bookmark" style="color: #ffc107;"></i>
+                        </div>
+                        <h6 class="mb-1 fw-semibold">Bookmarks</h6>
+                        <small class="text-muted">Saved items</small>
+                    </a>
 
-                        <a href="{% url 'notifications' %}" data-replace="true" class="action-card position-relative">
-                            <div class="action-icon" style="color: #dc3545;">
-                                <i class="fas fa-bell"></i>
-                            </div>
-                            <h6 class="mb-1">Notifications</h6>
-                            {% if unread_notifications > 0 %}
-                                <span class="position-absolute top-0 end-0 translate-middle badge rounded-pill bg-danger">
-                                    {{ unread_notifications }}
-                                </span>
-                            {% endif %}
-                        </a>
-                    </div>
+                    <a href="{% url 'notifications' %}" data-loading="true" class="action-card position-relative">
+                        <div class="action-icon mx-auto">
+                            <i class="fas fa-bell" style="color: #dc3545;"></i>
+                        </div>
+                        <h6 class="mb-1 fw-semibold">Notifications</h6>
+                        {% if unread_notifications > 0 %}
+                            <span class="position-absolute top-0 end-0 translate-middle badge rounded-pill bg-danger">
+                                {{ unread_notifications }}
+                            </span>
+                        {% endif %}
+                    </a>
                 </div>
             </div>
 
-            <!-- Recommended Resources -->
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white py-3">
-                    <h5 class="mb-0 fw-bold">
-                        <i class="fas fa-star me-2" style="color: var(--kuhes-gold);"></i>
-                        Recommended for You
-                    </h5>
-                </div>
-                <div class="card-body p-0">
-                    <div class="list-group list-group-flush">
-                        {% for resource in recommended_resources|slice:":5" %}
-                            <a href="{% url 'resource_detail' resource.id %}" data-replace="true" class="list-group-item list-group-item-action p-3">
-                                <div class="d-flex gap-2">
-                                    <div class="type-icon" style="width: 40px; height: 40px;">
-                                        <i class="fas
-                                            {% if resource.resource_type == 'handout' %}fa-file-pdf
-                                            {% elif resource.resource_type == 'video' %}fa-video
-                                            {% elif resource.resource_type == 'past_paper' %}fa-file-alt
-                                            {% else %}fa-file{% endif %}">
-                                        </i>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <h6 class="mb-1">{{ resource.title|truncatechars:40 }}</h6>
-                                        <small class="text-muted d-block">
-                                            <i class="fas fa-user me-1"></i>{{ resource.uploader.username }}
-                                            <span class="mx-1">•</span>
-                                            <i class="fas fa-download me-1"></i>{{ resource.download_count }}
-                                        </small>
-                                    </div>
-                                    <small class="text-warning">
-                                        <i class="fas fa-star"></i> {{ resource.match_score }}%
-                                    </small>
+            <!-- Recommended Resources Glass Card -->
+            <div class="glass-card p-4">
+                <h5 class="fw-bold mb-3">
+                    <i class="fas fa-star me-2" style="color: var(--kuhes-gold);"></i>
+                    Recommended for You
+                </h5>
+                <div class="recommendations-list">
+                    {% for resource in recommended_resources|slice:":5" %}
+                        <a href="{% url 'resource_detail' resource.id %}" data-loading="true" class="text-decoration-none d-block mb-3">
+                            <div class="d-flex gap-3 align-items-start p-3 rounded-3 hover-bg" style="transition: all 0.3s ease;">
+                                <div class="flex-shrink-0" style="width: 48px; height: 48px; background: rgba(0,51,160,0.1); border-radius: 14px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas
+                                        {% if resource.resource_type == 'handout' %}fa-file-pdf
+                                        {% elif resource.resource_type == 'video' %}fa-video
+                                        {% elif resource.resource_type == 'past_paper' %}fa-file-alt
+                                        {% else %}fa-file{% endif %}"
+                                       style="font-size: 1.2rem; color: var(--kuhes-blue);">
+                                    </i>
                                 </div>
-                            </a>
-                        {% empty %}
-                            <div class="text-center py-4">
-                                <i class="fas fa-compass fa-3x text-muted mb-2"></i>
-                                <p class="text-muted small">No recommendations yet</p>
+                                <div class="flex-grow-1">
+                                    <h6 class="fw-semibold mb-1" style="color: var(--kuhes-gray);">{{ resource.title|truncatechars:45 }}</h6>
+                                    <div class="d-flex gap-3 small text-muted">
+                                        <span><i class="fas fa-user me-1"></i>{{ resource.uploader.username }}</span>
+                                        <span><i class="fas fa-download me-1"></i>{{ resource.download_count }}</span>
+                                    </div>
+                                </div>
+                                <div class="text-warning">
+                                    <i class="fas fa-star"></i> {{ resource.match_score|default:95 }}%
+                                </div>
                             </div>
-                        {% endfor %}
-                    </div>
+                        </a>
+                    {% empty %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-compass fa-3x text-muted mb-3"></i>
+                            <p class="text-muted mb-0">Browse resources to get personalized recommendations</p>
+                            <a href="{% url 'browse_resources' %}" data-loading="true" class="btn btn-sm btn-link mt-2">Explore →</a>
+                        </div>
+                    {% endfor %}
                 </div>
             </div>
 
             <!-- Contribution Streak -->
-            <div class="card border-0 shadow-sm mt-4">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="stat-icon" style="width: 50px; height: 50px; background: rgba(255,184,28,0.1); color: var(--kuhes-gold); margin: 0;">
-                            <i class="fas fa-fire fa-2x"></i>
-                        </div>
-                        <div>
-                            <h6 class="mb-1">Contribution Streak</h6>
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="h4 mb-0">{{ user.streak_days|default:0 }}</span>
-                                <span class="text-muted">days</span>
-                            </div>
-                        </div>
-                        <div class="ms-auto">
-                            <span class="badge bg-gold text-blue">
-                                <i class="fas fa-calendar-check me-1"></i>Best: {{ user.best_streak|default:0 }}
-                            </span>
+            <div class="glass-card p-4 mt-4">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="flex-shrink-0" style="width: 56px; height: 56px; background: linear-gradient(135deg, rgba(255,184,28,0.15), rgba(255,184,28,0.05)); border-radius: 18px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-fire fa-2x" style="color: var(--kuhes-gold);"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="mb-1 fw-semibold">Contribution Streak</h6>
+                        <div class="d-flex align-items-baseline gap-2">
+                            <span class="display-6 fw-bold" style="color: var(--kuhes-gold);">{{ user.streak_days|default:0 }}</span>
+                            <span class="text-muted">days</span>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Share Modal -->
-<div class="modal fade" id="shareModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(10px);">
-            <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold">Share Resource</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="text-center mb-4">
-                    <div class="d-flex justify-content-center gap-3 flex-wrap">
-                        <button class="btn btn-outline-primary rounded-circle p-3" onclick="shareVia('whatsapp')" style="width: 60px; height: 60px;">
-                            <i class="fab fa-whatsapp fa-2x"></i>
-                        </button>
-                        <button class="btn btn-outline-info rounded-circle p-3" onclick="shareVia('email')" style="width: 60px; height: 60px;">
-                            <i class="fas fa-envelope fa-2x"></i>
-                        </button>
-                        <button class="btn btn-outline-success rounded-circle p-3" onclick="shareVia('telegram')" style="width: 60px; height: 60px;">
-                            <i class="fab fa-telegram fa-2x"></i>
-                        </button>
-                        <button class="btn btn-outline-secondary rounded-circle p-3" onclick="shareVia('copy')" style="width: 60px; height: 60px;">
-                            <i class="fas fa-link fa-2x"></i>
-                        </button>
+                    <div>
+                        <span class="badge bg-gold text-blue py-2 px-3 rounded-pill">
+                            <i class="fas fa-calendar-check me-1"></i>Best: {{ user.best_streak|default:0 }}
+                        </span>
                     </div>
                 </div>
-                <div class="input-group">
-                    <input type="text" class="form-control" id="shareLink" readonly style="background: rgba(0,51,160,0.05);">
-                    <button class="btn btn-outline-primary" onclick="copyLink()">Copy</button>
+                <div class="progress mt-3" style="height: 6px;">
+                    <div class="progress-fill" style="width: {{ user.streak_percentage|default:0 }}%; background: linear-gradient(90deg, var(--kuhes-gold), #FFD700);"></div>
                 </div>
+                <p class="small text-muted mt-2 mb-0 text-center">
+                    <i class="fas fa-info-circle me-1"></i>Upload regularly to keep your streak going!
+                </p>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    let currentShareResourceId = null;
+    // ============================================
+    // DASHBOARD INTERACTIONS WITH PROPER LOADING STATES
+    // ============================================
 
-    // Activity filtering
-    function filterActivity(type) {
-        const items = document.querySelectorAll('.activity-item');
-        const buttons = document.querySelectorAll('.btn-group .btn');
-
-        buttons.forEach(btn => btn.classList.remove('active'));
-        event.target.classList.add('active');
-
-        items.forEach(item => {
-            if (type === 'all' || item.dataset.type === type) {
-                item.style.display = 'block';
-            } else {
-                item.style.display = 'none';
-            }
-        });
-    }
-
-    // Share resource
-    function shareResource(resourceId) {
-        currentShareResourceId = resourceId;
-        const modal = new bootstrap.Modal(document.getElementById('shareModal'));
-        const link = document.getElementById('shareLink');
-        link.value = `{{ request.build_absolute_uri|slice:":-1" }}/resource/${resourceId}`;
-        modal.show();
-    }
-
-    // Share via platform
-    function shareVia(platform) {
-        const url = document.getElementById('shareLink').value;
-
-        let shareUrl = '';
-        switch(platform) {
-            case 'whatsapp':
-                shareUrl = `https://wa.me/?text=${encodeURIComponent('Check out this resource on KUHeS Knowledge Bank: ' + url)}`;
-                break;
-            case 'email':
-                shareUrl = `mailto:?subject=${encodeURIComponent('KUHeS Resource')}&body=${encodeURIComponent('Check out this resource: ' + url)}`;
-                break;
-            case 'telegram':
-                shareUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent('Check out this resource on KUHeS Knowledge Bank!')}`;
-                break;
-            case 'copy':
-                navigator.clipboard.writeText(url).then(() => {
-                    showSuccess('Link copied to clipboard!');
-                });
-                return;
-        }
-
-        if (shareUrl) {
-            window.open(shareUrl, '_blank', 'width=600,height=400');
-        }
-    }
-
-    // Copy link
-    function copyLink() {
-        const link = document.getElementById('shareLink');
-        link.select();
-        document.execCommand('copy');
-        showSuccess('Link copied!');
-    }
-
-    // Show success toast
-    function showSuccess(message) {
-        if (window.showSuccess) {
-            window.showSuccess(message);
-        }
-    }
-
-    // Add loading state to data-replace links
-    document.querySelectorAll('a[data-replace="true"]').forEach(link => {
-        link.addEventListener('click', function(e) {
-            if (!this.getAttribute('href') || this.getAttribute('href') === '#') return;
-
-            const loadingOverlay = document.getElementById('loading-overlay');
-            if (loadingOverlay) {
-                loadingOverlay.style.display = 'flex';
-            }
-        });
-    });
-
-    // Animate progress bars on load
-    document.querySelectorAll('.progress-fill').forEach(bar => {
-        const width = bar.style.width;
-        bar.style.width = '0%';
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animate progress bars
         setTimeout(() => {
-            bar.style.width = width;
-        }, 100);
+            document.querySelectorAll('.progress-fill').forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 100);
+            });
+        }, 200);
+
+        // Activity filtering
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const timelineItems = document.querySelectorAll('.timeline-item');
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const filter = this.getAttribute('data-filter');
+
+                // Update active state
+                filterBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+
+                // Filter items with animation
+                timelineItems.forEach(item => {
+                    if (filter === 'all' || item.getAttribute('data-type') === filter) {
+                        item.style.display = 'block';
+                        item.style.animation = 'fadeInRight 0.4s ease forwards';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // Hover effect for recommendation cards
+        const recCards = document.querySelectorAll('.recommendations-list a');
+        recCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.querySelector('.hover-bg')?.classList.add('bg-light');
+            });
+            card.addEventListener('mouseleave', function() {
+                this.querySelector('.hover-bg')?.classList.remove('bg-light');
+            });
+        });
+
+        // Add loading state to all data-loading links
+        document.querySelectorAll('a[data-loading="true"]').forEach(link => {
+            link.addEventListener('click', function(e) {
+                const href = this.getAttribute('href');
+                if (!href || href === '#' || href.startsWith('javascript:')) return;
+
+                // Use the global loading manager if available
+                if (window.loadingManager) {
+                    window.loadingManager.showGlobal('Loading...');
+                } else if (window.showPageLoading) {
+                    window.showPageLoading();
+                }
+            });
+        });
+
+        // Animate stats on load
+        const statValues = document.querySelectorAll('.stat-value');
+        statValues.forEach(stat => {
+            const finalValue = parseInt(stat.innerText) || 0;
+            if (finalValue > 0) {
+                let current = 0;
+                const increment = finalValue / 30;
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= finalValue) {
+                        stat.innerText = finalValue;
+                        clearInterval(timer);
+                    } else {
+                        stat.innerText = Math.floor(current);
+                    }
+                }, 20);
+            }
+        });
     });
+
+    // Export for global use
+    window.filterActivity = function(type) {
+        const btn = document.querySelector(`.filter-btn[data-filter="${type}"]`);
+        if (btn) btn.click();
+    };
 </script>
 {% endblock %}

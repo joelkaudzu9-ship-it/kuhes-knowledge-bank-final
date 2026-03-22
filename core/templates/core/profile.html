@@ -766,12 +766,15 @@
                             <div class="col-md-6 mb-3">
                                 <label for="edit_year_of_study" class="form-label">Year of Study</label>
                                 <input type="number" name="year_of_study" id="edit_year_of_study" class="form-control"
-                                       value="{{ user.year_of_study }}" min="1" max="6">
+                                       value="{% if user.year_of_study %}{{ user.year_of_study }}{% endif %}"
+                                       min="1" max="6" placeholder="e.g., 3">
+                                <small class="text-muted">Leave blank if not applicable</small>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="edit_graduation_year" class="form-label">Graduation Year</label>
                                 <input type="number" name="graduation_year" id="edit_graduation_year" class="form-control"
-                                       value="{{ user.graduation_year }}" min="2024" max="2035">
+                                       value="{% if user.graduation_year %}{{ user.graduation_year }}{% endif %}"
+                                       min="2024" max="2035" placeholder="e.g., 2028">
                             </div>
                         </div>
                     </div>
@@ -786,7 +789,8 @@
                         <div class="mb-3">
                             <label for="edit_postgrad_year" class="form-label">Year of Study</label>
                             <input type="number" name="year_of_study" id="edit_postgrad_year" class="form-control"
-                                   value="{{ user.year_of_study }}" min="1" max="6">
+                                   value="{% if user.year_of_study %}{{ user.year_of_study }}{% endif %}" min="1" max="6" placeholder="e.g., 2">
+                            <small class="text-muted">Leave blank if not applicable</small>
                         </div>
                     </div>
 
@@ -800,7 +804,8 @@
                         <div class="mb-3">
                             <label for="edit_diploma_year" class="form-label">Year of Study</label>
                             <input type="number" name="year_of_study" id="edit_diploma_year" class="form-control"
-                                   value="{{ user.year_of_study }}" min="1" max="4">
+                                   value="{% if user.year_of_study %}{{ user.year_of_study }}{% endif %}" min="1" max="4" placeholder="e.g., 1">
+                            <small class="text-muted">Leave blank if not applicable</small>
                         </div>
                     </div>
                 </div>

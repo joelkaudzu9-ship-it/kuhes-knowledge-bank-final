@@ -1,248 +1,532 @@
 {% extends 'core/base.html' %}
+{% load static %}
 
-{% block title %}Request Details{% endblock %}
+{% block title %}{{ request.title }} - Resource Request{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Professional, clean styling */
+    .detail-card {
+        background: white;
+        border-radius: 16px;
+        border: 1px solid #eef2f6;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+
+    /* Breadcrumb */
+    .breadcrumb {
+        background: transparent;
+        padding: 0;
+        margin-bottom: 1.5rem;
+    }
+
+    .breadcrumb-item a {
+        text-decoration: none;
+        color: var(--kuhes-blue);
+        font-size: 0.9rem;
+    }
+
+    .breadcrumb-item.active {
+        color: #6c757d;
+    }
+
+    /* Status badges */
+    .badge-status {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .badge-status.open { background: #e6f4ea; color: #1e7e34; }
+    .badge-status.in_progress { background: #fff3e0; color: #e67700; }
+    .badge-status.fulfilled { background: #e8f0fe; color: #1a73e8; }
+
+    .badge-urgency {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .badge-urgency.low { background: #e6f4ea; color: #1e7e34; }
+    .badge-urgency.medium { background: #fff3e0; color: #e67700; }
+    .badge-urgency.high { background: #fee2e2; color: #d93025; }
+    .badge-urgency.urgent { background: #fee2e2; color: #d93025; }
+
+    /* Upvote button */
+    .upvote-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 16px;
+        border-radius: 40px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        border: 1px solid #e0e4e8;
+        background: white;
+        color: #5f6b7a;
+        transition: all 0.2s;
+    }
+
+    .upvote-btn:hover {
+        background: #f8f9fa;
+        border-color: #cbd0d6;
+    }
+
+    .upvote-btn.upvoted {
+        background: #e6f4ea;
+        border-color: #1e7e34;
+        color: #1e7e34;
+    }
+
+    /* Description section */
+    .description-box {
+        background: #fafbfc;
+        border-radius: 12px;
+        padding: 20px;
+        margin: 20px 0;
+        border: 1px solid #eef2f6;
+    }
+
+    .description-box p {
+        color: #3c4a5a;
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    /* Section headers */
+    .section-title {
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #6c757d;
+        margin-bottom: 16px;
+    }
+
+    /* Info grid - better orientation */
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+        margin: 20px 0;
+    }
+
+    .info-item {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px solid #f0f2f5;
+    }
+
+    .info-label {
+        width: 100px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: #6c757d;
+        flex-shrink: 0;
+    }
+
+    .info-value {
+        font-size: 0.9rem;
+        color: #2c3e50;
+        font-weight: 500;
+    }
+
+    /* Action buttons */
+    .action-buttons {
+        display: flex;
+        gap: 12px;
+        margin-top: 24px;
+        padding-top: 24px;
+        border-top: 1px solid #eef2f6;
+    }
+
+    .btn-primary {
+        background: var(--kuhes-blue);
+        border: none;
+        border-radius: 10px;
+        padding: 10px 20px;
+        font-weight: 500;
+        font-size: 0.85rem;
+        transition: all 0.2s;
+    }
+
+    .btn-primary:hover {
+        background: #002a80;
+        transform: translateY(-1px);
+    }
+
+    .btn-outline {
+        background: white;
+        border: 1px solid #e0e4e8;
+        border-radius: 10px;
+        padding: 10px 20px;
+        font-weight: 500;
+        font-size: 0.85rem;
+        color: #5f6b7a;
+        transition: all 0.2s;
+    }
+
+    .btn-outline:hover {
+        background: #f8f9fa;
+        border-color: #cbd0d6;
+    }
+
+    .btn-danger-outline {
+        background: white;
+        border: 1px solid #fee2e2;
+        border-radius: 10px;
+        padding: 10px 20px;
+        font-weight: 500;
+        font-size: 0.85rem;
+        color: #d93025;
+        transition: all 0.2s;
+    }
+
+    .btn-danger-outline:hover {
+        background: #fee2e2;
+        border-color: #d93025;
+    }
+
+    /* Sidebar cards */
+    .sidebar-card {
+        background: white;
+        border-radius: 16px;
+        border: 1px solid #eef2f6;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .similar-item {
+        padding: 12px 0;
+        border-bottom: 1px solid #f0f2f5;
+    }
+
+    .similar-item:last-child {
+        border-bottom: none;
+    }
+
+    .similar-item a {
+        text-decoration: none;
+        font-weight: 500;
+        color: #2c3e50;
+        font-size: 0.85rem;
+        display: block;
+        margin-bottom: 6px;
+    }
+
+    .similar-item a:hover {
+        color: var(--kuhes-blue);
+    }
+
+    .similar-meta {
+        font-size: 0.7rem;
+        color: #9aa6b5;
+    }
+
+    /* Moderator panel */
+    .moderator-panel {
+        background: #fefaf0;
+        border-radius: 16px;
+        border: 1px solid #fef2e0;
+        padding: 20px;
+    }
+
+    /* Loading state */
+    .btn-loading {
+        position: relative;
+        pointer-events: none;
+        opacity: 0.6;
+    }
+
+    .btn-loading .btn-text {
+        visibility: hidden;
+    }
+
+    .btn-loading::after {
+        content: '';
+        position: absolute;
+        width: 14px;
+        height: 14px;
+        top: 50%;
+        left: 50%;
+        margin-left: -7px;
+        margin-top: -7px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Modal */
+    .modal-content {
+        border-radius: 20px;
+        border: none;
+    }
+
+    .modal-header {
+        background: var(--kuhes-blue);
+        color: white;
+        border-radius: 20px 20px 0 0;
+        padding: 16px 24px;
+    }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+        .container {
+            padding: 16px;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .action-buttons .btn {
+            width: 100%;
+        }
+
+        .info-item {
+            padding: 10px 0;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <nav aria-label="breadcrumb">
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'request_list' %}">Requests</a></li>
-            <li class="breadcrumb-item active">{{ request.title|truncatechars:30 }}</li>
+            <li class="breadcrumb-item active">{{ request.title|truncatechars:50 }}</li>
         </ol>
     </nav>
 
-    <div class="row">
+    <div class="row g-4">
+        <!-- Main Content - 2/3 width -->
         <div class="col-lg-8">
-            <!-- Main Request Card -->
-            <div class="card shadow mb-4">
-                <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0">{{ request.title }}</h4>
-                    <span class="badge {% if request.status == 'open' %}bg-success{% elif request.status == 'in_progress' %}bg-warning{% else %}bg-info{% endif %} fs-6">
+            <div class="detail-card p-4 p-md-5">
+                <!-- Header with Title and Status -->
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+                    <h1 class="h3 fw-semibold" style="color: #1a2c3e; margin: 0;">{{ request.title }}</h1>
+                    <span class="badge-status {{ request.status }}">
+                        <i class="fas
+                            {% if request.status == 'open' %}fa-circle
+                            {% elif request.status == 'in_progress' %}fa-spinner fa-pulse
+                            {% else %}fa-check-circle{% endif %} me-1" style="font-size: 0.65rem;"></i>
                         {{ request.get_status_display }}
                     </span>
                 </div>
-                <div class="card-body">
-                    <div class="d-flex justify-content-between mb-4">
-                        <div>
-                            <span class="badge {% if request.urgency == 'urgent' %}bg-danger{% elif request.urgency == 'high' %}bg-warning{% elif request.urgency == 'medium' %}bg-info{% else %}bg-secondary{% endif %} me-2">
-                                {{ request.get_urgency_display }}
-                            </span>
-                            <span class="text-muted">
-                                <i class="fas fa-user me-1"></i>{{ request.requester.username }}
-                            </span>
-                            <span class="text-muted ms-3">
-                                <i class="fas fa-clock me-1"></i>{{ request.created_at|timesince }} ago
+
+                <!-- Meta Row with Urgency and Metadata -->
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4 pb-2 border-bottom">
+                    <div class="d-flex flex-wrap gap-3">
+                        <span class="badge-urgency {{ request.urgency }}">
+                            <i class="fas
+                                {% if request.urgency == 'urgent' %}fa-exclamation-circle
+                                {% elif request.urgency == 'high' %}fa-arrow-up
+                                {% elif request.urgency == 'medium' %}fa-minus
+                                {% else %}fa-arrow-down{% endif %} me-1">
+                            </i>
+                            {{ request.get_urgency_display }}
+                        </span>
+                        <span class="text-muted small">
+                            <i class="far fa-user me-1"></i>{{ request.requester.get_full_name|default:request.requester.username }}
+                        </span>
+                        <span class="text-muted small">
+                            <i class="far fa-clock me-1"></i>{{ request.created_at|timesince }} ago
+                        </span>
+                    </div>
+
+                    <a href="{% url 'upvote_request' request.id %}"
+                       class="upvote-btn {% if user_upvoted %}upvoted{% endif %}"
+                       id="upvoteBtn">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>{{ request.upvotes }}</span>
+                    </a>
+                </div>
+
+                <!-- Description -->
+                <div class="description-box">
+                    <div class="section-title mb-3">DESCRIPTION</div>
+                    <p>{{ request.description|linebreaks }}</p>
+                </div>
+
+                <!-- Details in Grid Layout - Better Orientation -->
+                <div>
+                    <div class="section-title mb-3">DETAILS</div>
+                    <div class="info-grid">
+                        {% if request.level %}
+                        <div class="info-item">
+                            <span class="info-label">Level</span>
+                            <span class="info-value">{{ request.get_level_display }}</span>
+                        </div>
+                        {% endif %}
+                        {% if request.premed_subject %}
+                        <div class="info-item">
+                            <span class="info-label">Subject</span>
+                            <span class="info-value">{{ request.get_premed_subject_display }}</span>
+                        </div>
+                        {% endif %}
+                        {% if request.school %}
+                        <div class="info-item">
+                            <span class="info-label">School</span>
+                            <span class="info-value">{{ request.get_school_display }}</span>
+                        </div>
+                        {% endif %}
+                        {% if request.programme %}
+                        <div class="info-item">
+                            <span class="info-label">Programme</span>
+                            <span class="info-value">{{ request.programme }}</span>
+                        </div>
+                        {% endif %}
+                        {% if request.year_of_study %}
+                        <div class="info-item">
+                            <span class="info-label">Year</span>
+                            <span class="info-value">Year {{ request.year_of_study }}</span>
+                        </div>
+                        {% endif %}
+                        {% if request.course_code %}
+                        <div class="info-item">
+                            <span class="info-label">Course Code</span>
+                            <span class="info-value">{{ request.course_code }}</span>
+                        </div>
+                        {% endif %}
+                        {% if request.deadline %}
+                        <div class="info-item">
+                            <span class="info-label">Deadline</span>
+                            <span class="info-value">
+                                {{ request.deadline|date:"M d, Y" }}
+                                {% if request.deadline|timesince <= "3 days" %}
+                                    <span class="text-danger ms-2">(soon)</span>
+                                {% endif %}
                             </span>
                         </div>
-
-                        <!-- Upvote Button -->
-                        <a href="{% url 'upvote_request' request.id %}" class="btn {% if user_upvoted %}btn-success{% else %}btn-outline-success{% endif %}">
-                            <i class="fas fa-arrow-up me-1"></i>{{ request.upvotes }} Upvotes
-                        </a>
-                    </div>
-
-                    <!-- Description -->
-                    <div class="mb-4">
-                        <h5>Description</h5>
-                        <p class="lead">{{ request.description|linebreaks }}</p>
-                    </div>
-
-                    <!-- Details -->
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <h5>Details</h5>
-                            <table class="table table-sm">
-                                {% if request.level %}
-                                <tr>
-                                    <th>Level:</th>
-                                    <td>{{ request.get_level_display }}</td>
-                                </tr>
-                                {% endif %}
-
-                                {% if request.premed_subject %}
-                                <tr>
-                                    <th>Subject:</th>
-                                    <td>{{ request.get_premed_subject_display }}</td>
-                                </tr>
-                                {% endif %}
-
-                                {% if request.school %}
-                                <tr>
-                                    <th>School:</th>
-                                    <td>{{ request.get_school_display }}</td>
-                                </tr>
-                                {% endif %}
-
-                                {% if request.programme %}
-                                <tr>
-                                    <th>Programme:</th>
-                                    <td>{{ request.programme }}</td>
-                                </tr>
-                                {% endif %}
-
-                                {% if request.year_of_study %}
-                                <tr>
-                                    <th>Year:</th>
-                                    <td>{{ request.year_of_study }}</td>
-                                </tr>
-                                {% endif %}
-
-                                {% if request.course_code %}
-                                <tr>
-                                    <th>Course Code:</th>
-                                    <td>{{ request.course_code }}</td>
-                                </tr>
-                                {% endif %}
-
-                                {% if request.deadline %}
-                                <tr>
-                                    <th>Deadline:</th>
-                                    <td>{{ request.deadline|date:"F j, Y" }}</td>
-                                </tr>
-                                {% endif %}
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Action Buttons -->
-                    <div class="d-flex gap-2">
-                        {% if request.requester == user or user.role == 'moderator' or user.role == 'admin' %}
-                            {% if request.status != 'fulfilled' and request.status != 'closed' %}
-                                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#fulfillModal">
-                                    <i class="fas fa-check-circle me-2"></i>Mark as Fulfilled
-                                </button>
-                            {% endif %}
                         {% endif %}
-
-                        {% if request.requester == user or user.role == 'moderator' or user.role == 'admin' %}
-                            <a href="{% url 'delete_request' request.id %}" class="btn btn-outline-danger"
-                               onclick="return confirm('Delete this request? This cannot be undone.')">
-                                <i class="fas fa-trash me-2"></i>Delete
-                            </a>
-                        {% endif %}
-
-                        <a href="{% url 'request_list' %}" class="btn btn-outline-secondary">
-                            <i class="fas fa-arrow-left me-2"></i>Back to Requests
-                        </a>
                     </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    {% if request.requester == user or user.role == 'moderator' or user.role == 'admin' %}
+                        {% if request.status != 'fulfilled' and request.status != 'closed' %}
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#fulfillModal">
+                                <i class="fas fa-check me-2"></i>Mark Fulfilled
+                            </button>
+                        {% endif %}
+                    {% endif %}
+
+                    {% if request.requester == user or user.role == 'moderator' or user.role == 'admin' %}
+                        <a href="{% url 'delete_request' request.id %}" class="btn btn-danger-outline"
+                           onclick="return confirm('Delete this request? This cannot be undone.')">
+                            <i class="fas fa-trash me-2"></i>Delete
+                        </a>
+                    {% endif %}
+
+                    <a href="{% url 'request_list' %}" class="btn btn-outline">
+                        <i class="fas fa-arrow-left me-2"></i>Back
+                    </a>
                 </div>
             </div>
         </div>
 
+        <!-- Sidebar - 1/3 width -->
         <div class="col-lg-4">
             <!-- Similar Requests -->
-            <div class="card shadow mb-4">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-clone me-2 text-primary-blue"></i>Similar Requests</h5>
-                </div>
-                <div class="card-body">
-                    {% if similar_requests %}
-                        {% for similar in similar_requests %}
-                            <div class="mb-3 pb-2 border-bottom">
-                                <h6>
-                                    <a href="{% url 'request_detail' similar.id %}" class="text-decoration-none">
-                                        {{ similar.title|truncatechars:40 }}
-                                    </a>
-                                </h6>
-                                <small class="text-muted">
-                                    <i class="fas fa-arrow-up me-1"></i>{{ similar.upvotes }} votes
-                                    <span class="mx-2">•</span>
-                                    {{ similar.created_at|timesince }} ago
-                                </small>
-                            </div>
-                        {% endfor %}
-                    {% else %}
-                        <p class="text-muted text-center py-3">No similar requests found</p>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Moderator Panel (only visible to moderators) -->
-            {% if can_moderate %}
-            <div class="card shadow border-warning">
-                <div class="card-header bg-warning text-dark">
-                    <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i>Moderator Actions</h5>
-                </div>
-                <div class="card-body">
-                    <form method="post" action="{% url 'moderate_request' request.id %}" class="mb-3">
-                        {% csrf_token %}
-
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="btn-group w-100 mb-2">
-                                    <button type="submit" name="action" value="pin" class="btn {% if request.is_pinned %}btn-warning{% else %}btn-outline-warning{% endif %}">
-                                        <i class="fas fa-thumbtack me-2"></i>{% if request.is_pinned %}Unpin{% else %}Pin{% endif %}
-                                    </button>
-
-                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#priorityPanel">
-                                        <i class="fas fa-arrow-up me-2"></i>Set Priority
-                                    </button>
-                                </div>
-
-                                <div id="priorityPanel" class="collapse mb-2">
-                                    <div class="input-group">
-                                        <input type="number" name="priority" class="form-control"
-                                               value="{{ request.priority }}" min="0" max="10">
-                                        <button type="submit" name="action" value="priority" class="btn btn-primary">
-                                            Update Priority
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-12 mt-2">
-                                <div class="btn-group w-100 mb-2">
-                                    <button type="button" class="btn btn-outline-info" data-bs-toggle="collapse" data-bs-target="#notesPanel">
-                                        <i class="fas fa-sticky-note me-2"></i>Add Notes
-                                    </button>
-
-                                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#mergePanel">
-                                        <i class="fas fa-code-branch me-2"></i>Merge
-                                    </button>
-
-                                    {% if user.role == 'admin' %}
-                                    <button type="submit" name="action" value="delete" class="btn btn-outline-danger"
-                                            onclick="return confirm('Delete this request? This cannot be undone.')">
-                                        <i class="fas fa-trash me-2"></i>Delete
-                                    </button>
-                                    {% endif %}
-                                </div>
-
-                                <div id="notesPanel" class="collapse mb-2">
-                                    <textarea name="notes" class="form-control mb-2" rows="2"
-                                              placeholder="Internal moderator notes...">{{ request.moderator_notes }}</textarea>
-                                    <button type="submit" name="action" value="notes" class="btn btn-sm btn-info">
-                                        Save Notes
-                                    </button>
-                                </div>
-
-                                <div id="mergePanel" class="collapse mb-2">
-                                    <div class="input-group">
-                                        <input type="number" name="duplicate_id" class="form-control"
-                                               placeholder="Request ID to merge">
-                                        <button type="submit" name="action" value="merge" class="btn btn-secondary"
-                                                onclick="return confirm('Merge upvotes from duplicate into this request?')">
-                                            Merge
-                                        </button>
-                                    </div>
-                                </div>
+            <div class="sidebar-card">
+                <div class="section-title mb-3">SIMILAR REQUESTS</div>
+                {% if similar_requests %}
+                    {% for similar in similar_requests %}
+                        <div class="similar-item">
+                            <a href="{% url 'request_detail' similar.id %}">{{ similar.title|truncatechars:55 }}</a>
+                            <div class="similar-meta">
+                                <i class="fas fa-arrow-up me-1"></i>{{ similar.upvotes }} votes
+                                <span class="mx-2">•</span>
+                                <i class="far fa-clock me-1"></i>{{ similar.created_at|timesince }} ago
                             </div>
                         </div>
-                    </form>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted text-center py-3 mb-0">No similar requests found</p>
+                {% endif %}
+            </div>
 
-                    <!-- Display Moderator Notes if any -->
-                    {% if request.moderator_notes %}
-                    <div class="alert alert-info mt-3">
-                        <strong>Moderator Notes:</strong><br>
-                        {{ request.moderator_notes }}
+            <!-- Moderator Panel -->
+            {% if can_moderate %}
+            <div class="moderator-panel">
+                <div class="section-title mb-3">MODERATOR TOOLS</div>
+                <form method="post" action="{% url 'moderate_request' request.id %}" id="moderateForm">
+                    {% csrf_token %}
+
+                    <div class="d-flex gap-2 mb-3">
+                        <button type="submit" name="action" value="pin" class="btn btn-outline flex-grow-1">
+                            <i class="fas fa-thumbtack me-2"></i>{% if request.is_pinned %}Unpin{% else %}Pin{% endif %}
+                        </button>
+                        <button type="button" class="btn btn-outline" data-bs-toggle="collapse" data-bs-target="#priorityPanel">
+                            <i class="fas fa-arrow-up me-2"></i>Priority
+                        </button>
                     </div>
-                    {% endif %}
 
-                    <!-- Priority Badge -->
-                    {% if request.priority > 0 %}
-                    <span class="badge bg-primary">Priority: {{ request.priority }}</span>
-                    {% endif %}
-                </div>
+                    <div id="priorityPanel" class="collapse mb-3">
+                        <div class="input-group">
+                            <input type="number" name="priority" class="form-control form-control-sm"
+                                   value="{{ request.priority }}" min="0" max="10" style="width: 80px;">
+                            <button type="submit" name="action" value="priority" class="btn btn-sm btn-primary">Set</button>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 mb-3">
+                        <button type="button" class="btn btn-outline flex-grow-1" data-bs-toggle="collapse" data-bs-target="#notesPanel">
+                            <i class="fas fa-sticky-note me-2"></i>Notes
+                        </button>
+                        <button type="button" class="btn btn-outline flex-grow-1" data-bs-toggle="collapse" data-bs-target="#mergePanel">
+                            <i class="fas fa-code-branch me-2"></i>Merge
+                        </button>
+                    </div>
+
+                    <div id="notesPanel" class="collapse mb-3">
+                        <textarea name="notes" class="form-control form-control-sm mb-2" rows="2"
+                                  placeholder="Internal notes...">{{ request.moderator_notes }}</textarea>
+                        <button type="submit" name="action" value="notes" class="btn btn-sm btn-outline w-100">Save Notes</button>
+                    </div>
+
+                    <div id="mergePanel" class="collapse">
+                        <div class="input-group">
+                            <input type="number" name="duplicate_id" class="form-control form-control-sm"
+                                   placeholder="Request ID">
+                            <button type="submit" name="action" value="merge" class="btn btn-sm btn-outline">Merge</button>
+                        </div>
+                    </div>
+                </form>
+
+                {% if request.moderator_notes %}
+                    <div class="mt-3 pt-3 border-top">
+                        <small class="text-muted">Current Notes:</small>
+                        <p class="small mb-0 mt-1 text-muted">{{ request.moderator_notes }}</p>
+                    </div>
+                {% endif %}
+
+                {% if request.priority > 0 %}
+                    <div class="mt-2">
+                        <span class="badge bg-warning text-dark">Priority {{ request.priority }}</span>
+                    </div>
+                {% endif %}
             </div>
             {% endif %}
         </div>
@@ -251,29 +535,57 @@
 
 <!-- Fulfill Modal -->
 <div class="modal fade" id="fulfillModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title"><i class="fas fa-check-circle me-2"></i>Mark as Fulfilled</h5>
+            <div class="modal-header">
+                <h5 class="modal-title">Mark as Fulfilled</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <form method="post" action="{% url 'mark_fulfilled' request.id %}">
+            <form method="post" action="{% url 'mark_fulfilled' request.id %}" id="fulfillForm">
                 {% csrf_token %}
                 <div class="modal-body">
-                    <p>Which resource fulfilled this request?</p>
-                    <div class="mb-3">
-                        <label for="resource_id" class="form-label">Resource ID</label>
-                        <input type="number" name="resource_id" id="resource_id" class="form-control"
-                               placeholder="Enter the resource ID" required>
-                        <small class="text-muted">You can find the resource ID in the URL when viewing the resource.</small>
-                    </div>
+                    <p class="text-muted">Enter the ID of the resource that fulfills this request.</p>
+                    <input type="number" name="resource_id" class="form-control" placeholder="Resource ID" required>
+                    <small class="text-muted mt-2 d-block">You can find the ID in the resource URL.</small>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-success">Mark as Fulfilled</button>
+                    <button type="button" class="btn btn-outline" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="modalSubmitBtn">Confirm</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<script>
+    // Upvote button loading
+    const upvoteBtn = document.getElementById('upvoteBtn');
+    if (upvoteBtn) {
+        upvoteBtn.addEventListener('click', function(e) {
+            this.classList.add('btn-loading');
+        });
+    }
+
+    // Modal form loading
+    const fulfillForm = document.getElementById('fulfillForm');
+    if (fulfillForm) {
+        fulfillForm.addEventListener('submit', function(e) {
+            const btn = document.getElementById('modalSubmitBtn');
+            btn.classList.add('btn-loading');
+            btn.disabled = true;
+        });
+    }
+
+    // Moderator form loading
+    const moderateForm = document.getElementById('moderateForm');
+    if (moderateForm) {
+        moderateForm.addEventListener('submit', function(e) {
+            const btn = e.submitter;
+            if (btn) {
+                btn.classList.add('btn-loading');
+                btn.disabled = true;
+            }
+        });
+    }
+</script>
 {% endblock %}
