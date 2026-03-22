@@ -1,0 +1,24 @@
+{% extends 'core/emails/base_email.html' %}
+
+{% block email_title %}✅ Request Fulfilled!{% endblock %}
+
+{% block email_content %}
+<h2 style="color: #0033A0; margin-top: 0;">Hello {{ user.username }}! 🎉</h2>
+
+<p>Great news! Your request has been fulfilled!</p>
+
+<div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+    <p style="margin: 5px 0;"><strong>📌 Your Request:</strong> {{ request_obj.title }}</p>
+    <p style="margin: 5px 0;"><strong>📎 Fulfilled By:</strong> {{ resource.title }}</p>
+</div>
+
+<p>A resource matching your request is now available in the library.</p>
+
+<div style="text-align: center;">
+    <a href="{{ link }}" class="button">View Resource</a>
+</div>
+
+<div class="quote-block">
+    <p style="margin: 0;">"The best way to thank the community is to pay it forward - help others by sharing your own resources!"</p>
+</div>
+{% endblock %}

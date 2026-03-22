@@ -1,284 +1,702 @@
 {% extends 'core/base.html' %}
+{% load static %}
 
-{% block title %}Profile{% endblock %}
+{% block title %}Profile - KUHeS Knowledge Bank{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Glass morphism effects */
+    .profile-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 24px;
+        border: 1px solid rgba(255, 184, 28, 0.2);
+        transition: all 0.3s ease;
+        animation: slideUpFade 0.5s ease-out;
+    }
+
+    @keyframes slideUpFade {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Floating shapes */
+    .floating-shape {
+        position: fixed;
+        background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
+        border-radius: 50%;
+        filter: blur(60px);
+        opacity: 0.08;
+        z-index: 0;
+        animation: floatShape 8s ease-in-out infinite;
+        pointer-events: none;
+    }
+
+    @keyframes floatShape {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        50% { transform: translate(20px, -20px) scale(1.1); }
+    }
+
+    /* Avatar styling */
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 25px rgba(0, 51, 160, 0.2);
+    }
+
+    .profile-avatar i {
+        font-size: 4rem;
+        color: white;
+    }
+
+    .profile-avatar:hover {
+        transform: scale(1.05);
+        box-shadow: 0 12px 35px rgba(0, 51, 160, 0.3);
+    }
+
+    /* Stat badges */
+    .stat-badge {
+        background: rgba(0, 51, 160, 0.08);
+        border-radius: 12px;
+        padding: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .stat-badge:hover {
+        transform: translateY(-3px);
+        background: rgba(0, 51, 160, 0.12);
+    }
+
+    /* Table styling */
+    .info-table {
+        background: rgba(0, 51, 160, 0.02);
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .info-table td, .info-table th {
+        padding: 12px 16px;
+        border-bottom: 1px solid rgba(0, 51, 160, 0.05);
+    }
+
+    .info-table tr:last-child td,
+    .info-table tr:last-child th {
+        border-bottom: none;
+    }
+
+    /* List group items */
+    .list-group-item {
+        background: transparent;
+        border: none;
+        border-bottom: 1px solid rgba(0, 51, 160, 0.05);
+        transition: all 0.2s ease;
+    }
+
+    .list-group-item:hover {
+        background: rgba(0, 51, 160, 0.05);
+        transform: translateX(5px);
+    }
+
+    /* Button styling */
+    .btn-primary {
+        background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
+        border: none;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-primary:active::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 51, 160, 0.3);
+    }
+
+    .btn-outline-primary {
+        border: 2px solid var(--kuhes-blue);
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-primary:hover {
+        background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
+        border-color: transparent;
+        transform: translateY(-2px);
+    }
+
+    .btn-outline-success {
+        border: 2px solid #28a745;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-success:hover {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        border-color: transparent;
+        transform: translateY(-2px);
+        color: white;
+    }
+
+    .btn-outline-secondary {
+        border: 2px solid #6c757d;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-secondary:hover {
+        transform: translateY(-2px);
+        background: linear-gradient(135deg, #6c757d, #5a6268);
+        border-color: transparent;
+        color: white;
+    }
+
+    /* Loading state */
+    .btn-loading {
+        position: relative;
+        pointer-events: none;
+        opacity: 0.8;
+    }
+
+    .btn-loading .btn-text {
+        visibility: hidden;
+    }
+
+    .btn-loading::after {
+        content: '';
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        top: 50%;
+        left: 50%;
+        margin-left: -10px;
+        margin-top: -10px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Skeleton loader */
+    .skeleton-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: skeleton-loading 1.5s infinite;
+        margin: 0 auto;
+    }
+
+    .skeleton-line {
+        height: 16px;
+        border-radius: 8px;
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: skeleton-loading 1.5s infinite;
+        margin: 12px 0;
+    }
+
+    .skeleton-title {
+        height: 24px;
+        width: 60%;
+        border-radius: 8px;
+    }
+
+    @keyframes skeleton-loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+
+    /* Modal styling */
+    .modal-content {
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(10px);
+        border-radius: 24px;
+        border: 1px solid rgba(255, 184, 28, 0.2);
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
+        border: none;
+        border-radius: 24px 24px 0 0;
+    }
+
+    /* Alert styling */
+    .alert {
+        backdrop-filter: blur(10px);
+        border: none;
+        border-radius: 12px;
+        animation: slideDown 0.4s ease-out;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Badge styling */
+    .badge {
+        padding: 6px 12px;
+        border-radius: 30px;
+        font-weight: 500;
+    }
+
+    .badge.bg-success { background: linear-gradient(135deg, #28a745, #20c997); }
+    .badge.bg-warning { background: linear-gradient(135deg, #ffc107, #e0a800); color: #856404; }
+    .badge.bg-info { background: linear-gradient(135deg, #17a2b8, #138496); }
+    .badge.bg-primary { background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal)); }
+
+    /* Mobile optimizations */
+    @media (max-width: 768px) {
+        .container {
+            padding: 16px;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+        }
+
+        .profile-avatar i {
+            font-size: 3rem;
+        }
+
+        .card-body {
+            padding: 20px !important;
+        }
+
+        .info-table td, .info-table th {
+            padding: 8px 12px;
+            font-size: 0.85rem;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+    }
+
+    /* Touch-friendly tap targets */
+    @media (max-width: 768px) {
+        .btn, .list-group-item, .stat-badge {
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+    }
+
+    /* Resource item styling */
+    .resource-item {
+        transition: all 0.2s ease;
+    }
+
+    .resource-item:hover {
+        transform: translateX(5px);
+    }
+
+    /* Verification badge animation */
+    .verified-badge {
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
+<!-- Background decorative elements -->
+<div class="floating-shape" style="width: 500px; height: 500px; top: -200px; right: -200px;"></div>
+<div class="floating-shape" style="width: 350px; height: 350px; bottom: -150px; left: -150px;"></div>
+
 <div class="container mt-4">
-    <div class="row">
-        <div class="col-md-4">
-            <!-- Profile Card -->
-            <div class="card text-center">
-                <div class="card-body">
-                    <i class="fas fa-user-circle fa-5x text-primary-blue mb-3"></i>
-                    <h3>{{ user.username }}</h3>
-                    <p class="text-muted">{{ user.email }}</p>
-
-                    {% if user.is_verified %}
-                        <span class="badge bg-success mb-3">Verified Account</span>
-                    {% else %}
-                        <span class="badge bg-warning mb-3">Pending Verification</span>
-                    {% endif %}
-
-                    <hr>
-
-                    <p>
-                        <i class="fas fa-calendar me-2"></i>
-                        Joined: {{ user.date_joined|date:"F j, Y" }}
-                    </p>
-                    <p>
-                        <i class="fas fa-clock me-2"></i>
-                        Last active: {{ user.last_active|date:"F j, Y" }}
-                    </p>
-
-                    <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#editProfileModal">
-                        <i class="fas fa-edit me-2"></i>Edit Profile
-                    </button>
+    <!-- Skeleton Loader -->
+    <div id="profileSkeleton" style="display: none;">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card profile-card p-4 text-center">
+                    <div class="skeleton-avatar"></div>
+                    <div class="skeleton-title mx-auto mt-3"></div>
+                    <div class="skeleton-line mx-auto mt-2" style="width: 80%;"></div>
+                    <div class="skeleton-line mt-3"></div>
+                    <div class="skeleton-line"></div>
                 </div>
             </div>
-
-            <!-- Statistics Card -->
-            <div class="card mt-3">
-                <div class="card-body">
-                    <h5><i class="fas fa-chart-bar text-primary-blue me-2"></i>Statistics</h5>
-                    <hr>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Resources Uploaded:</span>
-                        <span class="badge bg-primary">{{ user.upload_count }}</span>
-                    </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Downloads Received:</span>
-                        <span class="badge bg-success">{{ user.download_count }}</span>
-                    </div>
-                    <div class="d-flex justify-content-between">
-                        <span>Account Status:</span>
-                        {% if user.is_verified %}
-                            <span class="badge bg-success">Verified</span>
-                        {% else %}
-                            <span class="badge bg-warning">Pending</span>
-                        {% endif %}
-                    </div>
-
-                    {% if user.upload_count > 0 %}
-                    <hr>
-                    <div class="text-center">
-                        <small class="text-muted">
-                            Your resources have been downloaded
-                            <strong>{{ user.download_count }}</strong> time{{ user.download_count|pluralize }}
-                        </small>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Quick Links Card -->
-            <div class="card mt-3">
-                <div class="card-body">
-                    <h5><i class="fas fa-link text-primary-blue me-2"></i>Quick Links</h5>
-                    <hr>
-                    <div class="d-grid gap-2">
-                        <a href="{% url 'my_uploads' %}" class="btn btn-outline-primary">
-                            <i class="fas fa-file-alt me-2"></i>My Uploads
-                        </a>
-                        <a href="{% url 'upload_resource' %}" class="btn btn-outline-success">
-                            <i class="fas fa-upload me-2"></i>Upload Resource
-                        </a>
-                        <a href="{% url 'change_password' %}" class="btn btn-outline-secondary">
-                            <i class="fas fa-key me-2"></i>Change Password
-                        </a>
-                    </div>
+            <div class="col-md-8">
+                <div class="card profile-card p-4">
+                    <div class="skeleton-line" style="height: 30px; width: 50%;"></div>
+                    <div class="skeleton-line mt-3"></div>
+                    <div class="skeleton-line"></div>
+                    <div class="skeleton-line"></div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="col-md-8">
-            <!-- Academic Profile Card -->
-            <div class="card">
-                <div class="card-header bg-white">
-                    <h4 class="mb-0"><i class="fas fa-graduation-cap text-primary-blue me-2"></i>Academic Profile</h4>
-                </div>
-                <div class="card-body">
-                    <table class="table table-hover">
-                        <tr>
-                            <th style="width: 200px;">Level:</th>
-                            <td>
-                                {% if user.level %}
-                                    <span class="badge bg-info fs-6">{{ user.get_level_display }}</span>
-                                {% else %}
-                                    <span class="text-muted">Not set</span>
-                                {% endif %}
-                            </td>
-                        </tr>
+    <!-- Actual Content -->
+    <div id="profileContent">
+        <div class="row">
+            <div class="col-md-4">
+                <!-- Profile Card -->
+                <div class="card profile-card text-center mb-3">
+                    <div class="card-body p-4">
+                        <div class="profile-avatar">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <h3 class="fw-bold mt-2">{{ user.get_full_name|default:user.username }}</h3>
+                        <p class="text-muted">{{ user.email }}</p>
 
-                        {% if user.level == 'premed' %}
-                        <tr>
-                            <th>Pre-Med Cohort:</th>
-                            <td>
-                                {% if user.premed_cohort %}
-                                    {{ user.premed_cohort }}
-                                {% else %}
-                                    <span class="text-muted">Not set</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Intended Programme:</th>
-                            <td>
-                                {% if user.intended_programme %}
-                                    {{ user.intended_programme }}
-                                {% else %}
-                                    <span class="text-muted">Not set</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endif %}
+                        <div class="mb-3">
+                            {% if user.is_verified %}
+                                <span class="badge bg-success verified-badge">
+                                    <i class="fas fa-check-circle me-1"></i>Verified Account
+                                </span>
+                            {% else %}
+                                <span class="badge bg-warning">
+                                    <i class="fas fa-clock me-1"></i>Pending Verification
+                                </span>
+                            {% endif %}
+                        </div>
 
-                        {% if user.level == 'undergraduate' %}
-                        <tr>
-                            <th>School:</th>
-                            <td>
-                                {% if user.school %}
-                                    {{ user.get_school_display }}
-                                {% else %}
-                                    <span class="text-muted">Not set</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Programme:</th>
-                            <td>
-                                {% if user.programme %}
-                                    {{ user.programme }}
-                                {% else %}
-                                    <span class="text-muted">Not set</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Year of Study:</th>
-                            <td>
-                                {% if user.year_of_study %}
-                                    Year {{ user.year_of_study }}
-                                {% else %}
-                                    <span class="text-muted">Not set</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Graduation Year:</th>
-                            <td>
-                                {% if user.graduation_year %}
-                                    {{ user.graduation_year }}
-                                {% else %}
-                                    <span class="text-muted">Not set</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endif %}
+                        <hr>
 
-                        {% if user.level == 'postgraduate' %}
-                        <tr>
-                            <th>Programme:</th>
-                            <td>
-                                {% if user.programme %}
-                                    {{ user.programme }}
-                                {% else %}
-                                    <span class="text-muted">Not set</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Year of Study:</th>
-                            <td>
-                                {% if user.year_of_study %}
-                                    Year {{ user.year_of_study }}
-                                {% else %}
-                                    <span class="text-muted">Not set</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endif %}
+                        <div class="text-start">
+                            <p class="mb-2">
+                                <i class="fas fa-calendar me-2" style="color: var(--kuhes-blue);"></i>
+                                <strong>Joined:</strong> {{ user.date_joined|date:"F j, Y" }}
+                            </p>
+                            <p class="mb-3">
+                                <i class="fas fa-clock me-2" style="color: var(--kuhes-blue);"></i>
+                                <strong>Last active:</strong> {{ user.last_active|date:"F j, Y"|default:"Today" }}
+                            </p>
+                        </div>
 
-                        {% if user.level == 'diploma' %}
-                        <tr>
-                            <th>Programme:</th>
-                            <td>
-                                {% if user.programme %}
-                                    {{ user.programme }}
-                                {% else %}
-                                    <span class="text-muted">Not set</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Year of Study:</th>
-                            <td>
-                                {% if user.year_of_study %}
-                                    Year {{ user.year_of_study }}
-                                {% else %}
-                                    <span class="text-muted">Not set</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endif %}
-                    </table>
-
-                    {% if not user.level %}
-                    <div class="alert alert-info mt-3">
-                        <i class="fas fa-info-circle me-2"></i>
-                        Complete your academic profile to get personalized resource recommendations.
+                        <button class="btn btn-primary w-100 mt-2" data-bs-toggle="modal" data-bs-target="#editProfileModal" id="editProfileBtn">
+                            <span class="btn-text">
+                                <i class="fas fa-edit me-2"></i>Edit Profile
+                            </span>
+                        </button>
                     </div>
-                    {% endif %}
+                </div>
+
+                <!-- Statistics Card -->
+                <div class="card profile-card mb-3">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3">
+                            <i class="fas fa-chart-bar me-2" style="color: var(--kuhes-blue);"></i>
+                            Statistics
+                        </h5>
+                        <div class="stat-badge d-flex justify-content-between align-items-center mb-2">
+                            <span>Resources Uploaded:</span>
+                            <span class="badge bg-primary fs-6">{{ user.upload_count|default:0 }}</span>
+                        </div>
+                        <div class="stat-badge d-flex justify-content-between align-items-center mb-2">
+                            <span>Downloads Received:</span>
+                            <span class="badge bg-success fs-6">{{ user.download_count|default:0 }}</span>
+                        </div>
+                        <div class="stat-badge d-flex justify-content-between align-items-center">
+                            <span>Account Status:</span>
+                            {% if user.is_verified %}
+                                <span class="badge bg-success">Verified</span>
+                            {% else %}
+                                <span class="badge bg-warning">Pending</span>
+                            {% endif %}
+                        </div>
+
+                        {% if user.upload_count > 0 %}
+                        <hr>
+                        <div class="text-center mt-2">
+                            <small class="text-muted">
+                                Your resources have been downloaded
+                                <strong>{{ user.download_count }}</strong> time{{ user.download_count|pluralize }}
+                            </small>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Quick Links Card -->
+                <div class="card profile-card">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3">
+                            <i class="fas fa-link me-2" style="color: var(--kuhes-blue);"></i>
+                            Quick Links
+                        </h5>
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'my_uploads' %}" data-replace="true" class="btn btn-outline-primary">
+                                <i class="fas fa-file-alt me-2"></i>My Uploads
+                            </a>
+                            <a href="{% url 'upload_resource' %}" data-replace="true" class="btn btn-outline-success">
+                                <i class="fas fa-upload me-2"></i>Upload Resource
+                            </a>
+                            <a href="{% url 'change_password' %}" data-replace="true" class="btn btn-outline-secondary">
+                                <i class="fas fa-key me-2"></i>Change Password
+                            </a>
+                            <a href="{% url 'my_bookmarks' %}" data-replace="true" class="btn btn-outline-warning">
+                                <i class="fas fa-bookmark me-2"></i>My Bookmarks
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Recent Activity Card -->
-            <div class="card mt-3">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-history text-primary-blue me-2"></i>Recent Uploads</h5>
+            <div class="col-md-8">
+                <!-- Academic Profile Card -->
+                <div class="card profile-card mb-3">
+                    <div class="card-header bg-transparent border-bottom-0 pt-4 pb-0">
+                        <h4 class="mb-0 fw-bold">
+                            <i class="fas fa-graduation-cap me-2" style="color: var(--kuhes-blue);"></i>
+                            Academic Profile
+                        </h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="info-table">
+                            <table class="table table-sm mb-0">
+                                <tr>
+                                    <th style="width: 200px;"><i class="fas fa-level-up-alt me-2"></i>Level:</th>
+                                    <td>
+                                        {% if user.level %}
+                                            <span class="badge bg-info fs-6">{{ user.get_level_display }}</span>
+                                        {% else %}
+                                            <span class="text-muted">Not set</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+
+                                {% if user.level == 'premed' %}
+                                <tr>
+                                    <th><i class="fas fa-users me-2"></i>Pre-Med Cohort:</th>
+                                    <td>
+                                        {% if user.premed_cohort %}
+                                            {{ user.premed_cohort }}
+                                        {% else %}
+                                            <span class="text-muted">Not set</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th><i class="fas fa-bullseye me-2"></i>Intended Programme:</th>
+                                    <td>
+                                        {% if user.intended_programme %}
+                                            {{ user.intended_programme }}
+                                        {% else %}
+                                            <span class="text-muted">Not set</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endif %}
+
+                                {% if user.level == 'undergraduate' %}
+                                <tr>
+                                    <th><i class="fas fa-university me-2"></i>School:</th>
+                                    <td>
+                                        {% if user.school %}
+                                            {{ user.get_school_display }}
+                                        {% else %}
+                                            <span class="text-muted">Not set</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th><i class="fas fa-certificate me-2"></i>Programme:</th>
+                                    <td>
+                                        {% if user.programme %}
+                                            {{ user.programme }}
+                                        {% else %}
+                                            <span class="text-muted">Not set</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th><i class="fas fa-calendar-alt me-2"></i>Year of Study:</th>
+                                    <td>
+                                        {% if user.year_of_study %}
+                                            Year {{ user.year_of_study }}
+                                        {% else %}
+                                            <span class="text-muted">Not set</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th><i class="fas fa-flag-checkered me-2"></i>Graduation Year:</th>
+                                    <td>
+                                        {% if user.graduation_year %}
+                                            {{ user.graduation_year }}
+                                        {% else %}
+                                            <span class="text-muted">Not set</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endif %}
+
+                                {% if user.level == 'postgraduate' %}
+                                <tr>
+                                    <th><i class="fas fa-graduation-cap me-2"></i>Programme:</th>
+                                    <td>
+                                        {% if user.programme %}
+                                            {{ user.programme }}
+                                        {% else %}
+                                            <span class="text-muted">Not set</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th><i class="fas fa-calendar-alt me-2"></i>Year of Study:</th>
+                                    <td>
+                                        {% if user.year_of_study %}
+                                            Year {{ user.year_of_study }}
+                                        {% else %}
+                                            <span class="text-muted">Not set</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endif %}
+
+                                {% if user.level == 'diploma' %}
+                                <tr>
+                                    <th><i class="fas fa-certificate me-2"></i>Programme:</th>
+                                    <td>
+                                        {% if user.programme %}
+                                            {{ user.programme }}
+                                        {% else %}
+                                            <span class="text-muted">Not set</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th><i class="fas fa-calendar-alt me-2"></i>Year of Study:</th>
+                                    <td>
+                                        {% if user.year_of_study %}
+                                            Year {{ user.year_of_study }}
+                                        {% else %}
+                                            <span class="text-muted">Not set</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            </table>
+                        </div>
+
+                        {% if not user.level %}
+                        <div class="alert alert-info mt-4">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Complete your academic profile to get personalized resource recommendations.
+                        </div>
+                        {% endif %}
+                    </div>
                 </div>
-                <div class="card-body">
-                    {% with recent_uploads=user.uploaded_resources.all|slice:":5" %}
-                        {% if recent_uploads %}
-                            <div class="list-group list-group-flush">
-                                {% for resource in recent_uploads %}
-                                    <div class="list-group-item px-0">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div>
-                                                <span class="badge {% if resource.status == 'approved' %}bg-success{% elif resource.status == 'pending' %}bg-warning{% elif resource.status == 'rejected' %}bg-danger{% else %}bg-secondary{% endif %} mb-1">
-                                                    {{ resource.get_status_display }}
-                                                </span>
-                                                <h6 class="mb-0">
-                                                    <a href="{% url 'resource_detail' resource.id %}" class="text-decoration-none text-dark">
-                                                        {{ resource.title|truncatechars:50 }}
-                                                    </a>
-                                                </h6>
-                                                <small class="text-muted">
-                                                    <i class="fas fa-clock me-1"></i>{{ resource.upload_date|timesince }} ago
-                                                    <i class="fas fa-download ms-2 me-1"></i>{{ resource.download_count }} downloads
-                                                </small>
+
+                <!-- Recent Activity Card -->
+                <div class="card profile-card">
+                    <div class="card-header bg-transparent border-bottom-0 pt-4 pb-0">
+                        <h5 class="mb-0 fw-bold">
+                            <i class="fas fa-history me-2" style="color: var(--kuhes-blue);"></i>
+                            Recent Uploads
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        {% with recent_uploads=user.uploaded_resources.all|slice:":5" %}
+                            {% if recent_uploads %}
+                                <div class="list-group list-group-flush">
+                                    {% for resource in recent_uploads %}
+                                        <div class="list-group-item px-0 resource-item">
+                                            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                                                <div class="flex-grow-1">
+                                                    <div class="mb-1">
+                                                        <span class="badge
+                                                            {% if resource.status == 'approved' %}bg-success
+                                                            {% elif resource.status == 'pending' %}bg-warning
+                                                            {% elif resource.status == 'rejected' %}bg-danger
+                                                            {% else %}bg-secondary{% endif %}">
+                                                            <i class="fas
+                                                                {% if resource.status == 'approved' %}fa-check-circle
+                                                                {% elif resource.status == 'pending' %}fa-clock
+                                                                {% elif resource.status == 'rejected' %}fa-times-circle
+                                                                {% else %}fa-circle{% endif %} me-1">
+                                                            </i>
+                                                            {{ resource.get_status_display }}
+                                                        </span>
+                                                        <span class="badge bg-secondary ms-1">{{ resource.get_resource_type_display }}</span>
+                                                    </div>
+                                                    <h6 class="mb-1">
+                                                        <a href="{% url 'resource_detail' resource.id %}" data-replace="true" class="text-decoration-none text-dark fw-semibold">
+                                                            {{ resource.title|truncatechars:50 }}
+                                                        </a>
+                                                    </h6>
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-clock me-1"></i>{{ resource.upload_date|timesince }} ago
+                                                        <i class="fas fa-download ms-2 me-1"></i>{{ resource.download_count }} downloads
+                                                        <i class="fas fa-eye ms-2 me-1"></i>{{ resource.views_count|default:0 }} views
+                                                    </small>
+                                                </div>
                                             </div>
-                                            <span class="badge bg-secondary">{{ resource.get_resource_type_display }}</span>
                                         </div>
+                                    {% endfor %}
+                                </div>
+                                {% if user.upload_count > 5 %}
+                                    <div class="text-center mt-3">
+                                        <a href="{% url 'my_uploads' %}" data-replace="true" class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-eye me-2"></i>View All {{ user.upload_count }} Uploads
+                                        </a>
                                     </div>
-                                {% endfor %}
-                            </div>
-                            {% if user.upload_count > 5 %}
-                                <div class="text-center mt-3">
-                                    <a href="{% url 'my_uploads' %}" class="btn btn-outline-primary btn-sm">
-                                        View All Uploads
+                                {% endif %}
+                            {% else %}
+                                <div class="text-center py-4">
+                                    <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                    <p class="text-muted mb-3">You haven't uploaded any resources yet.</p>
+                                    <a href="{% url 'upload_resource' %}" data-replace="true" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-upload me-2"></i>Upload Your First Resource
                                     </a>
                                 </div>
                             {% endif %}
-                        {% else %}
-                            <p class="text-muted text-center py-3">
-                                You haven't uploaded any resources yet.
-                                <br>
-                                <a href="{% url 'upload_resource' %}" class="btn btn-primary btn-sm mt-2">
-                                    <i class="fas fa-upload me-2"></i>Upload Your First Resource
-                                </a>
-                            </p>
-                        {% endif %}
-                    {% endwith %}
+                        {% endwith %}
+                    </div>
                 </div>
             </div>
         </div>
@@ -287,20 +705,23 @@
 
 <!-- Edit Profile Modal -->
 <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header bg-primary-blue text-white">
+            <div class="modal-header text-white">
                 <h5 class="modal-title" id="editProfileModalLabel">
                     <i class="fas fa-edit me-2"></i>Edit Profile
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form method="post">
+            <form method="post" id="profileForm">
                 {% csrf_token %}
-                <div class="modal-body">
+                <div class="modal-body p-4">
                     <div class="mb-3">
-                        <label for="edit_level" class="form-label">Academic Level</label>
-                        <select name="level" id="edit_level" class="form-control">
+                        <label for="edit_level" class="form-label fw-semibold">
+                            <i class="fas fa-graduation-cap me-2" style="color: var(--kuhes-blue);"></i>
+                            Academic Level
+                        </label>
+                        <select name="level" id="edit_level" class="form-select">
                             <option value="">Select level...</option>
                             <option value="premed" {% if user.level == 'premed' %}selected{% endif %}>🎓 Pre-Med</option>
                             <option value="undergraduate" {% if user.level == 'undergraduate' %}selected{% endif %}>📘 Undergraduate</option>
@@ -327,7 +748,7 @@
                     <div id="edit_undergrad_fields" style="display: {% if user.level == 'undergraduate' %}block{% else %}none{% endif %};">
                         <div class="mb-3">
                             <label for="edit_school" class="form-label">School</label>
-                            <select name="school" id="edit_school" class="form-control">
+                            <select name="school" id="edit_school" class="form-select">
                                 <option value="">Select school...</option>
                                 <option value="medicine" {% if user.school == 'medicine' %}selected{% endif %}>Medicine and Oral Health</option>
                                 <option value="nursing" {% if user.school == 'nursing' %}selected{% endif %}>Nursing</option>
@@ -383,9 +804,11 @@
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                <div class="modal-footer border-0 pb-4">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="saveProfileBtn">
+                        <span class="btn-text"><i class="fas fa-save me-2"></i>Save Changes</span>
+                    </button>
                 </div>
             </form>
         </div>
@@ -393,7 +816,7 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+    // Toggle dynamic fields in modal
     const levelSelect = document.getElementById('edit_level');
 
     function toggleFields() {
@@ -417,17 +840,64 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    levelSelect.addEventListener('change', toggleFields);
-});
-</script>
+    if (levelSelect) {
+        levelSelect.addEventListener('change', toggleFields);
+    }
 
-<style>
-.badge.bg-success { background-color: #28a745 !important; }
-.badge.bg-warning { background-color: #ffc107 !important; color: #000 !important; }
-.badge.bg-info { background-color: #17a2b8 !important; }
-.badge.bg-primary { background-color: #0066CC !important; }
-.table th { font-weight: 600; color: #495057; }
-.card { box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-.card-header { border-bottom: 2px solid #0066CC; }
-</style>
+    // Form submission with loading state
+    const profileForm = document.getElementById('profileForm');
+    if (profileForm) {
+        profileForm.addEventListener('submit', function(e) {
+            const saveBtn = document.getElementById('saveProfileBtn');
+            saveBtn.classList.add('btn-loading');
+            saveBtn.disabled = true;
+        });
+    }
+
+    // Edit profile button loading state
+    const editProfileBtn = document.getElementById('editProfileBtn');
+    if (editProfileBtn) {
+        editProfileBtn.addEventListener('click', function() {
+            // No loading state for modal open
+        });
+    }
+
+    // Show skeleton loader on slow connections
+    if (document.readyState === 'loading') {
+        const skeleton = document.getElementById('profileSkeleton');
+        const content = document.getElementById('profileContent');
+
+        if (skeleton && content) {
+            skeleton.style.display = 'block';
+            content.style.opacity = '0';
+
+            setTimeout(() => {
+                skeleton.style.display = 'none';
+                content.style.opacity = '1';
+                content.style.transition = 'opacity 0.3s ease';
+            }, 500);
+        }
+    }
+
+    // Add loading state to data-replace links
+    document.querySelectorAll('a[data-replace="true"]').forEach(link => {
+        link.addEventListener('click', function(e) {
+            if (!this.getAttribute('href') || this.getAttribute('href') === '#') return;
+            if (window.showLoading) window.showLoading('Loading...');
+        });
+    });
+
+    // Auto-dismiss alerts after 5 seconds
+    document.querySelectorAll('.alert').forEach(alert => {
+        setTimeout(() => {
+            if (alert && alert.parentElement) {
+                alert.style.opacity = '0';
+                alert.style.transition = 'opacity 0.3s';
+                setTimeout(() => {
+                    if (alert && alert.remove) alert.remove();
+                }, 300);
+            }
+        }, 5000);
+    });
+</script>
 {% endblock %}

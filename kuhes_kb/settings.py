@@ -1,6 +1,8 @@
+
 import os
 from pathlib import Path
-from decouple import config
+from decouple import config  # You're using python-decouple
+
 
 # Build paths
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -67,11 +69,7 @@ WSGI_APPLICATION = 'kuhes_kb.wsgi.application'
 import dj_database_url
 from decouple import config
 
-# Database Configuration
-import dj_database_url
-from decouple import config
-
-# Use environment variable for database URL on Render
+# Use environment variable for database URL on Render, otherwise local config
 if config('DATABASE_URL', default=None):
     # Production on Render
     DATABASES = {
@@ -164,63 +162,45 @@ if not DEBUG:
 
     # Static files storage for production
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# kuhes_kb/settings.py - Add this at the bottom
 
-# Detailed logging for debugging
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
-            'style': '{',
-        },
-    },
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
-        },
-    },
-    'root': {
-        'handlers': ['console'],
-        'level': 'INFO',
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        'django.request': {
-            'handlers': ['console'],
-            'level': 'DEBUG',  # This will show ALL request errors
-            'propagate': False,
-        },
-    },
-}
-# At the bottom of settings.py
 import os
-if os.environ.get('RENDER'):
-    print("=" * 50)
-    print("📧 EMAIL CONFIGURATION ON RENDER:")
-    print(f"EMAIL_HOST: {os.environ.get('EMAIL_HOST')}")
-    print(f"EMAIL_PORT: {os.environ.get('EMAIL_PORT')}")
-    print(f"EMAIL_HOST_USER: {os.environ.get('EMAIL_HOST_USER')}")
-    print(f"EMAIL_USE_TLS: {os.environ.get('EMAIL_USE_TLS')}")
-    print("=" * 50)
+import dj_database_url
 
-# ========== RENDER PORT FIX ==========
-import os
-import sys
+# ===================== PRODUCTION (PythonAnywhere) =====================
+if 'PYTHONANYWHERE_DOMAIN' in os.environ:
+    DEBUG = False
+    ALLOWED_HOSTS = ['yourusername.pythonanywhere.com']
 
-PORT = os.environ.get('PORT', '10000')
-print(f"\n{'='*50}")
-print(f"🔧 RENDER DEBUG INFO")
-print(f"{'='*50}")
-print(f"PORT env var: {os.environ.get('PORT', 'NOT SET')}")
-print(f"Using PORT: {PORT}")
-print(f"All env vars with PORT: {[k for k in os.environ.keys() if 'PORT' in k]}")
-print(f"{'='*50}\n")
+    # Database - Use Neon
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.environ.get('DATABASE_URL'),
+            conn_max_age=600,
+            ssl_require=True
+        )
+    }
 
-# Force gunicorn to use correct port
-os.environ.setdefault('PORT', PORT)
+    # Static files
+    STATIC_URL = '/static/'
+    STATIC_ROOT = '/home/yourusername/kuhes_kb/staticfiles'
+    STATICFILES_DIRS = ['/home/yourusername/kuhes_kb/static']
+
+    # Media files
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = '/home/yourusername/kuhes_kb/media'
+
+    # Email - Your Gmail settings (exactly as they work locally)
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = 'smtp.gmail.com'
+    EMAIL_PORT = 587
+    EMAIL_HOST_USER = 'kuhesknowledgebank@gmail.com'
+    EMAIL_HOST_PASSWORD = 'sklwbcqasodfqllh'  # Your app password
+    EMAIL_USE_TLS = True
+    DEFAULT_FROM_EMAIL = 'kuhesknowledgebank@gmail.com'
+
+# ===================== LOCAL DEVELOPMENT =====================
+else:
+    DEBUG = True
+    ALLOWED_HOSTS = []
+    # Your local database settings (SQLite or whatever you use)

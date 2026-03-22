@@ -1,178 +1,550 @@
 {% extends 'core/base.html' %}
+{% load static %}
 
-{% block title %}Upload Resource{% endblock %}
+{% block title %}Upload Resource - KUHeS Knowledge Bank{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Page-specific animations with glass morphism */
+    .upload-card {
+        animation: slideUpFade 0.5s ease-out;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 24px;
+        border: 1px solid rgba(255, 184, 28, 0.2);
+        overflow: hidden;
+    }
+
+    @keyframes slideUpFade {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Floating shapes animation */
+    .floating-shape {
+        position: fixed;
+        background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
+        border-radius: 50%;
+        filter: blur(60px);
+        opacity: 0.08;
+        z-index: 0;
+        animation: floatShape 8s ease-in-out infinite;
+        pointer-events: none;
+    }
+
+    @keyframes floatShape {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        50% { transform: translate(20px, -20px) scale(1.1); }
+    }
+
+    /* Card header */
+    .card-header {
+        background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
+        border: none;
+        padding: 1.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .card-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: rotate 20s linear infinite;
+    }
+
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    .card-header h4 {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Form controls */
+    .form-control, .form-select {
+        border: 2px solid rgba(0, 51, 160, 0.1);
+        border-radius: 12px;
+        padding: 12px 16px;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--kuhes-blue);
+        box-shadow: 0 0 0 4px rgba(0, 51, 160, 0.1);
+        transform: translateX(5px);
+        background: white;
+    }
+
+    /* Drag and drop zone */
+    .drop-zone {
+        border: 2px dashed rgba(0, 51, 160, 0.3);
+        border-radius: 16px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        background: rgba(0, 51, 160, 0.02);
+        cursor: pointer;
+    }
+
+    .drop-zone:hover, .drop-zone.drag-over {
+        border-color: var(--kuhes-blue);
+        background: rgba(0, 51, 160, 0.05);
+        transform: scale(1.02);
+    }
+
+    .drop-zone i {
+        font-size: 3rem;
+        color: var(--kuhes-blue);
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .drop-zone:hover i {
+        transform: translateY(-5px);
+    }
+
+    /* File preview */
+    .file-preview {
+        display: none;
+        background: rgba(0, 51, 160, 0.05);
+        border-radius: 12px;
+        padding: 12px;
+        margin-top: 12px;
+        animation: fadeInUp 0.3s ease;
+    }
+
+    .file-preview.show {
+        display: flex;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Progress bar */
+    .upload-progress {
+        display: none;
+        margin-top: 16px;
+    }
+
+    .upload-progress.show {
+        display: block;
+        animation: slideDown 0.3s ease;
+    }
+
+    .progress {
+        height: 8px;
+        border-radius: 4px;
+        background: rgba(0, 51, 160, 0.1);
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        background: linear-gradient(90deg, var(--kuhes-blue), var(--kuhes-teal));
+        transition: width 0.3s ease;
+        width: 0%;
+    }
+
+    .progress-status {
+        font-size: 0.85rem;
+        margin-top: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* Button loading */
+    .btn-loading {
+        position: relative;
+        pointer-events: none;
+        opacity: 0.8;
+    }
+
+    .btn-loading .btn-text {
+        visibility: hidden;
+    }
+
+    .btn-loading::after {
+        content: '';
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        top: 50%;
+        left: 50%;
+        margin-left: -10px;
+        margin-top: -10px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Skeleton loader */
+    .skeleton-line {
+        height: 16px;
+        border-radius: 8px;
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: skeleton-loading 1.5s infinite;
+        margin: 12px 0;
+    }
+
+    .skeleton-title {
+        height: 32px;
+        width: 60%;
+        border-radius: 8px;
+    }
+
+    @keyframes skeleton-loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+
+    /* Alert styling */
+    .alert {
+        backdrop-filter: blur(10px);
+        border: none;
+        border-radius: 12px;
+        animation: slideDown 0.4s ease-out;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Mobile optimizations */
+    @media (max-width: 768px) {
+        .container {
+            padding: 16px;
+        }
+
+        .card-header {
+            padding: 1rem;
+        }
+
+        .card-header h4 {
+            font-size: 1.25rem;
+        }
+
+        .card-body {
+            padding: 20px !important;
+        }
+
+        .drop-zone {
+            padding: 1.5rem;
+        }
+
+        .drop-zone i {
+            font-size: 2rem;
+        }
+    }
+
+    /* Tooltips */
+    .help-tooltip {
+        cursor: help;
+        border-bottom: 1px dashed var(--kuhes-gray);
+    }
+
+    /* Required field indicator */
+    .required-field::after {
+        content: '*';
+        color: #dc3545;
+        margin-left: 4px;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
+<!-- Background decorative elements -->
+<div class="floating-shape" style="width: 500px; height: 500px; top: -200px; right: -200px;"></div>
+<div class="floating-shape" style="width: 350px; height: 350px; bottom: -150px; left: -150px;"></div>
+
 <div class="container mt-4">
     <div class="row">
         <div class="col-md-8 mx-auto">
-            <div class="card shadow">
-                <div class="card-header bg-primary-blue text-white">
-                    <h4 class="mb-0"><i class="fas fa-upload me-2"></i>Upload Resource</h4>
+            <!-- Skeleton Loader -->
+            <div id="uploadSkeleton" style="display: none;">
+                <div class="card skeleton-card p-4">
+                    <div class="skeleton-title mb-4"></div>
+                    <div class="skeleton-line" style="height: 50px;"></div>
+                    <div class="skeleton-line" style="height: 80px;"></div>
+                    <div class="row">
+                        <div class="col-md-6"><div class="skeleton-line" style="height: 50px;"></div></div>
+                        <div class="col-md-6"><div class="skeleton-line" style="height: 50px;"></div></div>
+                    </div>
+                    <div class="skeleton-line" style="height: 100px;"></div>
                 </div>
-                <div class="card-body p-4">
-                    <form method="post" enctype="multipart/form-data" id="uploadForm">
-                        {% csrf_token %}
+            </div>
 
-                        <!-- Basic Info -->
-                        <div class="mb-3">
-                            <label for="id_title" class="form-label">Title *</label>
-                            <input type="text" name="title" id="id_title" class="form-control" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="id_description" class="form-label">Description</label>
-                            <textarea name="description" id="id_description" class="form-control" rows="3"></textarea>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="id_resource_type" class="form-label">Resource Type *</label>
-                                <select name="resource_type" id="id_resource_type" class="form-control" required>
-                                    <option value="">Select type...</option>
-                                    <option value="handout">📄 Handout</option>
-                                    <option value="past_paper">📝 Past Paper</option>
-                                    <option value="lecture_note">📚 Lecture Note</option>
-                                    <option value="research">🔬 Research Article</option>
-                                    <option value="clinical_guide">🩺 Clinical Guide</option>
-                                    <option value="video">🎥 Video</option>
-                                    <option value="study_set">📋 Study Set</option>
-                                    <option value="summary">📊 Summary Sheet</option>
-                                    <option value="lab_manual">🧪 Lab Manual</option>
-                                    <option value="case_study">🏥 Case Study</option>
-                                    <option value="formula_sheet">📐 Formula Sheet</option>
-                                    <option value="diagram">📊 Diagram</option>
-                                </select>
+            <!-- Actual Content -->
+            <div id="uploadContent">
+                <div class="card upload-card shadow-lg">
+                    <div class="card-header text-white">
+                        <h4 class="mb-0">
+                            <i class="fas fa-upload me-2"></i>
+                            Upload Resource
+                        </h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- Progress Bar -->
+                        <div class="upload-progress" id="uploadProgress">
+                            <div class="progress">
+                                <div class="progress-bar" id="progressBar" style="width: 0%"></div>
                             </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label for="id_level" class="form-label">Academic Level *</label>
-                                <select name="level" id="id_level" class="form-control" required>
-                                    <option value="">Select level...</option>
-                                    <option value="premed">🎓 Pre-Med</option>
-                                    <option value="undergraduate">📘 Undergraduate</option>
-                                    <option value="postgraduate">📚 Postgraduate</option>
-                                    <option value="diploma">📖 Diploma</option>
-                                </select>
+                            <div class="progress-status">
+                                <span id="progressText">Uploading...</span>
+                                <span id="progressPercent">0%</span>
                             </div>
                         </div>
 
-                        <!-- Pre-Med Section -->
-                        <div id="premedSection" style="display: none;">
-                            <div class="row">
-                                <div class="col-md-8 mb-3">
-                                    <label for="id_premed_subject" class="form-label">Pre-Med Subject *</label>
-                                    <select name="premed_subject" id="id_premed_subject" class="form-control">
-                                        <option value="">Select subject...</option>
-                                        <option value="biology">🧬 Biology</option>
-                                        <option value="chemistry">🧪 Chemistry</option>
-                                        <option value="physics">⚡ Physics</option>
-                                        <option value="mathematics">📐 Mathematics</option>
-                                        <option value="ict">💻 ICT</option>
-                                        <option value="communication">🗣️ Communication</option>
-                                    </select>
-                                </div>
+                        <form method="post" enctype="multipart/form-data" id="uploadForm">
+                            {% csrf_token %}
 
-                                <div class="col-md-4 mb-3">
-                                    <label for="id_premed_semester" class="form-label">Semester</label>
-                                    <select name="semester" id="id_premed_semester" class="form-control">
-                                        <option value="">Select...</option>
-                                        <option value="1">Semester 1</option>
-                                        <option value="2">Semester 2</option>
-                                    </select>
-                                </div>
+                            <!-- Title -->
+                            <div class="mb-3">
+                                <label for="id_title" class="form-label fw-semibold required-field">
+                                    <i class="fas fa-heading me-2" style="color: var(--kuhes-blue);"></i>
+                                    Title
+                                </label>
+                                <input type="text" name="title" id="id_title" class="form-control"
+                                       placeholder="e.g., Introduction to Human Anatomy" required>
+                                <small class="text-muted">Choose a clear, descriptive title for your resource</small>
                             </div>
-                        </div>
 
-                        <!-- Undergraduate Section -->
-                        <div id="undergradSection" style="display: none;">
+                            <!-- Description -->
+                            <div class="mb-3">
+                                <label for="id_description" class="form-label fw-semibold">
+                                    <i class="fas fa-align-left me-2" style="color: var(--kuhes-blue);"></i>
+                                    Description
+                                </label>
+                                <textarea name="description" id="id_description" class="form-control" rows="4"
+                                          placeholder="Describe what this resource covers, key topics, and intended audience..."></textarea>
+                            </div>
+
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label for="id_school" class="form-label">School *</label>
-                                    <select name="school" id="id_school" class="form-control">
-                                        <option value="">Select school...</option>
-                                        <option value="medicine">Medicine and Oral Health</option>
-                                        <option value="nursing">Nursing</option>
-                                        <option value="maternal">Maternal, Neonatal and Reproductive Health</option>
-                                        <option value="life_sciences">Life Sciences and Allied Health Professions</option>
-                                        <option value="public_health">Global and Public Health</option>
+                                    <label for="id_resource_type" class="form-label fw-semibold required-field">
+                                        <i class="fas fa-tag me-2" style="color: var(--kuhes-blue);"></i>
+                                        Resource Type
+                                    </label>
+                                    <select name="resource_type" id="id_resource_type" class="form-select" required>
+                                        <option value="">Select type...</option>
+                                        <option value="handout">📄 Handout</option>
+                                        <option value="past_paper">📝 Past Paper</option>
+                                        <option value="lecture_note">📚 Lecture Note</option>
+                                        <option value="research">🔬 Research Article</option>
+                                        <option value="clinical_guide">🩺 Clinical Guide</option>
+                                        <option value="video">🎥 Video</option>
+                                        <option value="study_set">📋 Study Set</option>
+                                        <option value="summary">📊 Summary Sheet</option>
+                                        <option value="lab_manual">🧪 Lab Manual</option>
+                                        <option value="case_study">🏥 Case Study</option>
+                                        <option value="formula_sheet">📐 Formula Sheet</option>
+                                        <option value="diagram">📊 Diagram</option>
                                     </select>
                                 </div>
 
                                 <div class="col-md-6 mb-3">
-                                    <label for="id_programme" class="form-label">Programme</label>
-                                    <input type="text" name="programme" id="id_programme" class="form-control" placeholder="e.g., MBBS, BNS, BPharm">
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-4 mb-3">
-                                    <label for="id_year_of_study" class="form-label">Year of Study</label>
-                                    <input type="number" name="year_of_study" id="id_year_of_study" class="form-control" min="1" max="6">
-                                </div>
-
-                                <div class="col-md-4 mb-3">
-                                    <label for="id_semester" class="form-label">Semester</label>
-                                    <select name="semester" id="id_semester" class="form-control">
-                                        <option value="">Select...</option>
-                                        <option value="1">Semester 1</option>
-                                        <option value="2">Semester 2</option>
+                                    <label for="id_level" class="form-label fw-semibold required-field">
+                                        <i class="fas fa-graduation-cap me-2" style="color: var(--kuhes-blue);"></i>
+                                        Academic Level
+                                    </label>
+                                    <select name="level" id="id_level" class="form-select" required>
+                                        <option value="">Select level...</option>
+                                        <option value="premed">🎓 Pre-Med</option>
+                                        <option value="undergraduate">📘 Undergraduate</option>
+                                        <option value="postgraduate">📚 Postgraduate</option>
+                                        <option value="diploma">📖 Diploma</option>
                                     </select>
                                 </div>
+                            </div>
 
-                                <div class="col-md-4 mb-3">
-                                    <label for="id_academic_year" class="form-label">Academic Year</label>
-                                    <input type="text" name="academic_year" id="id_academic_year" class="form-control" placeholder="e.g., 2024/2025">
+                            <!-- Pre-Med Section -->
+                            <div id="premedSection" class="dynamic-section" style="display: none;">
+                                <div class="card bg-light border-0 p-3 mb-3">
+                                    <h6 class="fw-bold mb-3"><i class="fas fa-microscope me-2"></i>Pre-Med Details</h6>
+                                    <div class="row">
+                                        <div class="col-md-8 mb-3">
+                                            <label for="id_premed_subject" class="form-label">Pre-Med Subject</label>
+                                            <select name="premed_subject" id="id_premed_subject" class="form-select">
+                                                <option value="">Select subject...</option>
+                                                <option value="biology">🧬 Biology</option>
+                                                <option value="chemistry">🧪 Chemistry</option>
+                                                <option value="physics">⚡ Physics</option>
+                                                <option value="mathematics">📐 Mathematics</option>
+                                                <option value="ict">💻 ICT</option>
+                                                <option value="communication">🗣️ Communication</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label for="id_premed_semester" class="form-label">Semester</label>
+                                            <select name="semester" id="id_premed_semester" class="form-select">
+                                                <option value="">Select...</option>
+                                                <option value="1">Semester 1</option>
+                                                <option value="2">Semester 2</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Common Fields -->
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="id_lecturer" class="form-label">Lecturer</label>
-                                <input type="text" name="lecturer" id="id_lecturer" class="form-control" placeholder="Dr. Banda">
+                            <!-- Undergraduate Section -->
+                            <div id="undergradSection" class="dynamic-section" style="display: none;">
+                                <div class="card bg-light border-0 p-3 mb-3">
+                                    <h6 class="fw-bold mb-3"><i class="fas fa-university me-2"></i>Undergraduate Details</h6>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="id_school" class="form-label">School</label>
+                                            <select name="school" id="id_school" class="form-select">
+                                                <option value="">Select school...</option>
+                                                <option value="medicine">Medicine and Oral Health</option>
+                                                <option value="nursing">Nursing</option>
+                                                <option value="maternal">Maternal, Neonatal and Reproductive Health</option>
+                                                <option value="life_sciences">Life Sciences and Allied Health Professions</option>
+                                                <option value="public_health">Global and Public Health</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="id_programme" class="form-label">Programme</label>
+                                            <input type="text" name="programme" id="id_programme" class="form-control"
+                                                   placeholder="e.g., MBBS, BNS, BPharm">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4 mb-3">
+                                            <label for="id_year_of_study" class="form-label">Year of Study</label>
+                                            <input type="number" name="year_of_study" id="id_year_of_study" class="form-control" min="1" max="6">
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label for="id_semester" class="form-label">Semester</label>
+                                            <select name="semester" id="id_semester" class="form-select">
+                                                <option value="">Select...</option>
+                                                <option value="1">Semester 1</option>
+                                                <option value="2">Semester 2</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label for="id_academic_year" class="form-label">Academic Year</label>
+                                            <input type="text" name="academic_year" id="id_academic_year" class="form-control"
+                                                   placeholder="e.g., 2024/2025">
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div class="col-md-6 mb-3">
-                                <label for="id_course_code" class="form-label">Course Code</label>
-                                <input type="text" name="course_code" id="id_course_code" class="form-control" placeholder="e.g., PRE101">
+                            <!-- Common Fields -->
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_lecturer" class="form-label fw-semibold">
+                                        <i class="fas fa-chalkboard-user me-2" style="color: var(--kuhes-blue);"></i>
+                                        Lecturer/Course Coordinator
+                                    </label>
+                                    <input type="text" name="lecturer" id="id_lecturer" class="form-control"
+                                           placeholder="e.g., Dr. Banda">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_course_code" class="form-label fw-semibold">
+                                        <i class="fas fa-code me-2" style="color: var(--kuhes-blue);"></i>
+                                        Course Code
+                                    </label>
+                                    <input type="text" name="course_code" id="id_course_code" class="form-control"
+                                           placeholder="e.g., PRE101, MED202">
+                                </div>
                             </div>
-                        </div>
 
-                        <div class="mb-3">
-                            <label for="id_tags" class="form-label">Tags</label>
-                            <input type="text" name="tags" id="id_tags" class="form-control" placeholder="e.g., biology, cells, mitosis">
-                            <small class="text-muted">Separate tags with commas</small>
-                        </div>
-
-                        <!-- File Upload Section (hidden for videos) -->
-                        <div id="fileUploadSection">
+                            <!-- Tags -->
                             <div class="mb-3">
-                                <label for="id_file" class="form-label">File *</label>
-                                <input type="file" name="file" id="id_file" class="form-control">
-                                <small class="text-muted">Allowed: PDF, PPT, DOC, JPG, PNG (Max 25MB)</small>
+                                <label for="id_tags" class="form-label fw-semibold">
+                                    <i class="fas fa-tags me-2" style="color: var(--kuhes-blue);"></i>
+                                    Tags
+                                </label>
+                                <input type="text" name="tags" id="id_tags" class="form-control"
+                                       placeholder="e.g., biology, cells, mitosis, anatomy">
+                                <small class="text-muted">Separate tags with commas for better discoverability</small>
                             </div>
-                        </div>
 
-                        <!-- Video Link Section (hidden by default) -->
-                        <div id="videoLinkSection" style="display: none;">
-                            <div class="mb-3">
-                                <label for="id_video_link" class="form-label">Video Link *</label>
-                                <input type="url" name="video_link" id="id_video_link" class="form-control" placeholder="https://www.youtube.com/watch?v=...">
-                                <small class="text-muted">Enter YouTube, Vimeo, or other video URL</small>
+                            <!-- File Upload Section -->
+                            <div id="fileUploadSection">
+                                <label class="form-label fw-semibold required-field">
+                                    <i class="fas fa-file me-2" style="color: var(--kuhes-blue);"></i>
+                                    File
+                                </label>
+                                <div class="drop-zone" id="dropZone">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <p class="mb-1">Drag and drop your file here, or click to select</p>
+                                    <small class="text-muted">PDF, PPT, DOC, JPG, PNG (Max 25MB)</small>
+                                    <input type="file" name="file" id="id_file" class="d-none">
+                                </div>
+                                <div class="file-preview" id="filePreview">
+                                    <i class="fas fa-file-alt me-2"></i>
+                                    <span id="fileName"></span>
+                                    <span class="ms-auto" id="fileSize"></span>
+                                    <button type="button" class="btn btn-sm btn-link text-danger" onclick="clearFile()">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
                             </div>
-                        </div>
 
-                        <hr>
+                            <!-- Video Link Section -->
+                            <div id="videoLinkSection" style="display: none;">
+                                <div class="mb-3">
+                                    <label for="id_video_link" class="form-label fw-semibold required-field">
+                                        <i class="fas fa-video me-2" style="color: var(--kuhes-blue);"></i>
+                                        Video Link
+                                    </label>
+                                    <input type="url" name="video_link" id="id_video_link" class="form-control"
+                                           placeholder="https://www.youtube.com/watch?v=...">
+                                    <small class="text-muted">Supports YouTube, Vimeo, and other video platforms</small>
+                                </div>
+                            </div>
 
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fas fa-cloud-upload-alt me-2"></i>Upload Resource
-                            </button>
-                            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Cancel</a>
-                        </div>
-                    </form>
+                            <hr class="my-4">
+
+                            <div class="d-flex gap-3 flex-wrap">
+                                <button type="submit" class="btn btn-primary btn-lg flex-grow-1" id="uploadBtn">
+                                    <span class="btn-text">
+                                        <i class="fas fa-cloud-upload-alt me-2"></i>
+                                        Upload Resource
+                                    </span>
+                                </button>
+                                <a href="{% url 'dashboard' %}" data-replace="true" class="btn btn-outline-secondary btn-lg px-4">
+                                    <i class="fas fa-times me-2"></i>Cancel
+                                </a>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -180,7 +552,7 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+    // DOM Elements
     const levelSelect = document.getElementById('id_level');
     const resourceTypeSelect = document.getElementById('id_resource_type');
     const premedSection = document.getElementById('premedSection');
@@ -189,10 +561,22 @@ document.addEventListener('DOMContentLoaded', function() {
     const videoLinkSection = document.getElementById('videoLinkSection');
     const fileInput = document.getElementById('id_file');
     const videoLinkInput = document.getElementById('id_video_link');
+    const dropZone = document.getElementById('dropZone');
+    const filePreview = document.getElementById('filePreview');
+    const fileNameSpan = document.getElementById('fileName');
+    const fileSizeSpan = document.getElementById('fileSize');
+    const uploadForm = document.getElementById('uploadForm');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const uploadProgress = document.getElementById('uploadProgress');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const progressPercent = document.getElementById('progressPercent');
 
+    // Pre-med elements
     const premedSubject = document.getElementById('id_premed_subject');
     const school = document.getElementById('id_school');
 
+    // Toggle dynamic sections
     function toggleSections() {
         const level = levelSelect.value;
         const resourceType = resourceTypeSelect.value;
@@ -204,33 +588,256 @@ document.addEventListener('DOMContentLoaded', function() {
         // Show relevant section based on level
         if (level === 'premed') {
             premedSection.style.display = 'block';
-            premedSubject.required = true;
-            school.required = false;
+            if (premedSubject) premedSubject.required = true;
+            if (school) school.required = false;
         } else if (level === 'undergraduate') {
             undergradSection.style.display = 'block';
-            premedSubject.required = false;
-            school.required = true;
+            if (premedSubject) premedSubject.required = false;
+            if (school) school.required = true;
         } else {
-            premedSubject.required = false;
-            school.required = false;
+            if (premedSubject) premedSubject.required = false;
+            if (school) school.required = false;
         }
 
         // Toggle file vs video based on resource type
         if (resourceType === 'video') {
             fileUploadSection.style.display = 'none';
             videoLinkSection.style.display = 'block';
-            fileInput.required = false;
-            videoLinkInput.required = true;
+            if (fileInput) fileInput.required = false;
+            if (videoLinkInput) videoLinkInput.required = true;
         } else {
             fileUploadSection.style.display = 'block';
             videoLinkSection.style.display = 'none';
-            fileInput.required = true;
-            videoLinkInput.required = false;
+            if (fileInput) fileInput.required = true;
+            if (videoLinkInput) videoLinkInput.required = false;
         }
     }
 
+    // Drag and drop functionality
+    if (dropZone && fileInput) {
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('drag-over');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                updateFilePreview(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                updateFilePreview(fileInput.files[0]);
+            } else {
+                hideFilePreview();
+            }
+        });
+    }
+
+    function updateFilePreview(file) {
+        if (!file) return;
+
+        const maxSize = 25 * 1024 * 1024; // 25MB
+        if (file.size > maxSize) {
+            showToast('File size exceeds 25MB limit', 'error');
+            fileInput.value = '';
+            hideFilePreview();
+            return;
+        }
+
+        fileNameSpan.textContent = file.name;
+        fileSizeSpan.textContent = formatFileSize(file.size);
+        filePreview.classList.add('show');
+        dropZone.style.display = 'none';
+    }
+
+    function hideFilePreview() {
+        filePreview.classList.remove('show');
+        dropZone.style.display = 'block';
+        fileInput.value = '';
+    }
+
+    function clearFile() {
+        hideFilePreview();
+        fileInput.value = '';
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // Show toast notification
+    function showToast(message, type = 'info') {
+        if (window.toast) {
+            window.toast[type](message);
+        } else if (window.showToast) {
+            window.showToast(message, type);
+        } else {
+            alert(message);
+        }
+    }
+
+    // Form submission with AJAX progress
+    if (uploadForm) {
+        uploadForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            // Validate required fields
+            const title = document.getElementById('id_title').value.trim();
+            const resourceType = resourceTypeSelect.value;
+            const level = levelSelect.value;
+
+            if (!title) {
+                showToast('Please enter a title', 'error');
+                document.getElementById('id_title').focus();
+                return;
+            }
+
+            if (!resourceType) {
+                showToast('Please select a resource type', 'error');
+                resourceTypeSelect.focus();
+                return;
+            }
+
+            if (!level) {
+                showToast('Please select an academic level', 'error');
+                levelSelect.focus();
+                return;
+            }
+
+            // Check file/video requirements
+            if (resourceType === 'video') {
+                const videoLink = videoLinkInput.value.trim();
+                if (!videoLink) {
+                    showToast('Please enter a video link', 'error');
+                    videoLinkInput.focus();
+                    return;
+                }
+            } else {
+                if (!fileInput.files || fileInput.files.length === 0) {
+                    showToast('Please select a file to upload', 'error');
+                    return;
+                }
+            }
+
+            // Show progress bar
+            uploadProgress.classList.add('show');
+            uploadBtn.classList.add('btn-loading');
+            uploadBtn.disabled = true;
+
+            // Simulate progress (for actual upload, use XHR with progress event)
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress >= 95) {
+                    clearInterval(interval);
+                    progress = 95;
+                }
+                updateProgress(Math.min(progress, 95));
+            }, 200);
+
+            // Submit form
+            const formData = new FormData(uploadForm);
+
+            try {
+                const response = await fetch(uploadForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                clearInterval(interval);
+
+                if (response.ok) {
+                    updateProgress(100);
+                    setTimeout(() => {
+                        showToast('Resource uploaded successfully!', 'success');
+                        window.location.href = "{% url 'my_uploads' %}";
+                    }, 500);
+                } else {
+                    const data = await response.json();
+                    showToast(data.error || 'Upload failed. Please try again.', 'error');
+                    resetUploadForm();
+                }
+            } catch (error) {
+                clearInterval(interval);
+                showToast('Network error. Please check your connection.', 'error');
+                resetUploadForm();
+            }
+        });
+    }
+
+    function updateProgress(percent) {
+        progressBar.style.width = percent + '%';
+        progressPercent.textContent = Math.round(percent) + '%';
+
+        if (percent >= 100) {
+            progressText.textContent = 'Complete! Redirecting...';
+        } else if (percent >= 75) {
+            progressText.textContent = 'Finalizing...';
+        } else if (percent >= 50) {
+            progressText.textContent = 'Uploading...';
+        } else {
+            progressText.textContent = 'Preparing upload...';
+        }
+    }
+
+    function resetUploadForm() {
+        uploadProgress.classList.remove('show');
+        uploadBtn.classList.remove('btn-loading');
+        uploadBtn.disabled = false;
+        progressBar.style.width = '0%';
+        progressPercent.textContent = '0%';
+        progressText.textContent = 'Uploading...';
+    }
+
+    // Event listeners
     levelSelect.addEventListener('change', toggleSections);
     resourceTypeSelect.addEventListener('change', toggleSections);
-});
+
+    // Show skeleton loader on slow connections
+    if (document.readyState === 'loading') {
+        const skeleton = document.getElementById('uploadSkeleton');
+        const content = document.getElementById('uploadContent');
+
+        if (skeleton && content) {
+            skeleton.style.display = 'block';
+            content.style.opacity = '0';
+
+            setTimeout(() => {
+                skeleton.style.display = 'none';
+                content.style.opacity = '1';
+                content.style.transition = 'opacity 0.3s ease';
+            }, 500);
+        }
+    }
+
+    // Initialize sections on page load
+    toggleSections();
+
+    // Add loading state to data-replace links
+    document.querySelectorAll('a[data-replace="true"]').forEach(link => {
+        link.addEventListener('click', function(e) {
+            if (!this.getAttribute('href') || this.getAttribute('href') === '#') return;
+            if (window.showLoading) window.showLoading('Loading...');
+        });
+    });
 </script>
 {% endblock %}

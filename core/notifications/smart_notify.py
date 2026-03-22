@@ -1,8 +1,8 @@
+
 from django.conf import settings
 from django.urls import reverse
-from ..models import Notification, ModeratorSeat, User, Resource, ResourceRequest
+from ..models import Notification, ModeratorSeat, User
 from ..utils import send_email_notification
-
 
 def create_notification(user, notification_type, title, message, resource=None, request_obj=None):
     """Create in-app notification"""
@@ -15,7 +15,6 @@ def create_notification(user, notification_type, title, message, resource=None, 
         request=request_obj
     )
     return notification
-
 
 class SmartNotifier:
     """Intelligent notification dispatcher"""

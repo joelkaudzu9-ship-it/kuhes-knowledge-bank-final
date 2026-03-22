@@ -1,49 +1,531 @@
 {% extends 'core/base.html' %}
+{% load static %}
 
-{% block title %}Delete Resource{% endblock %}
+{% block title %}Delete Resource - KUHeS Knowledge Bank{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Page-specific animations with glass morphism */
+    .delete-card {
+        animation: slideUpFade 0.5s ease-out;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-radius: 24px;
+        border: 1px solid rgba(220, 53, 69, 0.3);
+        overflow: hidden;
+    }
+
+    @keyframes slideUpFade {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Floating shapes animation */
+    .floating-shape {
+        position: fixed;
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        border-radius: 50%;
+        filter: blur(60px);
+        opacity: 0.1;
+        z-index: 0;
+        animation: floatShape 8s ease-in-out infinite;
+        pointer-events: none;
+    }
+
+    .floating-shape:nth-child(2) {
+        animation-delay: -4s;
+        background: linear-gradient(135deg, #ffc107, #e0a800);
+    }
+
+    @keyframes floatShape {
+        0%, 100% {
+            transform: translate(0, 0) scale(1);
+        }
+        50% {
+            transform: translate(20px, -20px) scale(1.1);
+        }
+    }
+
+    /* Card header with danger gradient */
+    .card-header {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        border: none;
+        padding: 1.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .card-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+        animation: rotate 20s linear infinite;
+    }
+
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    .card-header h4 {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Alert styling with glass morphism */
+    .alert-warning {
+        background: linear-gradient(135deg, rgba(255, 193, 7, 0.95), rgba(224, 168, 0, 0.95));
+        backdrop-filter: blur(10px);
+        border: none;
+        border-radius: 16px;
+        color: #856404;
+        padding: 1rem;
+        margin: 1rem 0;
+        animation: pulseWarning 2s ease-in-out infinite;
+    }
+
+    @keyframes pulseWarning {
+        0%, 100% {
+            box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4);
+        }
+        50% {
+            box-shadow: 0 0 0 10px rgba(255, 193, 7, 0);
+        }
+    }
+
+    .alert-warning strong {
+        font-size: 1.1rem;
+        display: block;
+        margin-bottom: 8px;
+        color: #856404;
+    }
+
+    .alert-warning small {
+        font-size: 0.85rem;
+        display: block;
+    }
+
+    /* Resource info styling */
+    .resource-info {
+        background: rgba(0, 51, 160, 0.05);
+        border-radius: 16px;
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+
+    /* Badge styling */
+    .badge {
+        padding: 6px 12px;
+        border-radius: 30px;
+        font-weight: 600;
+        font-size: 0.75rem;
+    }
+
+    .badge.bg-success {
+        background: linear-gradient(135deg, #28a745, #20c997);
+    }
+
+    .badge.bg-warning {
+        background: linear-gradient(135deg, #ffc107, #e0a800);
+        color: #856404;
+    }
+
+    .badge.bg-danger {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+    }
+
+    /* Danger message styling */
+    .danger-message {
+        background: rgba(220, 53, 69, 0.1);
+        border-left: 4px solid #dc3545;
+        padding: 1rem;
+        border-radius: 12px;
+        margin: 1rem 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        animation: shake 0.5s ease-in-out;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+
+    .danger-message i {
+        font-size: 1.5rem;
+        color: #dc3545;
+    }
+
+    .danger-message p {
+        margin: 0;
+        color: #721c24;
+        font-weight: 500;
+    }
+
+    /* Button styling */
+    .btn-danger {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        border: none;
+        border-radius: 12px;
+        padding: 12px 24px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-danger::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-danger:active::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .btn-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
+    }
+
+    .btn-outline-secondary {
+        border: 2px solid #6c757d;
+        border-radius: 12px;
+        padding: 12px 24px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        background: transparent;
+    }
+
+    .btn-outline-secondary:hover {
+        transform: translateY(-2px);
+        background: linear-gradient(135deg, #6c757d, #5a6268);
+        border-color: transparent;
+        color: white;
+    }
+
+    /* Loading state for button */
+    .btn-loading {
+        position: relative;
+        pointer-events: none;
+        opacity: 0.8;
+    }
+
+    .btn-loading .btn-text {
+        visibility: hidden;
+    }
+
+    .btn-loading::after {
+        content: '';
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        top: 50%;
+        left: 50%;
+        margin-left: -10px;
+        margin-top: -10px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Icon animations */
+    .fa-trash, .fa-times {
+        transition: transform 0.3s ease;
+    }
+
+    .btn-danger:hover .fa-trash {
+        transform: scale(1.1) rotate(-5deg);
+    }
+
+    .btn-outline-secondary:hover .fa-times {
+        transform: scale(1.1);
+    }
+
+    /* Mobile optimizations */
+    @media (max-width: 768px) {
+        .container {
+            padding: 16px;
+        }
+
+        .card-header {
+            padding: 1rem;
+        }
+
+        .card-header h4 {
+            font-size: 1.25rem;
+        }
+
+        .card-body {
+            padding: 24px 20px !important;
+        }
+
+        .delete-card {
+            border-radius: 20px;
+        }
+
+        .alert-warning {
+            padding: 0.75rem;
+        }
+
+        .alert-warning strong {
+            font-size: 1rem;
+        }
+
+        .danger-message {
+            padding: 0.75rem;
+        }
+
+        .danger-message i {
+            font-size: 1.2rem;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        .d-grid.gap-2 {
+            gap: 8px;
+        }
+
+        .floating-shape {
+            filter: blur(40px);
+        }
+    }
+
+    /* Touch-friendly tap targets */
+    @media (max-width: 768px) {
+        .btn,
+        .alert-warning {
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+    }
+
+    /* Card title styling */
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--kuhes-blue);
+        margin-bottom: 1rem;
+    }
+
+    /* Resource type icon */
+    .resource-type-icon {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 8px;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
+<!-- Background decorative elements -->
+<div class="floating-shape" style="width: 400px; height: 400px; top: -150px; right: -150px;"></div>
+<div class="floating-shape" style="width: 300px; height: 300px; bottom: -100px; left: -100px;"></div>
+
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <div class="card border-danger">
-                <div class="card-header bg-danger text-white">
-                    <h4 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Confirm Deletion</h4>
+            <div class="delete-card card shadow-lg border-0">
+                <div class="card-header text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Confirm Deletion
+                    </h4>
                 </div>
-                <div class="card-body">
-                    <h5 class="card-title">Are you sure you want to delete this resource?</h5>
+                <div class="card-body p-4">
+                    <h5 class="card-title">
+                        <i class="fas fa-question-circle me-2" style="color: var(--kuhes-blue);"></i>
+                        Are you sure you want to delete this resource?
+                    </h5>
 
+                    <!-- Resource Information with glass effect -->
                     <div class="alert alert-warning">
-                        <strong>{{ resource.title }}</strong><br>
-                        <small class="text-muted">
-                            Type: {{ resource.get_resource_type_display }}<br>
-                            Status:
-                            <span class="badge {% if resource.status == 'approved' %}bg-success{% elif resource.status == 'pending' %}bg-warning{% else %}bg-danger{% endif %}">
-                                {{ resource.get_status_display }}
-                            </span>
+                        <strong>
+                            <i class="fas fa-file-alt me-2"></i>
+                            {{ resource.title }}
+                        </strong>
+                        <small class="text-muted d-block mt-2">
+                            <div class="resource-type-icon">
+                                <i class="fas
+                                    {% if resource.resource_type == 'handout' %}fa-file-pdf
+                                    {% elif resource.resource_type == 'video' %}fa-video
+                                    {% elif resource.resource_type == 'past_paper' %}fa-file-alt
+                                    {% elif resource.resource_type == 'lecture_note' %}fa-book
+                                    {% elif resource.resource_type == 'clinical_guide' %}fa-stethoscope
+                                    {% else %}fa-file{% endif %} me-1">
+                                </i>
+                                Type: {{ resource.get_resource_type_display }}
+                            </div>
+                            <div class="mt-1">
+                                Status:
+                                <span class="badge
+                                    {% if resource.status == 'approved' %}bg-success
+                                    {% elif resource.status == 'pending' %}bg-warning
+                                    {% else %}bg-danger{% endif %} ms-1">
+                                    <i class="fas
+                                        {% if resource.status == 'approved' %}fa-check-circle
+                                        {% elif resource.status == 'pending' %}fa-clock
+                                        {% else %}fa-times-circle{% endif %} me-1">
+                                    </i>
+                                    {{ resource.get_status_display }}
+                                </span>
+                            </div>
+                            {% if resource.upload_date %}
+                                <div class="mt-1">
+                                    <i class="fas fa-calendar-alt me-1"></i>
+                                    Uploaded: {{ resource.upload_date|date:"M d, Y" }}
+                                </div>
+                            {% endif %}
+                            {% if resource.download_count %}
+                                <div class="mt-1">
+                                    <i class="fas fa-download me-1"></i>
+                                    Downloads: {{ resource.download_count }}
+                                </div>
+                            {% endif %}
                         </small>
                     </div>
 
-                    <p class="text-danger">
-                        <i class="fas fa-info-circle me-1"></i>
-                        This action cannot be undone.
-                    </p>
+                    <!-- Danger Warning with animation -->
+                    <div class="danger-message">
+                        <i class="fas fa-info-circle"></i>
+                        <p>
+                            <strong>Warning:</strong> This action cannot be undone.
+                            All associated data, including downloads, bookmarks, and ratings, will be permanently removed.
+                        </p>
+                    </div>
 
-                    <form method="post">
+                    <!-- Additional Warning for Approved Resources -->
+                    {% if resource.status == 'approved' %}
+                        <div class="alert alert-danger" style="background: rgba(220, 53, 69, 0.1); border-left: 4px solid #dc3545;">
+                            <i class="fas fa-users me-2"></i>
+                            <small>
+                                This resource has been downloaded <strong>{{ resource.download_count }}</strong> times
+                                and bookmarked by <strong>{{ resource.bookmark_count|default:0 }}</strong> users.
+                                Deleting it will remove access for everyone.
+                            </small>
+                        </div>
+                    {% endif %}
+
+                    <!-- Form with buttons -->
+                    <form method="post" id="deleteForm">
                         {% csrf_token %}
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-danger">
-                                <i class="fas fa-trash me-2"></i>Yes, Delete Resource
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-danger" id="deleteBtn">
+                                <span class="btn-text">
+                                    <i class="fas fa-trash me-2"></i>
+                                    Yes, Permanently Delete Resource
+                                </span>
                             </button>
                             <a href="{% if resource.status == 'pending' %}{% url 'my_uploads' %}{% else %}{% url 'resource_detail' resource.id %}{% endif %}"
+                               data-replace="true"
                                class="btn btn-outline-secondary">
-                                <i class="fas fa-times me-2"></i>Cancel
+                                <i class="fas fa-times me-2"></i>
+                                Cancel - Keep Resource
                             </a>
                         </div>
                     </form>
+
+                    <!-- Security Note -->
+                    <div class="mt-4 pt-3 border-top text-center">
+                        <small class="text-muted">
+                            <i class="fas fa-shield-alt me-1"></i>
+                            This action is logged for security purposes
+                        </small>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    // Add loading state to delete button
+    document.getElementById('deleteForm').addEventListener('submit', function(e) {
+        const deleteBtn = document.getElementById('deleteBtn');
+
+        // Add loading state
+        deleteBtn.classList.add('btn-loading');
+
+        // Disable the button to prevent double submission
+        deleteBtn.disabled = true;
+    });
+
+    // Add loading state for cancel link (data-replace)
+    document.querySelectorAll('a[data-replace="true"]').forEach(link => {
+        link.addEventListener('click', function(e) {
+            if (!this.getAttribute('href') || this.getAttribute('href') === '#') return;
+
+            // Show loading overlay if exists
+            const loadingOverlay = document.getElementById('loading-overlay');
+            if (loadingOverlay) {
+                loadingOverlay.style.display = 'flex';
+            }
+        });
+    });
+
+    // Add keyboard shortcut (Enter to confirm deletion)
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.ctrlKey && !e.shiftKey) {
+            const activeElement = document.activeElement;
+            if (activeElement && activeElement.tagName !== 'BUTTON' && activeElement.tagName !== 'A') {
+                const deleteBtn = document.getElementById('deleteBtn');
+                if (deleteBtn && !deleteBtn.disabled) {
+                    e.preventDefault();
+                    deleteBtn.click();
+                }
+            }
+        }
+    });
+
+    // Add warning for accidental clicks on cancel (optional)
+    const cancelLink = document.querySelector('.btn-outline-secondary');
+    if (cancelLink) {
+        cancelLink.addEventListener('click', function(e) {
+            // No confirmation needed, just proceed with smooth transition
+            document.body.style.opacity = '0.7';
+        });
+    }
+
+    // Add animation to card on load
+    const deleteCard = document.querySelector('.delete-card');
+    if (deleteCard) {
+        deleteCard.style.animation = 'slideUpFade 0.5s ease-out';
+    }
+</script>
 {% endblock %}

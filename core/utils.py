@@ -122,6 +122,7 @@ def send_email_notification(user, subject, message, link=None):
 
 def send_password_reset_email(user, request):
     """Send password reset link"""
+    print(f"🔐 [UTILS] Starting password reset for: {user.email}")  # ADD THIS
     # Create reset token
     reset = PasswordReset.objects.create(user=user)
 

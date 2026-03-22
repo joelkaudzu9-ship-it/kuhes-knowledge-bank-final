@@ -19,6 +19,7 @@ urlpatterns = [
     path('my-uploads/', views.my_uploads, name='my_uploads'),
     path('browse/', views.browse_resources, name='browse_resources'),
     path('moderator/', views.moderator_dashboard, name='moderator_dashboard'),
+    path('test-email-direct/', views.test_email_direct, name='test_email_direct'),
     path('moderator/approve/<int:resource_id>/', views.approve_resource, name='approve_resource'),
     path('moderator/reject/<int:resource_id>/', views.reject_resource, name='reject_resource'),
     path('moderator/bulk-approve/', views.bulk_approve, name='bulk_approve'),

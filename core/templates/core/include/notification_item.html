@@ -1,0 +1,93 @@
+{% load static %}
+<div class="list-group-item list-group-item-action notification-item position-relative swipe-container
+    {% if not notification.is_read %}list-group-item-primary{% endif %}"
+     data-id="{{ notification.id }}"
+     data-type="{{ notification.type }}"
+     data-date="{{ notification.created_at|date:'Y-m-d' }}"
+     data-read="{% if notification.is_read %}true{% else %}false{% endif %}">
+
+    <!-- Selection Checkbox -->
+    <div class="select-checkbox">
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="{{ notification.id }}" id="select{{ notification.id }}">
+        </div>
+    </div>
+
+    <!-- Unread Dot (for unread) -->
+    {% if not notification.is_read %}
+        <div class="unread-dot"></div>
+    {% endif %}
+
+    <div class="d-flex gap-3 align-items-start">
+        <!-- Type Icon -->
+        <div class="type-icon {{ notification.type }}">
+            {% if notification.type == 'request_created' %}
+                <i class="fas fa-plus-circle"></i>
+            {% elif notification.type == 'request_updated' %}
+                <i class="fas fa-sync-alt"></i>
+            {% elif notification.type == 'request_fulfilled' %}
+                <i class="fas fa-check-circle"></i>
+            {% elif notification.type == 'request_upvoted' %}
+                <i class="fas fa-thumbs-up"></i>
+            {% elif notification.type == 'resource_approved' %}
+                <i class="fas fa-check-circle"></i>
+            {% elif notification.type == 'resource_rejected' %}
+                <i class="fas fa-times-circle"></i>
+            {% elif notification.type == 'resource_uploaded' %}
+                <i class="fas fa-cloud-upload-alt"></i>
+            {% elif notification.type == 'resource_downloaded' %}
+                <i class="fas fa-download"></i>
+            {% elif notification.type == 'comment_added' %}
+                <i class="fas fa-comment"></i>
+            {% elif notification.type == 'moderator_action' %}
+                <i class="fas fa-shield-alt"></i>
+            {% elif notification.type == 'system_announcement' %}
+                <i class="fas fa-bullhorn"></i>
+            {% else %}
+                <i class="fas fa-bell"></i>
+            {% endif %}
+        </div>
+
+        <!-- Content -->
+        <div class="flex-grow-1">
+            <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+                <h6 class="mb-1 fw-semibold">{{ notification.title }}</h6>
+                <small class="text-muted" title="{{ notification.created_at|date:'M d, Y H:i' }}">
+                    <i class="far fa-clock me-1"></i>{{ notification.created_at|timesince }} ago
+                </small>
+            </div>
+
+            <p class="mb-1 text-muted small">{{ notification.message }}</p>
+
+            <!-- Related Resource/Request Link -->
+            {% if notification.resource %}
+                <a href="{% url 'resource_detail' notification.resource.id %}" class="small text-primary text-decoration-none mt-1 d-inline-block">
+                    <i class="fas fa-external-link-alt me-1"></i>View Resource
+                </a>
+            {% elif notification.request %}
+                <a href="{% url 'request_detail' notification.request.id %}" class="small text-primary text-decoration-none mt-1 d-inline-block">
+                    <i class="fas fa-external-link-alt me-1"></i>View Request
+                </a>
+            {% endif %}
+
+            <!-- Badges -->
+            <div class="d-flex gap-2 mt-2">
+                <span class="badge bg-light text-dark">{{ notification.get_type_display }}</span>
+                {% if not notification.is_read %}
+                    <span class="badge bg-primary">New</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Swipe Actions for Mobile -->
+    <div class="swipe-actions">
+        <a href="{% url 'mark_notification_read' notification.id %}" class="swipe-action read">
+            <i class="fas fa-check"></i>
+        </a>
+        <a href="{% url 'delete_notification' notification.id %}" class="swipe-action delete"
+           onclick="return confirm('Delete this notification?')">
+            <i class="fas fa-trash"></i>
+        </a>
+    </div>
+</div>

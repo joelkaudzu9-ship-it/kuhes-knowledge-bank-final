@@ -296,8 +296,12 @@ class Resource(models.Model):
     def save(self, *args, **kwargs):
         # Set file size and type if file exists
         if self.file and not self.file_size:
-            self.file_size = self.file.size
-            self.file_type = self.file.name.split('.')[-1].lower()
+            try:
+                self.file_size = self.file.size
+            except (AttributeError, OSError):
+                self.file_size = 0
+            if self.file.name:
+                self.file_type = self.file.name.split('.')[-1].lower()
         super().save(*args, **kwargs)
 
     def clean(self):
@@ -308,44 +312,6 @@ class Resource(models.Model):
             raise ValidationError('Video link is required for video resources')
         elif self.resource_type != 'video' and not self.file:
             raise ValidationError('File is required for non-video resources')
-
-
-class ResourceRequest(models.Model):
-    """Model for students to request resources"""
-
-    title = models.CharField(max_length=200)
-    description = models.TextField()
-
-    # Classification
-    level = models.CharField(max_length=20, choices=Resource.LEVEL_CHOICES)
-    premed_subject = models.CharField(max_length=20, choices=Resource.SUBJECT_CHOICES, blank=True, null=True)
-    school = models.CharField(max_length=20, choices=User.SCHOOL_CHOICES, blank=True, null=True)
-    programme = models.CharField(max_length=100, blank=True)
-    year_of_study = models.IntegerField(blank=True, null=True)
-
-    # Requester
-    requester = models.ForeignKey(User, on_delete=models.CASCADE, related_name='resource_requests')
-
-    # Status
-    OPEN = 'open'
-    FULFILLED = 'fulfilled'
-    CLOSED = 'closed'
-
-    STATUS_CHOICES = [
-        (OPEN, 'Open'),
-        (FULFILLED, 'Fulfilled'),
-        (CLOSED, 'Closed'),
-    ]
-
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=OPEN)
-    fulfilled_by = models.ForeignKey(Resource, on_delete=models.SET_NULL, null=True, blank=True)
-
-    # Metadata
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return f"{self.title} - {self.requester.username}"
 
 
 class Bookmark(models.Model):
@@ -415,7 +381,6 @@ class ResourceRequest(models.Model):
 
     # Votes
     upvotes = models.IntegerField(default=0)
-    # Add to existing ResourceRequest class
     priority = models.IntegerField(default=0, help_text="Higher number = higher priority (moderator only)")
     is_pinned = models.BooleanField(default=False, help_text="Pin important requests")
     moderator_notes = models.TextField(blank=True, help_text="Internal moderator notes")
@@ -617,8 +582,11 @@ class ModeratorSeat(models.Model):
 
     def get_display_name(self):
         """Get human-readable seat name"""
+        subject_dict = dict(self.SUBJECT_CHOICES)
+
         if self.seat_type == 'subject_lead' and self.subject:
-            return f"Pre-Med {self.get_subject_display()} Lead"
+            subject_name = subject_dict.get(self.subject, self.subject)
+            return f"Pre-Med {subject_name} Lead"
         elif self.seat_type == 'class_rep':
             return f"{self.programme} Year {self.year} Representative 1"
         elif self.seat_type == 'assistant':
@@ -639,6 +607,10 @@ class ModeratorSeat(models.Model):
                 'transferred_at': timezone.now().isoformat(),
                 'transferred_by': transferred_by.username if transferred_by else 'system'
             }
+
+            # Ensure holder_history is a list
+            if not isinstance(self.holder_history, list):
+                self.holder_history = []
             self.holder_history.append(history_entry)
 
             # Remove moderator role from old holder if they have no other seats
@@ -727,14 +699,14 @@ class TransferRequest(models.Model):
         # Transfer the seat
         self.seat.transfer_to(self.to_user, verifier)
 
-        # Create notification
-        from .notifications import create_notification
-        create_notification(
-            user=self.to_user,
-            notification_type='moderator_transfer',
-            title="🎉 You're now a Class Rep!",
-            message=f"You have been approved as {self.seat.name}."
-        )
+        # Create notification (commented out until notifications module is ready)
+        # from .notifications import create_notification
+        # create_notification(
+        #     user=self.to_user,
+        #     notification_type='moderator_transfer',
+        #     title="🎉 You're now a Class Rep!",
+        #     message=f"You have been approved as {self.seat.name}."
+        # )
 
     def reject(self, verifier, reason=""):
         self.status = 'rejected'
@@ -742,3 +714,8 @@ class TransferRequest(models.Model):
         self.verified_at = timezone.now()
         self.responded_at = timezone.now()
         self.save()
+        # TODO: Use reason parameter to notify user why request was rejected
+        if reason:
+            # Log the reason for now
+            print(f"Transfer request rejected. Reason: {reason}")
+        # TODO: Add notification for rejection

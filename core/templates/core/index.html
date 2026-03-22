@@ -1,27 +1,653 @@
 {% extends 'core/base.html' %}
+{% load static %}
 
-{% block title %}Home{% endblock %}
+{% block title %}KUHeS Knowledge Bank{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Additional page-specific styles with glass morphism */
+    .hero-section {
+        position: relative;
+        background: linear-gradient(135deg, var(--kuhes-blue) 0%, #1a4cb0 50%, var(--kuhes-teal) 100%);
+        overflow: hidden;
+        min-height: 85vh;
+        display: flex;
+        align-items: center;
+    }
+
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        opacity: 0.1;
+        z-index: 0;
+    }
+
+    .hero-section::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,184,28,0.1) 0%, transparent 70%);
+        animation: rotate 20s linear infinite;
+        z-index: 0;
+    }
+
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    .hero-section .container {
+        position: relative;
+        z-index: 2;
+    }
+
+    /* Glass morphism elements */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .feature-card {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.5s ease;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(5px);
+        border-radius: 20px;
+        border: 1px solid rgba(0, 51, 160, 0.1);
+    }
+
+    .feature-card.fade-in-up {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .feature-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 51, 160, 0.15);
+        border-color: rgba(255, 184, 28, 0.3);
+    }
+
+    @keyframes fadeInUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .floating-stats {
+        animation: float 6s ease-in-out infinite;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(8px);
+        border-radius: 20px;
+        padding: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .floating-stats:hover {
+        transform: scale(1.05);
+        background: rgba(255, 255, 255, 0.25);
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+    /* Pulse animation for badge */
+    .pulse {
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.05); opacity: 0.9; }
+    }
+
+    /* Resource items with glass morphism */
+    .resource-item {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(5px);
+        border-radius: 16px;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0, 51, 160, 0.1);
+        cursor: pointer;
+    }
+
+    .resource-item:hover {
+        transform: translateX(8px);
+        background: white;
+        box-shadow: 0 8px 25px rgba(0, 51, 160, 0.1);
+        border-color: var(--kuhes-gold);
+    }
+
+    .resource-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .resource-item:hover .resource-icon {
+        transform: scale(1.1);
+    }
+
+    .resource-content {
+        flex: 1;
+    }
+
+    .resource-title {
+        font-weight: 600;
+        color: var(--kuhes-blue);
+        margin-bottom: 6px;
+        font-size: 0.95rem;
+    }
+
+    .resource-meta {
+        font-size: 0.75rem;
+        color: var(--kuhes-gray);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .quote-block {
+        position: relative;
+        padding: 2rem;
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        border-radius: 30px;
+        border: 1px solid rgba(255, 184, 28, 0.3);
+    }
+
+    /* Button hover effects */
+    .btn-gold {
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .btn-gold::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-gold:active::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    /* Loading skeleton for resources */
+    .skeleton {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+    }
+
+    @keyframes loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+
+    /* Mobile optimizations */
+    @media (max-width: 768px) {
+        .hero-section {
+            min-height: 70vh;
+        }
+
+        .display-3 {
+            font-size: 2rem;
+        }
+
+        .feature-card {
+            margin-bottom: 1rem;
+        }
+
+        .resource-item {
+            padding: 12px;
+        }
+
+        .resource-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 1.2rem;
+        }
+
+        .quote-block {
+            padding: 1.5rem;
+            margin: 0 1rem;
+        }
+
+        .floating-stats {
+            padding: 8px;
+        }
+
+        .floating-stats .h3 {
+            font-size: 1.3rem;
+        }
+    }
+
+    /* Touch-friendly tap targets */
+    @media (max-width: 768px) {
+        .btn,
+        .resource-item,
+        .feature-card {
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+    }
+
+    /* Smooth scroll behavior */
+    html {
+        scroll-behavior: smooth;
+    }
+
+    /* Loading overlay for page transitions */
+    .page-transition {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: white;
+        z-index: 9999;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .page-transition.active {
+        opacity: 1;
+        visibility: visible;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row">
-        <div class="col-12 text-center">
-            <h1 class="display-4 mb-4">Welcome to KUHeS Knowledge Bank</h1>
-            <p class="lead">Your centralized platform for academic resources</p>
+<!-- Hero Section with KUHeS Branding -->
+<section class="hero-section">
+    <div class="container position-relative" style="z-index: 1;">
+        <div class="row min-vh-75 align-items-center py-5">
+            <div class="col-12 col-lg-8 mx-auto text-center text-white">
+                <!-- Animated Badge -->
+                <span class="badge bg-gold text-blue mb-4 pulse d-inline-flex align-items-center gap-2 px-4 py-2" style="font-size: 0.9rem;">
+                    <i class="fas fa-university"></i>
+                    Kamuzu University of Health Sciences
+                </span>
 
-            {% if user.is_authenticated %}
-                <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg mt-3">
-                    Go to Dashboard
-                </a>
-            {% else %}
-                <a href="{% url 'login' %}" class="btn btn-primary btn-lg mt-3 me-2">
-                    Login
-                </a>
-                <a href="{% url 'register' %}" class="btn btn-success btn-lg mt-3">
-                    Register
-                </a>
-            {% endif %}
+                <!-- Main Title -->
+                <h1 class="display-3 fw-bold mb-4 text-white">
+                    Knowledge Bank
+                    <span class="d-block display-6 mt-2" style="color: var(--kuhes-gold);">
+                        Your Gateway to Academic Excellence
+                    </span>
+                </h1>
+
+                <!-- Description -->
+                <p class="lead mb-5 opacity-90" style="font-size: 1.2rem;">
+                    Access thousands of academic resources including lecture notes, past papers,
+                    clinical guides, and research materials — all in one place.
+                </p>
+
+                <!-- Stats Preview -->
+                <div class="row justify-content-center mb-5 g-3">
+                    <div class="col-4">
+                        <div class="floating-stats">
+                            <div class="h3 fw-bold text-gold mb-1">5K+</div>
+                            <div class="small opacity-75">Resources</div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="floating-stats" style="animation-delay: 0.2s;">
+                            <div class="h3 fw-bold text-gold mb-1">2K+</div>
+                            <div class="small opacity-75">Students</div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="floating-stats" style="animation-delay: 0.4s;">
+                            <div class="h3 fw-bold text-gold mb-1">50+</div>
+                            <div class="small opacity-75">Courses</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons with data-replace -->
+                <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'dashboard' %}" data-replace="true" class="btn btn-gold btn-lg flex-fill flex-sm-grow-0 px-5">
+                            <i class="fas fa-tachometer-alt me-2"></i>
+                            Go to Dashboard
+                        </a>
+                        <a href="{% url 'browse_resources' %}" data-replace="true" class="btn btn-outline-light btn-lg flex-fill flex-sm-grow-0 px-5">
+                            <i class="fas fa-book-open me-2"></i>
+                            Browse Resources
+                        </a>
+                     {% else %}
+                        <a href="{% url 'login' %}" data-replace="true" class="btn btn-gold btn-lg flex-fill flex-sm-grow-0 px-5">
+                            <i class="fas fa-sign-in-alt me-2"></i>
+                            Login
+                        </a>
+                        <a href="{% url 'register' %}" data-replace="true" class="btn btn-outline-light btn-lg flex-fill flex-sm-grow-0 px-5">
+                            <i class="fas fa-user-plus me-2"></i>
+                            Create Account
+                        </a>
+                    {% endif %}
+                </div>
+
+                <!-- Quick Access Note -->
+                <p class="mt-4 mb-0 small opacity-75">
+                    <i class="fas fa-shield-alt me-1"></i>
+                    Secure access for KUHeS students and staff
+                </p>
+            </div>
         </div>
     </div>
-</div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5 bg-white">
+    <div class="container py-4">
+        <!-- Section Header -->
+        <div class="row mb-5">
+            <div class="col-12 text-center">
+                <span class="badge bg-primary mb-3 px-4 py-2">Why Choose Us</span>
+                <h2 class="display-5 fw-bold mb-3">Everything You Need for<br>Your Studies</h2>
+                <p class="text-muted">Comprehensive resources tailored for medical and health sciences students</p>
+            </div>
+        </div>
+
+        <!-- Features Grid -->
+        <div class="row g-4">
+            <!-- Feature 1 -->
+            <div class="col-6 col-lg-3">
+                <div class="feature-card card h-100 border-0 shadow-sm text-center p-3">
+                    <div class="card-body">
+                        <div class="feature-icon mb-3">
+                            <span class="badge bg-primary rounded-circle p-3 d-inline-flex align-items-center justify-content-center" style="width: 70px; height: 70px;">
+                                <i class="fas fa-book-medical fa-2x text-white"></i>
+                            </span>
+                        </div>
+                        <h5 class="fw-bold mb-2">Lecture Notes</h5>
+                        <p class="small text-muted mb-0">Comprehensive notes from top lecturers</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="col-6 col-lg-3">
+                <div class="feature-card card h-100 border-0 shadow-sm text-center p-3">
+                    <div class="card-body">
+                        <div class="feature-icon mb-3">
+                            <span class="badge bg-gold rounded-circle p-3 d-inline-flex align-items-center justify-content-center" style="width: 70px; height: 70px;">
+                                <i class="fas fa-file-pdf fa-2x text-blue"></i>
+                            </span>
+                        </div>
+                        <h5 class="fw-bold mb-2">Past Papers</h5>
+                        <p class="small text-muted mb-0">Previous exams with marking schemes</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="col-6 col-lg-3">
+                <div class="feature-card card h-100 border-0 shadow-sm text-center p-3">
+                    <div class="card-body">
+                        <div class="feature-icon mb-3">
+                            <span class="badge bg-teal rounded-circle p-3 d-inline-flex align-items-center justify-content-center" style="width: 70px; height: 70px;">
+                                <i class="fas fa-video fa-2x text-white"></i>
+                            </span>
+                        </div>
+                        <h5 class="fw-bold mb-2">Video Lectures</h5>
+                        <p class="small text-muted mb-0">Recorded sessions and tutorials</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 4 -->
+            <div class="col-6 col-lg-3">
+                <div class="feature-card card h-100 border-0 shadow-sm text-center p-3">
+                    <div class="card-body">
+                        <div class="feature-icon mb-3">
+                            <span class="badge bg-success rounded-circle p-3 d-inline-flex align-items-center justify-content-center" style="width: 70px; height: 70px;">
+                                <i class="fas fa-stethoscope fa-2x text-white"></i>
+                            </span>
+                        </div>
+                        <h5 class="fw-bold mb-2">Clinical Guides</h5>
+                        <p class="small text-muted mb-0">Practical procedures and protocols</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action Section -->
+<section class="py-5" style="background: linear-gradient(135deg, var(--kuhes-light-bg) 0%, #fff 100%);">
+    <div class="container py-4">
+        <div class="row align-items-center">
+            <div class="col-lg-8 mx-auto text-center">
+                <div class="quote-block mb-4">
+                    <i class="fas fa-quote-left fa-2x text-gold opacity-50 mb-3"></i>
+                    <p class="h4 fw-normal mb-3">
+                        The KUHeS Knowledge Bank has transformed how I access study materials.
+                        Everything I need is just a click away!
+                    </p>
+                    <div class="quote-author">
+                        <strong>- Dr. M. Banda</strong>, Senior Lecturer
+                    </div>
+                </div>
+
+                {% if not user.is_authenticated %}
+                <div class="mt-5">
+                    <h3 class="h4 mb-3">Ready to get started?</h3>
+                    <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
+                        <a href="{% url 'register' %}" data-replace="true" class="btn btn-primary btn-lg">
+                            <i class="fas fa-user-graduate me-2"></i>
+                            Join Knowledge Bank
+                        </a>
+                        <a href="#" class="btn btn-outline-primary btn-lg" data-replace="true">
+                            <i class="fas fa-play-circle me-2"></i>
+                            Watch Demo
+                        </a>
+                    </div>
+                    <p class="mt-3 small text-muted">
+                        Free access for all KUHeS students and faculty members
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Recent Activity Preview (for logged out users) -->
+{% if not user.is_authenticated %}
+<section class="py-5 bg-white border-top">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-4">
+                <h3 class="h4 fw-bold">Recently Added Resources</h3>
+                <p class="text-muted small">Latest materials shared by your peers</p>
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <!-- Sample Resource Items -->
+            <div class="col-12 col-md-4">
+                <div class="resource-item" data-href="#" onclick="window.location.href=this.dataset.href">
+                    <div class="resource-icon">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <div class="resource-content">
+                        <div class="resource-title">Anatomy Notes - Musculoskeletal System</div>
+                        <div class="resource-meta">
+                            <span><i class="fas fa-download me-1"></i> 234 downloads</span>
+                            <span class="badge bg-gold text-blue">PDF</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-4">
+                <div class="resource-item" data-href="#" onclick="window.location.href=this.dataset.href">
+                    <div class="resource-icon">
+                        <i class="fas fa-video"></i>
+                    </div>
+                    <div class="resource-content">
+                        <div class="resource-title">Clinical Skills - Blood Pressure</div>
+                        <div class="resource-meta">
+                            <span><i class="fas fa-eye me-1"></i> 1.2K views</span>
+                            <span class="badge bg-primary text-white">Video</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-4">
+                <div class="resource-item" data-href="#" onclick="window.location.href=this.dataset.href">
+                    <div class="resource-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="resource-content">
+                        <div class="resource-title">Past Paper - MBBS Year 3 2024</div>
+                        <div class="resource-meta">
+                            <span><i class="fas fa-download me-1"></i> 567 downloads</span>
+                            <span class="badge bg-teal text-white">Exam</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="{% url 'browse_resources' %}" data-replace="true" class="btn btn-link text-gold fw-bold">
+                Browse All Resources <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Mobile App Download Banner -->
+<section class="py-3" style="background: var(--kuhes-blue);">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-8">
+                <p class="text-white mb-0 small fw-bold">
+                    <i class="fas fa-mobile-alt me-2 text-gold"></i>
+                    Get the mobile app for offline access
+                </p>
+            </div>
+            <div class="col-4 text-end">
+                <a href="#" class="btn btn-sm btn-gold" data-replace="true">
+                    Download
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add smooth scroll for buttons
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
+    // Intersection Observer for animations
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('fade-in-up');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1, rootMargin: '50px' });
+
+    document.querySelectorAll('.feature-card').forEach((el) => observer.observe(el));
+
+    // Add loading effect for data-replace links
+    document.querySelectorAll('a[data-replace="true"]').forEach(link => {
+        link.addEventListener('click', function(e) {
+            // Don't add loading for empty href or javascript
+            if (!this.getAttribute('href') || this.getAttribute('href') === '#') return;
+
+            // Add loading class to body
+            document.body.style.opacity = '0.7';
+            document.body.style.transition = 'opacity 0.2s';
+
+            // Show loading overlay if exists
+            const loadingOverlay = document.getElementById('loading-overlay');
+            if (loadingOverlay) {
+                loadingOverlay.style.display = 'flex';
+            }
+        });
+    });
+
+    // Reset loading state on page load
+    window.addEventListener('pageshow', function() {
+        document.body.style.opacity = '';
+        const loadingOverlay = document.getElementById('loading-overlay');
+        if (loadingOverlay) {
+            loadingOverlay.style.display = 'none';
+        }
+    });
+
+    // Add hover effect for resource items (mobile friendly)
+    const resourceItems = document.querySelectorAll('.resource-item');
+    resourceItems.forEach(item => {
+        item.addEventListener('touchstart', function() {
+            this.style.transform = 'translateX(8px)';
+        });
+        item.addEventListener('touchend', function() {
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 150);
+        });
+    });
+</script>
 {% endblock %}

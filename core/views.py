@@ -11,8 +11,9 @@ from django.urls import reverse
 from django.utils import timezone
 from django.db.models import Count, Sum, Avg, Q
 from django.contrib.admin.views.decorators import staff_member_required
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from datetime import datetime, timedelta
+import logging
 
 from .models import (
     User, EmailVerification, PasswordReset, Resource,
@@ -23,8 +24,8 @@ from .forms import ResourceUploadForm, ResourceRequestForm
 from .utils import send_verification_email, send_password_reset_email
 from .notifications.smart_notify import SmartNotifier
 
-import logging
 logger = logging.getLogger(__name__)
+
 
 # Add this debug view temporarily
 def debug_view(request):
@@ -36,7 +37,6 @@ def debug_view(request):
         return HttpResponse(f"✅ Django is working! Users: {user_count}")
     except Exception as e:
         return HttpResponse(f"❌ Error: {str(e)}", status=500)
-
 
 
 def index(request):
@@ -71,18 +71,30 @@ def register(request):
             messages.error(request, 'Username already taken!')
             return redirect('register')
 
-        # Create user - 🔥 TEMPORARILY ACTIVE WITHOUT EMAIL VERIFICATION
+        # Create user (inactive until email verified)
         user = User.objects.create_user(
             username=username,
             email=email,
             password=password1
         )
-        user.is_active = True  # ← CHANGE THIS FROM False TO True
-        user.is_verified = True  # ← ADD THIS LINE
+        user.is_active = False
         user.save()
 
-        # 🔥 SKIP EMAIL FOR NOW
-        messages.success(request, 'Account created! You can now log in.')
+        # Send verification email
+        try:
+            send_verification_email(user, request)
+            messages.success(request, 'Account created! Please check your email to verify your account.')
+        except Exception as e:
+            # If email fails, create token and show link for development
+            verification = EmailVerification.objects.create(user=user)
+            verification_link = request.build_absolute_uri(
+                reverse('verify_email', args=[str(verification.token)])
+            )
+            messages.warning(
+                request,
+                f'⚠️ Email could not be sent. Use this link to verify: {verification_link}'
+            )
+            logger.error(f"Email sending failed: {e}")
 
         return redirect('login')
 
@@ -125,63 +137,48 @@ def resend_verification(request):
 
 
 def forgot_password(request):
-    # At the top of the function, add:
-    if request.method == 'POST':
-        email = request.POST.get('email')
-        try:
-            user = User.objects.get(email=email)
-            # 🔥 TEMP FIX: Print link to logs
-            from django.utils import timezone
-            from .models import PasswordReset
-            reset = PasswordReset.objects.create(user=user)
-            reset_link = request.build_absolute_uri(
-                reverse('reset_password', args=[str(reset.token)])
-            )
-            print("=" * 60)
-            print("🔗 RESET LINK (TEMP):")
-            print(reset_link)
-            print("=" * 60)
-            messages.success(request, 'Check Render logs for reset link!')
-        except:
-            messages.success(request, 'If account exists, link in logs')
-        return redirect('login')
     """Handle forgot password request"""
-    print("=" * 50)
-    print("🔍 FORGOT PASSWORD VIEW CALLED")
-    print(f"Method: {request.method}")
-    print("=" * 50)
-
     if request.method == 'POST':
         email = request.POST.get('email')
-        print(f"📧 Email submitted: {email}")
+        logger.info(f"Password reset requested for email: {email}")
 
         try:
+            # Check if user exists
             user = User.objects.get(email=email, is_active=True)
-            print(f"✅ User found: {user.username}")
+            logger.info(f"User found: {user.username} (ID: {user.id})")
 
             # Try to send email
             try:
-                send_password_reset_email(user, request)
-                print(f"📧 Password reset email function completed")
+                reset = send_password_reset_email(user, request)
+                logger.info(f"Password reset email sent. Token: {reset.token}")
                 messages.success(request, 'Password reset link sent to your email!')
-            except Exception as e:
-                print(f"❌ Email sending failed: {str(e)}")
-                messages.error(request, 'Error sending email. Please try again later.')
+            except Exception as email_error:
+                logger.error(f"Email sending failed: {email_error}")
+
+                # For development, show the link anyway
+                if settings.DEBUG:
+                    reset = PasswordReset.objects.create(user=user)
+                    reset_link = request.build_absolute_uri(
+                        reverse('reset_password', args=[str(reset.token)])
+                    )
+                    messages.warning(
+                        request,
+                        f'⚠️ DEVELOPMENT MODE: Use this link: {reset_link}'
+                    )
+                else:
+                    messages.error(request, 'Could not send email. Please try again later.')
 
         except User.DoesNotExist:
-            print(f"❌ User not found: {email}")
+            logger.warning(f"User not found with email: {email}")
             # Don't reveal that email doesn't exist for security
             messages.success(request, 'If an account exists with that email, a reset link has been sent.')
         except Exception as e:
-            print(f"❌ Unexpected error: {str(e)}")
-            import traceback
-            traceback.print_exc()
+            logger.error(f"Unexpected error: {e}")
             messages.error(request, 'An error occurred. Please try again.')
 
         return redirect('login')
 
     return render(request, 'core/forgot_password.html')
-
 
 
 def reset_password(request, token):
@@ -216,20 +213,36 @@ def reset_password(request, token):
 
 
 def custom_logout(request):
-    """Custom logout view"""
+    """Custom logout view - prevents back button from showing logged-in pages"""
     logout(request)
+
+    # Clear session data
+    request.session.flush()
+
     messages.success(request, 'You have been successfully logged out.')
-    return redirect('index')
+
+    # Create response with cache-control headers
+    response = redirect('index')
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
+
 
 class CustomLoginView(LoginView):
     template_name = 'core/login.html'
 
     def form_valid(self, form):
-        messages.success(self.request, f'Welcome back, {form.get_user().username}!')
-        return super().form_valid(form)
+        try:
+            messages.success(self.request, f'Welcome back, {form.get_user().username}!')
+            return super().form_valid(form)
+        except Exception as e:
+            logger.error(f"Login error: {e}", exc_info=True)
+            messages.error(self.request, 'An error occurred during login.')
+            return redirect('login')
 
     def form_invalid(self, form):
-        messages.error(self.request, 'Invalid email or password.')
+        messages.error(self.request, 'Invalid email or password. Please try again.')
         return super().form_invalid(form)
 
 
@@ -283,7 +296,7 @@ def upload_resource(request):
             user.upload_count += 1
             user.save()
 
-            # 🔔 SMART NOTIFY - Only relevant reps
+            # Notify relevant reps
             SmartNotifier.notify_new_resource(resource)
 
             if resource.resource_type == 'video':
@@ -361,6 +374,8 @@ def moderator_dashboard(request):
                 year_of_study=user_seat.year
             )
             scope = f"{user_seat.programme} YEAR {user_seat.year}"
+        else:
+            scope = "NO CLASS ASSIGNED"
     else:
         # Moderators without seats see nothing (shouldn't happen)
         resource_filter = Q(id__in=[])  # Empty queryset
@@ -425,7 +440,7 @@ def approve_resource(request, resource_id):
     resource.approval_date = timezone.now()
     resource.save()
 
-    # 🔔 NOTIFY ONLY UPLOADER
+    # Notify uploader
     SmartNotifier.notify_resource_approved(resource)
 
     messages.success(request, f'✅ Resource "{resource.title}" has been approved and is now public!')
@@ -462,7 +477,7 @@ def reject_resource(request, resource_id):
         resource.approval_date = timezone.now()
         resource.save()
 
-        # 🔔 NOTIFY ONLY UPLOADER
+        # Notify uploader
         SmartNotifier.notify_resource_rejected(resource, reason)
 
         messages.success(request, f'❌ Resource "{resource.title}" has been rejected.')
@@ -482,26 +497,26 @@ def request_list(request):
     sort = request.GET.get('sort', '-upvotes')
 
     # Base queryset - NO FILTERS! Everyone sees all requests
-    requests = ResourceRequest.objects.all()
+    requests_queryset = ResourceRequest.objects.all()
 
     # Apply filters (user-selected)
     if status:
-        requests = requests.filter(status=status)
+        requests_queryset = requests_queryset.filter(status=status)
     if level:
-        requests = requests.filter(level=level)
+        requests_queryset = requests_queryset.filter(level=level)
 
     # Apply sorting
     if sort == 'newest':
-        requests = requests.order_by('-created_at')
+        requests_queryset = requests_queryset.order_by('-created_at')
     elif sort == 'oldest':
-        requests = requests.order_by('created_at')
+        requests_queryset = requests_queryset.order_by('created_at')
     elif sort == 'urgent':
-        requests = requests.order_by('-urgency', '-upvotes')
+        requests_queryset = requests_queryset.order_by('-urgency', '-upvotes')
     else:
-        requests = requests.order_by('-upvotes', '-created_at')
+        requests_queryset = requests_queryset.order_by('-upvotes', '-created_at')
 
     # Check if current user has upvoted each request
-    for req in requests:
+    for req in requests_queryset:
         req.user_upvoted = RequestUpvote.objects.filter(
             user=request.user,
             request=req
@@ -515,7 +530,7 @@ def request_list(request):
     }
 
     context = {
-        'requests': requests,
+        'requests': requests_queryset,
         'counts': counts,
         'current_status': status,
         'current_level': level,
@@ -564,14 +579,16 @@ def create_request(request):
 
             resource_request.save()
 
-            # 🔔 SMART NOTIFY - Only relevant reps
+            # Notify relevant reps
             SmartNotifier.notify_new_request(resource_request)
 
             messages.success(request, 'Your request has been posted!')
             return redirect('request_list')
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field}: {error}')
     else:
-        form = ResourceRequestForm()
-
         # Pre-fill form with user's class info
         initial_data = {}
         if request.user.level == 'premed':
@@ -632,7 +649,7 @@ def upvote_request(request, request_id):
         resource_request.upvotes += 1
         resource_request.save()
 
-        # 🔔 SMART NOTIFY - Only notify requester (not all moderators)
+        # Notify requester
         if resource_request.requester != request.user:
             SmartNotifier.notify_request_upvoted(resource_request, request.user)
 
@@ -668,7 +685,7 @@ def mark_fulfilled(request, request_id):
                 resource_request.fulfilled_at = timezone.now()
                 resource_request.save()
 
-                # 🔔 NOTIFY ONLY REQUESTER
+                # Notify requester
                 SmartNotifier.notify_request_fulfilled(resource_request, resource)
 
                 messages.success(request, 'Request marked as fulfilled! The requester has been notified.')
@@ -686,7 +703,6 @@ def my_requests(request):
     """View user's own requests"""
     user_requests = ResourceRequest.objects.filter(requester=request.user).order_by('-created_at')
     return render(request, 'core/requests/my_requests.html', {'requests': user_requests})
-
 
 
 @login_required
@@ -787,6 +803,8 @@ def analytics_dashboard(request):
                 programme=user_seat.programme,
                 year_of_study=user_seat.year
             )
+        else:
+            scope = "GENERAL MODERATOR (no specific class)"
     else:
         # Fallback for moderators without seats
         scope = "GENERAL MODERATOR (no specific class)"
@@ -796,9 +814,14 @@ def analytics_dashboard(request):
     # ===========================================
 
     # User stats (filtered)
-    total_users = User.objects.filter(user_filters).count() if not is_admin else User.objects.count()
-    active_users = User.objects.filter(user_filters, last_active__gte=last_30_days).count()
-    new_users_7d = User.objects.filter(user_filters, date_joined__gte=last_7_days).count()
+    if is_admin:
+        total_users = User.objects.count()
+        active_users = User.objects.filter(last_active__gte=last_30_days).count()
+        new_users_7d = User.objects.filter(date_joined__gte=last_7_days).count()
+    else:
+        total_users = User.objects.filter(user_filters).count()
+        active_users = User.objects.filter(user_filters, last_active__gte=last_30_days).count()
+        new_users_7d = User.objects.filter(user_filters, date_joined__gte=last_7_days).count()
 
     # Resource stats (filtered)
     resources = Resource.objects.filter(resource_filters)
@@ -806,14 +829,17 @@ def analytics_dashboard(request):
     approved_resources = resources.filter(status='approved').count()
     pending_resources = resources.filter(status='pending').count()
 
-    total_downloads = resources.aggregate(total=Sum('download_count'))['total'] or 0
-    total_views = resources.aggregate(total=Sum('view_count'))['total'] or 0
+    download_sum = resources.aggregate(total=Sum('download_count'))['total']
+    total_downloads = download_sum if download_sum is not None else 0
+
+    view_sum = resources.aggregate(total=Sum('view_count'))['total']
+    total_views = view_sum if view_sum is not None else 0
 
     # Request stats (filtered)
-    requests = ResourceRequest.objects.filter(request_filters)
-    total_requests = requests.count()
-    open_requests = requests.filter(status='open').count()
-    fulfilled_requests = requests.filter(status='fulfilled').count()
+    requests_queryset = ResourceRequest.objects.filter(request_filters)
+    total_requests = requests_queryset.count()
+    open_requests = requests_queryset.filter(status='open').count()
+    fulfilled_requests = requests_queryset.filter(status='fulfilled').count()
 
     # Top Resources (within scope)
     top_resources = resources.filter(status='approved').order_by('-download_count')[:10]
@@ -839,7 +865,7 @@ def analytics_dashboard(request):
 
     # Recent Activity (within scope)
     recent_uploads = resources.filter(status='approved').order_by('-upload_date')[:10]
-    recent_requests = requests.order_by('-created_at')[:10]
+    recent_requests = requests_queryset.order_by('-created_at')[:10]
 
     # Daily Activity (last 7 days) - within scope
     daily_downloads = []
@@ -922,7 +948,7 @@ def moderate_request(request, request_id):
                 priority = int(request.POST.get('priority', 0))
                 resource_request.priority = priority
                 messages.success(request, f'Priority set to {priority}!')
-            except:
+            except ValueError:
                 messages.error(request, 'Invalid priority value')
 
         elif action == 'notes':
@@ -941,7 +967,7 @@ def moderate_request(request, request_id):
                 duplicate.save()
                 resource_request.save()
                 messages.success(request, f'Merged with request #{duplicate_id}')
-            except:
+            except ResourceRequest.DoesNotExist:
                 messages.error(request, 'Duplicate request not found')
 
         elif action == 'delete':
@@ -983,20 +1009,20 @@ def bulk_approve(request):
 @login_required
 def notifications(request):
     """View user notifications"""
-    notifications = Notification.objects.filter(user=request.user).order_by('-created_at')
+    notifications_list = Notification.objects.filter(user=request.user).order_by('-created_at')
 
     # Mark all as read
     if request.GET.get('mark_read'):
-        notifications.update(is_read=True)
+        notifications_list.update(is_read=True)
         messages.success(request, 'All notifications marked as read')
         return redirect('notifications')
 
     # Get counts
-    unread_count = notifications.filter(is_read=False).count()
+    unread_count = notifications_list.filter(is_read=False).count()
 
     # Pagination
     from django.core.paginator import Paginator
-    paginator = Paginator(notifications, 20)
+    paginator = Paginator(notifications_list, 20)
     page = request.GET.get('page')
     notifications_page = paginator.get_page(page)
 
@@ -1113,18 +1139,18 @@ def browse_resources(request):
 def download_resource(request, resource_id):
     """Download resource with proper permission checks"""
 
-    print(f"🔍 Download requested for resource ID: {resource_id}")
+    logger.info(f"Download requested for resource ID: {resource_id}")
 
     # First, try to get the resource without status filter
     try:
         resource = Resource.objects.get(id=resource_id)
-        print(f"✅ Resource found: {resource.title} (Status: {resource.status})")
+        logger.info(f"Resource found: {resource.title} (Status: {resource.status})")
     except Resource.DoesNotExist:
-        print(f"❌ Resource {resource_id} not found in database")
+        logger.error(f"Resource {resource_id} not found in database")
         messages.error(request, 'Resource not found.')
         return redirect('browse_resources')
     except Exception as e:
-        print(f"❌ Error fetching resource: {e}")
+        logger.error(f"Error fetching resource: {e}")
         messages.error(request, 'Error accessing resource.')
         return redirect('browse_resources')
 
@@ -1206,17 +1232,17 @@ def download_resource(request, resource_id):
                         can_download = True
                         reason = f"{user_seat.programme} rep access"
         except Exception as e:
-            print(f"❌ Error checking moderator seat: {e}")
+            logger.error(f"Error checking moderator seat: {e}")
 
     # ===========================================
     # DENY ACCESS IF NOT PERMITTED
     # ===========================================
     if not can_download:
-        print(f"❌ Download denied for user {user.email} - no permission")
+        logger.warning(f"Download denied for user {user.email} - no permission")
         messages.error(request, 'You do not have permission to download this resource.')
         return redirect('resource_detail', resource_id=resource_id)
 
-    print(f"✅ Download permitted: {reason}")
+    logger.info(f"Download permitted: {reason}")
 
     # ===========================================
     # INCREMENT DOWNLOAD COUNTS (only for approved)
@@ -1229,19 +1255,19 @@ def download_resource(request, resource_id):
             if resource.uploader:
                 resource.uploader.download_count += 1
                 resource.uploader.save()
-            print(f"📊 Download count incremented")
+            logger.info(f"Download count incremented")
     except Exception as e:
-        print(f"⚠️ Could not increment download count: {e}")
+        logger.warning(f"Could not increment download count: {e}")
         # Continue anyway - don't block download for counting error
 
     # ===========================================
     # SERVE THE FILE
     # ===========================================
     try:
-        print(f"📁 Serving file: {resource.file.url}")
+        logger.info(f"Serving file: {resource.file.url}")
         return redirect(resource.file.url)
     except Exception as e:
-        print(f"❌ Error serving file: {e}")
+        logger.error(f"Error serving file: {e}")
         messages.error(request, 'Error accessing file.')
         return redirect('resource_detail', resource_id=resource_id)
 
@@ -1337,14 +1363,16 @@ def resource_detail(request, resource_id):
         resource.view_count += 1
         resource.save()
 
+    user_seat = ModeratorSeat.objects.filter(current_holder=user).first() if user.role in ['moderator',
+                                                                                           'senior_moderator'] else None
+
     context = {
         'resource': resource,
         'can_download': can_download,
         'can_interact': can_interact,
         'is_moderator_view': (
                     user.role in ['moderator', 'senior_moderator', 'admin'] and resource.status != 'approved'),
-        'user_seat': ModeratorSeat.objects.filter(current_holder=user).first() if user.role in ['moderator',
-                                                                                                'senior_moderator'] else None,
+        'user_seat': user_seat,
     }
 
     return render(request, 'core/resource_detail.html', context)
@@ -1395,7 +1423,7 @@ def delete_resource(request, resource_id):
         resource.delete()
 
         # Log the deletion
-        print(f"🗑️ Resource '{title}' (ID: {resource_id}) deleted by {request.user.email} ({reason})")
+        logger.info(f"Resource '{title}' (ID: {resource_id}) deleted by {request.user.email} ({reason})")
 
         messages.success(request, f'Resource "{title}" has been deleted.')
 
@@ -1502,7 +1530,7 @@ def delete_request(request, request_id):
         title = resource_request.title
         resource_request.delete()
 
-        print(f"🗑️ Request '{title}' (ID: {request_id}) deleted by {request.user.email} ({reason})")
+        logger.info(f"Request '{title}' (ID: {request_id}) deleted by {request.user.email} ({reason})")
 
         messages.success(request, f'Request "{title}" has been deleted.')
         return redirect('request_list')
@@ -1703,3 +1731,32 @@ def ajax_toast(request):
             }
         })
     return JsonResponse({'error': 'Not AJAX'}, status=400)
+
+
+def test_email_direct(request):
+    """Direct test of email functionality"""
+    result = []
+    result.append("🔍 TESTING EMAIL DIRECTLY\n")
+
+    try:
+        # Test 1: Check settings
+        result.append(f"EMAIL_HOST: {settings.EMAIL_HOST}")
+        result.append(f"EMAIL_PORT: {settings.EMAIL_PORT}")
+        result.append(f"EMAIL_HOST_USER: {settings.EMAIL_HOST_USER}")
+        result.append(f"DEFAULT_FROM_EMAIL: {settings.DEFAULT_FROM_EMAIL}")
+
+        # Test 2: Try to send
+        send_mail(
+            'Direct Test from KUHeS',
+            'This email was sent directly from the test view.',
+            settings.DEFAULT_FROM_EMAIL,
+            [settings.EMAIL_HOST_USER],  # Send to yourself
+            fail_silently=False,
+        )
+        result.append("\n✅ Email sent successfully!")
+    except Exception as e:
+        result.append(f"\n❌ Error: {str(e)}")
+        import traceback
+        result.append(traceback.format_exc())
+
+    return HttpResponse('<br>'.join(result).replace('\n', '<br>'))

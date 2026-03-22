@@ -1,53 +1,545 @@
 {% extends 'core/base.html' %}
+{% load static %}
 
-{% block title %}Resource Requests{% endblock %}
+{% block title %}Resource Requests - KUHeS Knowledge Bank{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Page-specific animations with glass morphism */
+    .requests-container {
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Floating shapes animation */
+    .floating-shape {
+        position: fixed;
+        background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
+        border-radius: 50%;
+        filter: blur(60px);
+        opacity: 0.1;
+        z-index: 0;
+        animation: floatShape 8s ease-in-out infinite;
+        pointer-events: none;
+    }
+
+    .floating-shape:nth-child(2) {
+        animation-delay: -4s;
+        background: linear-gradient(135deg, var(--kuhes-gold), var(--kuhes-teal));
+    }
+
+    @keyframes floatShape {
+        0%, 100% {
+            transform: translate(0, 0) scale(1);
+        }
+        50% {
+            transform: translate(20px, -20px) scale(1.1);
+        }
+    }
+
+    /* Header styling */
+    .page-header {
+        margin-bottom: 2rem;
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0;
+    }
+
+    /* Stats Cards with glass morphism */
+    .stat-card {
+        border: none;
+        border-radius: 20px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        position: relative;
+        animation: slideUp 0.5s ease-out;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-card .card-body {
+        padding: 1.5rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .stat-card.bg-success {
+        background: linear-gradient(135deg, #27ae60, #2ecc71);
+    }
+
+    .stat-card.bg-warning {
+        background: linear-gradient(135deg, #f39c12, #e67e22);
+    }
+
+    .stat-card.bg-info {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+    }
+
+    .stat-card h6 {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        letter-spacing: 0.5px;
+        color: white;
+    }
+
+    .stat-card h2 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-top: 0.5rem;
+        margin-bottom: 0;
+        color: white;
+    }
+
+    .stat-card i {
+        opacity: 0.3;
+        transition: all 0.3s ease;
+        color: white;
+    }
+
+    .stat-card:hover i {
+        opacity: 0.5;
+        transform: scale(1.1);
+    }
+
+    /* Request Card styling */
+    .request-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        border: 1px solid rgba(0, 51, 160, 0.1);
+        transition: all 0.3s ease;
+        height: 100%;
+        overflow: hidden;
+        animation: cardFadeIn 0.5s ease-out;
+    }
+
+    @keyframes cardFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .request-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        border-color: rgba(255, 184, 28, 0.3);
+    }
+
+    .request-card.urgent-card {
+        border-left: 4px solid #dc3545;
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+
+    .request-card .card-body {
+        padding: 1.5rem;
+    }
+
+    /* Badge styling */
+    .badge {
+        padding: 6px 12px;
+        border-radius: 50px;
+        font-weight: 500;
+        font-size: 0.75rem;
+    }
+
+    .badge.bg-success {
+        background: linear-gradient(135deg, #27ae60, #2ecc71);
+    }
+
+    .badge.bg-warning {
+        background: linear-gradient(135deg, #f39c12, #e67e22);
+        color: #000;
+    }
+
+    .badge.bg-info {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+    }
+
+    .badge.bg-danger {
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+    }
+
+    .badge.bg-secondary {
+        background: linear-gradient(135deg, #7f8c8d, #95a5a6);
+    }
+
+    .badge.bg-primary {
+        background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
+    }
+
+    .badge.bg-warning i {
+        color: #000;
+    }
+
+    /* Card title styling */
+    .card-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin: 0.75rem 0;
+    }
+
+    .card-title a {
+        color: var(--kuhes-blue);
+        transition: all 0.2s ease;
+    }
+
+    .card-title a:hover {
+        color: var(--kuhes-teal);
+        text-decoration: none;
+    }
+
+    /* Description text */
+    .card-text {
+        color: var(--kuhes-gray);
+        line-height: 1.5;
+    }
+
+    /* Metadata styling */
+    .request-meta {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .meta-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+        font-size: 0.85rem;
+        color: var(--kuhes-gray);
+    }
+
+    .meta-info i {
+        margin-right: 4px;
+        color: var(--kuhes-blue);
+    }
+
+    .votes-count {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: rgba(39, 174, 96, 0.1);
+        padding: 4px 10px;
+        border-radius: 50px;
+        font-weight: 600;
+        color: #27ae60;
+    }
+
+    .votes-count i {
+        color: #27ae60;
+    }
+
+    /* Button styling */
+    .btn-primary {
+        background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
+        border: none;
+        border-radius: 12px;
+        padding: 10px 24px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-primary:active::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 51, 160, 0.3);
+    }
+
+    .btn-outline-primary {
+        border: 2px solid var(--kuhes-blue);
+        color: var(--kuhes-blue);
+        border-radius: 10px;
+        padding: 6px 16px;
+        font-size: 0.85rem;
+        transition: all 0.2s ease;
+    }
+
+    .btn-outline-primary:hover {
+        background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
+        border-color: transparent;
+        transform: translateX(5px);
+    }
+
+    /* Empty state styling */
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+        color: var(--kuhes-blue);
+    }
+
+    .empty-state h3 {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+        color: var(--kuhes-blue);
+    }
+
+    /* Card footer styling */
+    .card-footer {
+        background: rgba(0, 51, 160, 0.05);
+        border-top: 1px solid rgba(0, 51, 160, 0.1);
+        padding: 0.75rem 1.5rem;
+        font-size: 0.8rem;
+    }
+
+    /* Loading state for buttons */
+    .btn-loading {
+        position: relative;
+        pointer-events: none;
+        opacity: 0.8;
+    }
+
+    .btn-loading .btn-text {
+        visibility: hidden;
+    }
+
+    .btn-loading::after {
+        content: '';
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        top: 50%;
+        left: 50%;
+        margin-left: -10px;
+        margin-top: -10px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Animation delays for stat cards */
+    .stat-card:nth-child(1) { animation-delay: 0.1s; }
+    .stat-card:nth-child(2) { animation-delay: 0.2s; }
+    .stat-card:nth-child(3) { animation-delay: 0.3s; }
+
+    /* Mobile optimizations */
+    @media (max-width: 768px) {
+        .container {
+            padding: 16px;
+        }
+
+        .page-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .page-header h1 {
+            font-size: 1.5rem;
+            text-align: center;
+        }
+
+        .page-header .btn {
+            width: 100%;
+            text-align: center;
+        }
+
+        .stat-card h2 {
+            font-size: 1.8rem;
+        }
+
+        .stat-card i {
+            font-size: 2rem;
+        }
+
+        .request-card .card-body {
+            padding: 1rem;
+        }
+
+        .card-title {
+            font-size: 1rem;
+        }
+
+        .meta-info {
+            font-size: 0.75rem;
+        }
+
+        .btn-outline-primary {
+            padding: 4px 12px;
+            font-size: 0.75rem;
+        }
+
+        .empty-state {
+            padding: 2rem;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+        }
+
+        .empty-state h3 {
+            font-size: 1.2rem;
+        }
+    }
+
+    /* Touch-friendly tap targets */
+    @media (max-width: 768px) {
+        .btn,
+        .request-card,
+        .stat-card {
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+    }
+
+    /* Filter section (optional - add if needed) */
+    .filter-section {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 1rem;
+        margin-bottom: 2rem;
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1><i class="fas fa-hand-holding-heart me-2 text-primary-blue"></i>Resource Requests</h1>
-        <a href="{% url 'create_request' %}" class="btn btn-primary">
-            <i class="fas fa-plus me-2"></i>New Request
+<!-- Background decorative elements -->
+<div class="floating-shape" style="width: 400px; height: 400px; top: -150px; right: -150px;"></div>
+<div class="floating-shape" style="width: 300px; height: 300px; bottom: -100px; left: -100px;"></div>
+
+<div class="container mt-4 requests-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>
+            <i class="fas fa-hand-holding-heart me-2"></i>
+            Resource Requests
+        </h1>
+        <a href="{% url 'create_request' %}" data-replace="true" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>
+            New Request
         </a>
     </div>
 
     <!-- Stats Cards -->
-    <div class="row mb-4">
+    <div class="row mb-4 g-4">
         <div class="col-md-4">
-            <div class="card text-white bg-success">
+            <div class="stat-card text-white bg-success">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="mb-0">Open</h6>
+                            <h6 class="mb-0 text-uppercase fw-semibold">Open</h6>
                             <h2 class="mt-2 mb-0">{{ counts.open|default:0 }}</h2>
+                            <small class="opacity-75">Awaiting responses</small>
                         </div>
-                        <i class="fas fa-door-open fa-3x opacity-50"></i>
+                        <i class="fas fa-door-open fa-3x"></i>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card text-white bg-warning">
+            <div class="stat-card text-white bg-warning">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="mb-0">In Progress</h6>
+                            <h6 class="mb-0 text-uppercase fw-semibold">In Progress</h6>
                             <h2 class="mt-2 mb-0">{{ counts.in_progress|default:0 }}</h2>
+                            <small class="opacity-75">Being worked on</small>
                         </div>
-                        <i class="fas fa-spinner fa-3x opacity-50"></i>
+                        <i class="fas fa-spinner fa-3x"></i>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card text-white bg-info">
+            <div class="stat-card text-white bg-info">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="mb-0">Fulfilled</h6>
+                            <h6 class="mb-0 text-uppercase fw-semibold">Fulfilled</h6>
                             <h2 class="mt-2 mb-0">{{ counts.fulfilled|default:0 }}</h2>
+                            <small class="opacity-75">Completed requests</small>
                         </div>
-                        <i class="fas fa-check-circle fa-3x opacity-50"></i>
+                        <i class="fas fa-check-circle fa-3x"></i>
                     </div>
                 </div>
             </div>
@@ -55,91 +547,132 @@
     </div>
 
     <!-- Requests List -->
-    <div class="row">
+    <div class="row g-4">
         {% for req in requests %}
-        <div class="col-md-6 mb-4">
-            <div class="card h-100 {% if req.urgency == 'urgent' %}border-danger{% endif %}">
+        <div class="col-md-6">
+            <div class="request-card {% if req.urgency == 'urgent' %}urgent-card{% endif %}">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap">
-                        <div class="mb-2">
-                            <span class="badge
-                                {% if req.status == 'open' %}bg-success
-                                {% elif req.status == 'in_progress' %}bg-warning
-                                {% elif req.status == 'fulfilled' %}bg-info
-                                {% else %}bg-secondary{% endif %} me-1">
-                                {{ req.get_status_display }}
-                            </span>
-                            <span class="badge
-                                {% if req.urgency == 'urgent' %}bg-danger
-                                {% elif req.urgency == 'high' %}bg-warning
-                                {% elif req.urgency == 'medium' %}bg-info
-                                {% else %}bg-secondary{% endif %} me-1">
-                                {{ req.get_urgency_display }}
-                            </span>
+                    <!-- Badges Row -->
+                    <div class="d-flex flex-wrap gap-1 mb-2">
+                        <span class="badge
+                            {% if req.status == 'open' %}bg-success
+                            {% elif req.status == 'in_progress' %}bg-warning
+                            {% elif req.status == 'fulfilled' %}bg-info
+                            {% else %}bg-secondary{% endif %}">
+                            <i class="fas
+                                {% if req.status == 'open' %}fa-door-open
+                                {% elif req.status == 'in_progress' %}fa-spinner fa-pulse
+                                {% elif req.status == 'fulfilled' %}fa-check-circle
+                                {% else %}fa-circle{% endif %} me-1"></i>
+                            {{ req.get_status_display }}
+                        </span>
+                        <span class="badge
+                            {% if req.urgency == 'urgent' %}bg-danger
+                            {% elif req.urgency == 'high' %}bg-warning
+                            {% elif req.urgency == 'medium' %}bg-info
+                            {% else %}bg-secondary{% endif %}">
+                            <i class="fas
+                                {% if req.urgency == 'urgent' %}fa-exclamation-triangle
+                                {% elif req.urgency == 'high' %}fa-arrow-up
+                                {% elif req.urgency == 'medium' %}fa-minus
+                                {% else %}fa-arrow-down{% endif %} me-1"></i>
+                            {{ req.get_urgency_display }}
+                        </span>
 
-                            <!-- Pinned Badge -->
-                            {% if req.is_pinned %}
-                                <span class="badge bg-warning me-1"><i class="fas fa-thumbtack"></i> Pinned</span>
-                            {% endif %}
+                        <!-- Pinned Badge -->
+                        {% if req.is_pinned %}
+                            <span class="badge bg-warning">
+                                <i class="fas fa-thumbtack me-1"></i> Pinned
+                            </span>
+                        {% endif %}
 
-                            <!-- Priority Badge -->
-                            {% if req.priority > 0 %}
-                                <span class="badge bg-primary">Priority {{ req.priority }}</span>
-                            {% endif %}
-                        </div>
+                        <!-- Priority Badge -->
+                        {% if req.priority > 0 %}
+                            <span class="badge bg-primary">
+                                <i class="fas fa-star me-1"></i> Priority {{ req.priority }}
+                            </span>
+                        {% endif %}
                     </div>
 
+                    <!-- Title -->
                     <h5 class="card-title">
-                        <a href="{% url 'request_detail' req.id %}" class="text-decoration-none text-dark">
+                        <a href="{% url 'request_detail' req.id %}" data-replace="true" class="text-decoration-none">
                             {{ req.title }}
                         </a>
                     </h5>
 
-                    <p class="card-text text-muted small">{{ req.description|truncatechars:100 }}</p>
+                    <!-- Description -->
+                    <p class="card-text text-muted small">
+                        {{ req.description|truncatechars:120 }}
+                    </p>
 
-                    <div class="mb-2">
+                    <!-- Tags/Categories -->
+                    <div class="mb-2 d-flex flex-wrap gap-1">
                         {% if req.level == 'premed' and req.premed_subject %}
-                            <span class="badge bg-info me-1">{{ req.get_premed_subject_display }}</span>
+                            <span class="badge bg-info">
+                                <i class="fas fa-book me-1"></i>{{ req.get_premed_subject_display }}
+                            </span>
                         {% endif %}
 
                         {% if req.school %}
-                            <span class="badge bg-secondary me-1">{{ req.get_school_display|truncatechars:20 }}</span>
+                            <span class="badge bg-secondary">
+                                <i class="fas fa-school me-1"></i>{{ req.get_school_display|truncatechars:20 }}
+                            </span>
                         {% endif %}
 
                         {% if req.programme %}
-                            <span class="badge bg-secondary me-1">{{ req.programme }}</span>
+                            <span class="badge bg-secondary">
+                                <i class="fas fa-graduation-cap me-1"></i>{{ req.programme }}
+                            </span>
                         {% endif %}
 
                         {% if req.year_of_study %}
-                            <span class="badge bg-secondary me-1">Year {{ req.year_of_study }}</span>
+                            <span class="badge bg-secondary">
+                                <i class="fas fa-calendar-alt me-1"></i>Year {{ req.year_of_study }}
+                            </span>
                         {% endif %}
 
                         {% if req.course_code %}
-                            <span class="badge bg-secondary">{{ req.course_code }}</span>
+                            <span class="badge bg-secondary">
+                                <i class="fas fa-code me-1"></i>{{ req.course_code }}
+                            </span>
                         {% endif %}
                     </div>
 
-                    <div class="d-flex justify-content-between align-items-center mt-3">
-                        <div>
-                            <i class="fas fa-arrow-up text-success me-1"></i>
-                            <strong>{{ req.upvotes }}</strong> votes
-                            <span class="text-muted mx-2">•</span>
-                            <i class="fas fa-user me-1"></i>{{ req.requester.username }}
-                            <span class="text-muted mx-2">•</span>
-                            <small class="text-muted">{{ req.created_at|timesince }} ago</small>
+                    <!-- Meta Information -->
+                    <div class="request-meta">
+                        <div class="meta-info">
+                            <span class="votes-count">
+                                <i class="fas fa-arrow-up"></i>
+                                {{ req.upvotes }} votes
+                            </span>
+                            <span>
+                                <i class="fas fa-user"></i>
+                                {{ req.requester.username }}
+                            </span>
+                            <span>
+                                <i class="far fa-clock"></i>
+                                {{ req.created_at|timesince }} ago
+                            </span>
                         </div>
 
-                        <a href="{% url 'request_detail' req.id %}" class="btn btn-sm btn-outline-primary">
-                            View <i class="fas fa-arrow-right ms-1"></i>
+                        <a href="{% url 'request_detail' req.id %}" data-replace="true" class="btn btn-outline-primary">
+                            View Details <i class="fas fa-arrow-right ms-1"></i>
                         </a>
                     </div>
                 </div>
 
+                <!-- Deadline Footer -->
                 {% if req.deadline %}
-                <div class="card-footer bg-transparent">
+                <div class="card-footer">
                     <small class="text-muted">
                         <i class="fas fa-calendar-alt me-1"></i>
                         Deadline: {{ req.deadline|date:"M d, Y" }}
+                        {% if req.deadline|timesince <= "3 days" %}
+                            <span class="text-danger ms-2">
+                                <i class="fas fa-exclamation-circle"></i> Approaching
+                            </span>
+                        {% endif %}
                     </small>
                 </div>
                 {% endif %}
@@ -147,18 +680,70 @@
         </div>
         {% empty %}
         <div class="col-12">
-            <div class="card">
-                <div class="card-body text-center py-5">
-                    <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
-                    <h3>No requests yet</h3>
-                    <p class="text-muted">Be the first to request a resource!</p>
-                    <a href="{% url 'create_request' %}" class="btn btn-primary">
-                        <i class="fas fa-plus me-2"></i>Create Request
-                    </a>
-                </div>
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <h3>No requests yet</h3>
+                <p class="text-muted mb-4">Be the first to request a resource from the community!</p>
+                <a href="{% url 'create_request' %}" data-replace="true" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Create Request
+                </a>
             </div>
         </div>
         {% endfor %}
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add loading state to buttons with data-replace
+    document.querySelectorAll('a[data-replace="true"]').forEach(link => {
+        link.addEventListener('click', function(e) {
+            if (!this.getAttribute('href') || this.getAttribute('href') === '#') return;
+
+            // Add loading state to the clicked button
+            this.classList.add('btn-loading');
+
+            // Show loading overlay if exists
+            const loadingOverlay = document.getElementById('loading-overlay');
+            if (loadingOverlay) {
+                loadingOverlay.style.display = 'flex';
+            }
+        });
+    });
+
+    // Add staggered animation to request cards
+    const cards = document.querySelectorAll('.request-card');
+    cards.forEach((card, index) => {
+        card.style.animationDelay = `${0.05 * index}s`;
+    });
+
+    // Add hover effect for vote count (if vote buttons exist)
+    const voteButtons = document.querySelectorAll('.vote-btn');
+    voteButtons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            // Add your vote logic here
+            console.log('Vote clicked');
+        });
+    });
+
+    // Auto-refresh counts? (optional - could add WebSocket or polling)
+    // This is commented out - enable if needed
+    /*
+    function refreshCounts() {
+        fetch('/api/requests/counts/')
+            .then(response => response.json())
+            .then(data => {
+                // Update counts dynamically
+                document.querySelectorAll('.stat-card h2').forEach((el, idx) => {
+                    if (idx === 0) el.textContent = data.open;
+                    if (idx === 1) el.textContent = data.in_progress;
+                    if (idx === 2) el.textContent = data.fulfilled;
+                });
+            });
+    }
+    // setInterval(refreshCounts, 30000);
+    */
+</script>
 {% endblock %}

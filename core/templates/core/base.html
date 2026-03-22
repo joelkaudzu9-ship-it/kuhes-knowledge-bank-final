@@ -1,11 +1,18 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=yes">
+    <meta name="theme-color" content="#0033A0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="KUHeS KB">
+    <link rel="manifest" href="{% static 'core/manifest.json' %}">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
 
-    <!-- Favicon -->
+    <!-- Favicon & Icons -->
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'core/images/favicon-32x32.png' %}">
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'core/images/favicon-16x16.png' %}">
     <link rel="apple-touch-icon" href="{% static 'core/images/apple-touch-icon.png' %}">
@@ -14,378 +21,579 @@
     <meta property="og:title" content="KUHeS Knowledge Bank">
     <meta property="og:description" content="Your central hub for academic resources at Kamuzu University of Health Sciences">
     <meta property="og:image" content="{% static 'core/images/og-image.jpg' %}">
-    <meta property="og:url" content="{{ request.build_absolute_uri }}">
-    <meta name="twitter:card" content="summary_large_image">
+    <meta property="og:type" content="website">
 
-    <!-- Preconnect for Google Fonts -->
+    <!-- SEO Meta -->
+    <meta name="description" content="KUHeS Knowledge Bank - Academic resource sharing platform for Kamuzu University of Health Sciences students and staff">
+
+    <!-- Preconnect & Resource Hints -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 
-    <!-- Defer non-critical CSS -->
-    <link rel="preload" href="{% static 'core/css/style.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="{% static 'core/css/style.css' %}"></noscript>
-
-    <title>KUHeS Knowledge Bank - {% block title %}{% endblock %}</title>
-
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+    <!-- Critical CSS inline -->
     <style>
         :root {
-            --primary-blue: #0066CC;
-            --secondary-green: #00A86B;
-            --accent-orange: #FF8C42;
-            --background-light: #f8f9fa;
-            --text-dark: #333333;
-            --font-heading: 'Montserrat', sans-serif;
-            --font-body: 'Open Sans', sans-serif;
+            --kuhes-blue: #0033A0;
+            --kuhes-gold: #FFB81C;
+            --kuhes-teal: #00A5B0;
+            --kuhes-gray: #53565A;
+            --kuhes-light-bg: #F5F7FA;
+            --kuhes-white: #FFFFFF;
+            --safe-area-top: env(safe-area-inset-top, 0px);
+            --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+            --header-height: 70px;
+        }
+
+        * {
+            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            background-color: var(--background-light);
-            font-family: var(--font-body);
-            color: var(--text-dark);
+            font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--kuhes-light-bg);
+            color: var(--kuhes-gray);
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            min-height: -webkit-fill-available;
             opacity: 1;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.2s ease;
+            line-height: 1.5;
         }
 
-        h1, h2, h3, h4, h5, h6 {
-            font-family: var(--font-heading);
-            font-weight: 700;
+        html {
+            height: -webkit-fill-available;
+        }
+
+        /* Enhanced Loading Overlay */
+        #loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(255,255,255,0.98);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .loading-spinner {
+            position: relative;
+            width: 60px;
+            height: 60px;
+        }
+
+        .spinner-ring {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 4px solid rgba(0, 51, 160, 0.1);
+            border-top-color: var(--kuhes-blue);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .spinner-ring-inner {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            right: 12px;
+            bottom: 12px;
+            border: 3px solid rgba(255, 184, 28, 0.2);
+            border-top-color: var(--kuhes-gold);
+            border-radius: 50%;
+            animation: spin 0.5s linear infinite reverse;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-progress {
+            width: 200px;
+            height: 3px;
+            background: rgba(0, 51, 160, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .loading-progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--kuhes-blue), var(--kuhes-teal));
+            transition: width 0.3s ease;
+        }
+
+        /* Skeleton Loader */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+            border-radius: 8px;
+        }
+
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Page Transition */
+        .page-transition {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            z-index: 9998;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            pointer-events: none;
+        }
+
+        .page-transition.active {
+            transform: translateX(0);
+        }
+
+        /* Button Loading State */
+        .btn-loading {
+            position: relative;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .btn-loading .btn-text {
+            visibility: hidden;
+        }
+
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            margin-left: -10px;
+            margin-top: -10px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        /* Card Skeleton */
+        .card-skeleton {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(0, 51, 160, 0.1);
+        }
+
+        .skeleton-line {
+            height: 16px;
+            margin: 8px 0;
+            border-radius: 8px;
+        }
+
+        .skeleton-line.short { width: 60%; }
+        .skeleton-line.medium { width: 80%; }
+        .skeleton-line.long { width: 100%; }
+
+        .skeleton-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+        }
+
+        /* Lazy Image Loading */
+        .lazy-image {
+            background: linear-gradient(135deg, #f0f0f0, #e0e0e0);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .lazy-image::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+
+        .lazy-image.loaded::after {
+            display: none;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
         }
 
         body.fade-out {
             opacity: 0;
         }
 
-        .navbar-brand {
-            transition: transform 0.3s ease;
+        /* Toast container */
+        #toast-container {
+            position: fixed;
+            top: calc(var(--safe-area-top) + 10px);
+            left: 16px;
+            right: 16px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
         }
 
-        .navbar-brand:hover {
-            transform: scale(1.02);
-        }
-
-        .logo-circle {
+        /* Hamburger Menu Styles */
+        .hamburger-menu {
+            display: none;
+            position: relative;
+            z-index: 1001;
+            cursor: pointer;
+            background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
             width: 45px;
             height: 45px;
-            background-color: #ffffff;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
+            border-radius: 12px;
+            flex-direction: column;
             justify-content: center;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border: 1px solid rgba(0,0,0,0.05);
+            align-items: center;
+            transition: all 0.3s ease;
+            margin-left: auto;
         }
 
-        .logo-circle img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            padding: 2px;
+        .hamburger-menu span {
+            width: 24px;
+            height: 2px;
+            background: white;
+            margin: 3px 0;
+            transition: 0.3s;
+            border-radius: 2px;
         }
 
-        .btn-primary {
-            background-color: var(--primary-blue);
-            border-color: var(--primary-blue);
-            font-family: var(--font-heading);
-            font-weight: 600;
+        .hamburger-menu.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
         }
 
-        .btn-primary:hover {
-            background-color: #0052a3;
-            border-color: #0052a3;
+        .hamburger-menu.active span:nth-child(2) {
+            opacity: 0;
         }
 
-        .btn-success {
-            background-color: var(--secondary-green);
-            border-color: var(--secondary-green);
-            font-family: var(--font-heading);
-            font-weight: 600;
+        .hamburger-menu.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(6px, -6px);
         }
 
-        .text-primary-blue {
-            color: var(--primary-blue);
-        }
-
-        .bg-primary-blue {
-            background-color: var(--primary-blue);
-        }
-
-        .border-primary-blue {
-            border-color: var(--primary-blue) !important;
-        }
-
-        .card {
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,102,204,0.2);
-        }
-
-        .alert {
-            border-radius: 8px;
-        }
-
-        footer {
-            margin-top: auto;
-        }
-
-        .notification-badge {
-            position: absolute;
-            top: 0;
-            right: -5px;
-            font-size: 0.6rem;
-            padding: 0.2rem 0.4rem;
-        }
-
-        /* Loading Overlay */
-        #loading-overlay {
+        /* Overlay Navigation */
+        .nav-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(5px);
-            display: none;
-            justify-content: center;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: visibility 0.3s, opacity 0.3s ease;
+            display: flex;
             align-items: center;
-            z-index: 9999;
-            transition: opacity 0.3s ease;
+            justify-content: center;
         }
 
-        /* Spinner */
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid var(--background-light);
-            border-top: 5px solid var(--primary-blue);
-            border-right: 5px solid var(--secondary-green);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            box-shadow: 0 4px 15px rgba(0,102,204,0.2);
+        .nav-overlay.active {
+            visibility: visible;
+            opacity: 1;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .nav-overlay-content {
+            text-align: center;
+            padding: 2rem;
+            max-width: 90%;
+            width: 100%;
         }
 
-        /* Hide default Django messages */
-        .messages, .alert, [class*="alert-"] {
-            display: none;
+        .nav-overlay-content a {
+            display: block;
+            font-size: 1.5rem;
+            color: var(--kuhes-blue);
+            text-decoration: none;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            border-radius: 12px;
         }
 
-        /* Mobile Responsive */
+        .nav-overlay-content a:hover {
+            transform: translateX(10px);
+            background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
+            color: white;
+        }
+
         @media (max-width: 768px) {
-            .navbar-brand span {
-                font-size: 1rem;
+            .hamburger-menu {
+                display: flex;
             }
 
-            .logo-circle {
-                width: 40px;
-                height: 40px;
+            .navbar-toggler {
+                display: none !important;
             }
 
-            .btn {
-                white-space: normal;
-                word-wrap: break-word;
+            .navbar-collapse {
+                display: none !important;
             }
 
-            h1 {
-                font-size: 1.8rem;
+            .nav-overlay-content a {
+                font-size: 1.2rem;
+                padding: 0.8rem;
             }
+        }
 
-            h2 {
-                font-size: 1.5rem;
-            }
+        /* Logo styles */
+        .logo-circle {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--kuhes-white), #f8f9fa);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,51,160,0.15);
+            border: 1px solid rgba(0,51,160,0.1);
+            transition: all 0.2s ease;
+        }
 
-            .spinner {
-                width: 40px;
-                height: 40px;
-                border-width: 4px;
+        .btn {
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--kuhes-blue), #1A4CB0);
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,51,160,0.3);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,51,160,0.4);
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, var(--kuhes-gold), #FFD700);
+            color: var(--kuhes-blue);
+            border: none;
+        }
+
+        .btn-gold:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255,184,28,0.4);
+        }
+
+        /* ========== FROZEN NAVBAR ENHANCEMENT ========== */
+        /* Ensure navbar stays perfectly frozen at top with all its styling */
+        .navbar {
+            position: sticky !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            z-index: 1030 !important;
+            background: white !important;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08) !important;
+            width: 100% !important;
+            backdrop-filter: blur(0px) !important;
+            transform: translateZ(0);
+            will-change: transform;
+        }
+
+        /* Additional reinforcement for mobile */
+        @supports (position: sticky) {
+            .navbar {
+                position: sticky !important;
+                top: 0 !important;
             }
+        }
+
+        /* Prevent any content from peeking behind the frozen navbar */
+        main {
+            scroll-margin-top: var(--header-height);
+        }
+
+        /* Ensure the safe-area padding is preserved while frozen */
+        .navbar .container {
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+
+        /* Make sure the navbar content is properly aligned with safe area */
+        .navbar {
+            padding-top: max(0.5rem, var(--safe-area-top)) !important;
         }
     </style>
 
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="preload" href="{% static 'core/css/style.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{% static 'core/css/style.css' %}"></noscript>
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"></noscript>
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
+
+    <title>KUHeS Knowledge Bank - {% block title %}Academic Resource Platform{% endblock %}</title>
+
     {% block extra_css %}{% endblock %}
 </head>
-<body class="page-transition">
-    <!-- Add loading spinner overlay -->
-    <div id="loading-overlay" style="display: none;">
-        <div class="spinner"></div>
+<body>
+    <!-- Enhanced Loading Overlay -->
+    <div id="loading-overlay">
+        <div class="loading-spinner">
+            <div class="spinner-ring"></div>
+            <div class="spinner-ring-inner"></div>
+        </div>
+        <p id="loading-message" style="color: var(--kuhes-blue); font-weight: 600;">Loading...</p>
+        <div class="loading-progress">
+            <div class="loading-progress-bar"></div>
+        </div>
     </div>
 
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm py-2">
+    <!-- Page Transition Element -->
+    <div class="page-transition"></div>
+
+    <!-- Overlay Navigation Menu -->
+    <div class="nav-overlay" id="navOverlay">
+        <div class="nav-overlay-content">
+            {% if user.is_authenticated %}
+                <div class="mb-4 pb-2 border-bottom">
+                    <div class="d-flex align-items-center justify-content-center gap-3 mb-2">
+                        <div class="bg-primary bg-opacity-10 rounded-circle p-3">
+                            <i class="fas fa-user fa-2x" style="color: var(--kuhes-blue);"></i>
+                        </div>
+                    </div>
+                    <div class="fw-bold">{{ user.get_full_name|default:user.username }}</div>
+                    <small class="text-muted">{{ user.email|truncatechars:30 }}</small>
+                </div>
+                <a href="{% url 'dashboard' %}" data-replace="true"><i class="fas fa-tachometer-alt me-3"></i>Dashboard</a>
+                {% if user.role == 'moderator' or user.role == 'senior_moderator' or user.role == 'admin' %}
+                    <a href="{% url 'moderator_dashboard' %}" data-replace="true"><i class="fas fa-shield-alt me-3"></i>Moderate</a>
+                {% endif %}
+                <a href="{% url 'upload_resource' %}" data-replace="true"><i class="fas fa-upload me-3"></i>Upload</a>
+                <a href="{% url 'browse_resources' %}" data-replace="true"><i class="fas fa-search me-3"></i>Browse</a>
+                <a href="{% url 'request_list' %}" data-replace="true"><i class="fas fa-list me-3"></i>All Requests</a>
+                <a href="{% url 'my_requests' %}" data-replace="true"><i class="fas fa-user me-3"></i>My Requests</a>
+                <a href="{% url 'create_request' %}" data-replace="true"><i class="fas fa-plus-circle me-3"></i>Create Request</a>
+                <a href="{% url 'my_bookmarks' %}" data-replace="true"><i class="fas fa-bookmark me-3"></i>Bookmarks</a>
+                <a href="{% url 'profile' %}" data-replace="true"><i class="fas fa-id-card me-3"></i>Profile</a>
+                <a href="{% url 'my_uploads' %}" data-replace="true"><i class="fas fa-cloud-upload-alt me-3"></i>My Uploads</a>
+                <a href="{% url 'change_password' %}" data-replace="true"><i class="fas fa-key me-3"></i>Security</a>
+                <hr class="my-3">
+                <a href="{% url 'logout' %}" data-replace="true" class="text-danger"><i class="fas fa-sign-out-alt me-3"></i>Logout</a>
+            {% else %}
+                <a href="{% url 'browse_resources' %}" data-replace="true"><i class="fas fa-search me-3"></i>Browse</a>
+                <a href="{% url 'login' %}" data-replace="true"><i class="fas fa-sign-in-alt me-3"></i>Login</a>
+                <a href="{% url 'register' %}" data-replace="true"><i class="fas fa-user-plus me-3"></i>Register</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Navigation - FROZEN AT TOP with enhanced sticky behavior -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm py-2 sticky-top" style="padding-top: calc(0.5rem + var(--safe-area-top)) !important;">
         <div class="container">
-            <!-- Logo and Brand -->
-            <a class="navbar-brand d-flex align-items-center" href="{% url 'index' %}">
-                <!-- KUHeS Logo inside white circle -->
-                <div class="logo-circle me-2">
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'index' %}" style="gap: 12px;">
+                <div class="logo-circle">
                     <img src="{% static 'core/images/kuhes-logo.png' %}"
                          alt="KUHeS Logo"
-                         onerror="this.style.display='none'; document.getElementById('fallback-circle').style.display='flex';">
+                         loading="eager"
+                         width="40"
+                         height="40"
+                         onerror="this.style.display='none'; this.parentElement.classList.add('fallback');">
                 </div>
-
-                <!-- Fallback circle with K (shown if image fails to load) -->
-                <div id="fallback-circle" class="logo-circle me-2 bg-primary-blue text-white d-none align-items-center justify-content-center fw-bold" style="font-size: 20px; background-color: var(--primary-blue);">
-                    K
+                <div class="d-flex flex-column">
+                    <span class="fw-bold" style="color: var(--kuhes-blue); font-size: 1.2rem; line-height: 1.2;">KUHeS</span>
+                    <span class="small text-muted d-none d-sm-block" style="font-size: 0.7rem;">Knowledge Bank</span>
                 </div>
-
-                <span class="fw-bold text-primary-blue">KUHeS</span>
-                <span class="ms-2 d-none d-sm-inline text-dark fw-normal">Knowledge Bank</span>
             </a>
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+            <div class="hamburger-menu" id="hamburgerBtn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                     aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-center">
+                <ul class="navbar-nav ms-auto align-items-lg-center" style="gap: 4px;">
                     {% if user.is_authenticated %}
-                        <!-- Dashboard Link -->
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'dashboard' %}">
-                                <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                        <li class="nav-item d-none d-lg-block">
+                            <a href="{% url 'dashboard' %}" data-replace="true" class="nav-link px-3 py-2 rounded-pill">
+                                <i class="fas fa-tachometer-alt me-2"></i><span>Dashboard</span>
                             </a>
                         </li>
-
-                        <!-- Moderator Link -->
-                        {% if user.role == 'moderator' or user.role == 'senior_moderator' or user.role == 'admin' %}
-                            <li class="nav-item">
-                                <a class="nav-link text-warning fw-semibold" href="{% url 'moderator_dashboard' %}">
-                                    <i class="fas fa-shield-alt me-1"></i>Moderate
-                                </a>
-                            </li>
-                        {% endif %}
-
-                        <!-- Upload Link -->
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'upload_resource' %}">
-                                <i class="fas fa-upload me-1"></i>Upload
+                        <li class="nav-item d-none d-lg-block">
+                            <a href="{% url 'upload_resource' %}" data-replace="true" class="nav-link px-3 py-2 rounded-pill">
+                                <i class="fas fa-upload me-2"></i><span>Upload</span>
                             </a>
                         </li>
-
-                        <!-- Browse Link -->
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'browse_resources' %}">
-                                <i class="fas fa-search me-1"></i>Browse
+                        <li class="nav-item d-none d-lg-block">
+                            <a href="{% url 'browse_resources' %}" data-replace="true" class="nav-link px-3 py-2 rounded-pill">
+                                <i class="fas fa-search me-2"></i><span>Browse</span>
                             </a>
                         </li>
-
-                        <!-- Requests Dropdown -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="requestsDropdown" role="button"
-                               data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-hand-holding-heart me-1"></i>Requests
+                        <li class="nav-item d-none d-lg-block">
+                            <a href="{% url 'my_bookmarks' %}" data-replace="true" class="nav-link px-3 py-2 rounded-pill">
+                                <i class="fas fa-bookmark me-2"></i><span>Bookmarks</span>
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="requestsDropdown">
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'request_list' %}">
-                                        <i class="fas fa-list me-2"></i>All Requests
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'my_requests' %}">
-                                        <i class="fas fa-user me-2"></i>My Requests
-                                    </a>
-                                </li>
+                        </li>
+                        <li class="nav-item dropdown d-none d-lg-block">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center px-3 py-2 rounded-pill" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user-circle fs-5 me-1"></i>
+                                <span class="d-none d-lg-inline">{{ user.get_short_name|default:user.username|truncatechars:12 }}</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 py-2">
+                                <li><a href="{% url 'profile' %}" data-replace="true" class="dropdown-item py-2"><i class="fas fa-id-card me-3"></i>Profile</a></li>
+                                <li><a href="{% url 'my_uploads' %}" data-replace="true" class="dropdown-item py-2"><i class="fas fa-cloud-upload-alt me-3"></i>My Uploads</a></li>
+                                <li><a href="{% url 'change_password' %}" data-replace="true" class="dropdown-item py-2"><i class="fas fa-key me-3"></i>Security</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'create_request' %}">
-                                        <i class="fas fa-plus me-2"></i>Create Request
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-
-                        <!-- Analytics Link -->
-                        {% if user.role == 'moderator' or user.role == 'senior_moderator' or user.role == 'admin' %}
-                            <li class="nav-item">
-                                <a class="nav-link text-info" href="{% url 'analytics_dashboard' %}">
-                                    <i class="fas fa-chart-line me-1"></i>Analytics
-                                </a>
-                            </li>
-                        {% endif %}
-
-                        <!-- Notifications Bell -->
-                        <li class="nav-item">
-                            <a class="nav-link position-relative" href="{% url 'notifications' %}">
-                                <i class="fas fa-bell"></i>
-                                {% if unread_notifications > 0 %}
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notification-badge">
-                                        {{ unread_notifications }}
-                                    </span>
-                                {% endif %}
-                            </a>
-                        </li>
-
-                        <!-- User Dropdown -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown"
-                               role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-user-circle me-1 fs-5"></i>
-                                <span class="d-none d-lg-inline">{{ user.username|truncatechars:10 }}</span>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'profile' %}">
-                                        <i class="fas fa-id-card me-2"></i>Profile
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'my_uploads' %}">
-                                        <i class="fas fa-file me-2"></i>My Uploads
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'my_bookmarks' %}">
-                                        <i class="fas fa-bookmark me-2 text-warning"></i>My Bookmarks
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'change_password' %}">
-                                        <i class="fas fa-key me-2"></i>Change Password
-                                    </a>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item text-danger" href="{% url 'logout' %}">
-                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
-                                    </a>
-                                </li>
+                                <li><a href="{% url 'logout' %}" data-replace="true" class="dropdown-item py-2 text-danger"><i class="fas fa-sign-out-alt me-3"></i>Logout</a></li>
                             </ul>
                         </li>
                     {% else %}
-                        <!-- Public Navigation -->
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'browse_resources' %}">
-                                <i class="fas fa-search me-1"></i>Browse
+                        <li class="nav-item d-none d-lg-block">
+                            <a href="{% url 'browse_resources' %}" data-replace="true" class="nav-link px-3 py-2 rounded-pill">
+                                <i class="fas fa-search me-2"></i>Browse
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'login' %}">
-                                <i class="fas fa-sign-in-alt me-1"></i>Login
+                        <li class="nav-item d-none d-lg-block">
+                            <a href="{% url 'login' %}" data-replace="true" class="nav-link px-3 py-2 rounded-pill">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'register' %}">
-                                <i class="fas fa-user-plus me-1"></i>Register
+                        <li class="nav-item d-none d-lg-block">
+                            <a href="{% url 'register' %}" data-replace="true" class="btn btn-gold ms-lg-2" style="padding: 8px 20px;">
+                                <i class="fas fa-user-plus me-2"></i>Register
                             </a>
                         </li>
                     {% endif %}
@@ -394,148 +602,217 @@
         </div>
     </nav>
 
-    <!-- Django Messages (hidden, will be converted to toasts) -->
-    <div style="display: none;">
+    <div style="display: none;" id="django-messages">
         {% if messages %}
             {% for message in messages %}
-                <div class="messages">
-                    <div class="alert alert-{{ message.tags }}">
-                        {{ message }}
-                    </div>
-                </div>
+                <div class="message-item" data-message="{{ message }}" data-tags="{{ message.tags }}">{{ message }}</div>
             {% endfor %}
         {% endif %}
     </div>
 
-    <!-- Main Content -->
-    <main class="flex-grow-1">
+    <div id="toast-container"></div>
+
+    <main class="flex-grow-1" style="min-height: calc(100vh - var(--header-height));">
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-white mt-5 py-4 border-top">
+    <footer class="bg-white mt-auto py-4 border-top">
         <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-6 text-center text-md-start">
-                    <p class="mb-0 text-muted small">
-                        &copy; {% now "Y" %} KUHeS Knowledge Bank. All rights reserved.
-                    </p>
+            <div class="row g-3 align-items-center">
+                <div class="col-12 col-md-6 text-center text-md-start">
+                    <div class="d-flex align-items-center justify-content-center justify-content-md-start gap-2">
+                        <img src="{% static 'core/images/kuhes-logo.png' %}" alt="KUHeS" height="30" style="opacity: 0.8;">
+                        <p class="mb-0 text-muted small">&copy; {% now "Y" %} KUHeS Knowledge Bank</p>
+                    </div>
                 </div>
-                <div class="col-md-6 text-center text-md-end">
-                    <small class="text-muted">
-                        <i class="fas fa-envelope me-1"></i> support@kuhes.ac.mw
-                    </small>
+                <div class="col-12 col-md-6 text-center text-md-end">
+                    <div class="d-flex justify-content-center justify-content-md-end gap-3">
+                        <a href="#" class="text-muted small text-decoration-none"><i class="fas fa-question-circle me-1"></i>Help</a>
+                        <a href="#" class="text-muted small text-decoration-none"><i class="fas fa-shield-alt me-1"></i>Privacy</a>
+                        <a href="#" class="text-muted small text-decoration-none"><i class="fas fa-envelope me-1"></i>Contact</a>
+                    </div>
                 </div>
             </div>
         </div>
     </footer>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script defer src="{% static 'core/js/toasts.js' %}"></script>
 
     <script>
-        // Smooth page transitions
-        document.addEventListener('click', function(e) {
-            const link = e.target.closest('a');
-            if (link &&
-                link.href &&
-                !link.hasAttribute('download') &&
-                !link.target &&
-                !link.closest('.dropdown-toggle') &&
-                link.href.indexOf(window.location.origin) === 0) {
+        // Enhanced loading functions
+        window.showLoading = function(message = 'Loading...') {
+            const overlay = document.getElementById('loading-overlay');
+            const messageEl = document.getElementById('loading-message');
+            const progressBar = document.querySelector('.loading-progress-bar');
 
-                e.preventDefault();
-                document.body.classList.add('fade-out');
+            if (overlay) {
+                overlay.style.display = 'flex';
+                if (messageEl) messageEl.textContent = message;
+                if (progressBar) progressBar.style.width = '0%';
 
-                const overlay = document.getElementById('loading-overlay');
-                if (overlay) {
-                    overlay.style.display = 'flex';
-                }
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += Math.random() * 20;
+                    if (progress >= 90) clearInterval(interval);
+                    if (progressBar) progressBar.style.width = Math.min(progress, 90) + '%';
+                }, 200);
 
+                overlay.dataset.progressInterval = interval;
+            }
+        };
+
+        window.hideLoading = function() {
+            const overlay = document.getElementById('loading-overlay');
+            const progressBar = document.querySelector('.loading-progress-bar');
+
+            if (overlay) {
+                if (progressBar) progressBar.style.width = '100%';
+                if (overlay.dataset.progressInterval) clearInterval(parseInt(overlay.dataset.progressInterval));
                 setTimeout(() => {
-                    window.location.href = link.href;
+                    overlay.style.display = 'none';
+                    if (progressBar) progressBar.style.width = '0%';
                 }, 300);
             }
+        };
+
+        window.showSkeleton = function(container, count = 3) {
+            if (!container) return;
+            let html = '';
+            for (let i = 0; i < count; i++) {
+                html += `
+                    <div class="card-skeleton skeleton">
+                        <div class="d-flex gap-3 mb-3">
+                            <div class="skeleton-icon skeleton"></div>
+                            <div class="flex-grow-1">
+                                <div class="skeleton-line medium skeleton"></div>
+                                <div class="skeleton-line short skeleton mt-2"></div>
+                            </div>
+                        </div>
+                        <div class="skeleton-line long skeleton"></div>
+                        <div class="skeleton-line long skeleton mt-2"></div>
+                        <div class="skeleton-line short skeleton mt-2"></div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        };
+
+        // Data-replace handling
+        document.addEventListener('click', function(e) {
+            const link = e.target.closest('a');
+            if (link && link.hasAttribute('data-replace')) {
+                e.preventDefault();
+                showLoading('Loading...');
+                window.location.replace(link.href);
+            }
         });
 
-        window.addEventListener('pageshow', function(event) {
-            const overlay = document.getElementById('loading-overlay');
-            if (overlay) {
-                overlay.style.display = 'none';
-            }
-            document.body.classList.remove('fade-out');
-        });
-    </script>
+        window.addEventListener('pageshow', function() { hideLoading(); });
 
-    <!-- Toast Notifications Container (SINGLE INSTANCE) -->
-    <div id="toast-container" style="
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 9999;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        pointer-events: none;
-    "></div>
+        // Hamburger menu functionality
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        const navOverlay = document.getElementById('navOverlay');
 
-    <!-- Toast JavaScript -->
-    <script src="{% static 'core/js/toasts.js' %}"></script>
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('Toast system initializing...');
+        if (hamburgerBtn && navOverlay) {
+            hamburgerBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                this.classList.toggle('active');
+                navOverlay.classList.toggle('active');
+                document.body.style.overflow = navOverlay.classList.contains('active') ? 'hidden' : '';
+            });
 
-        function showMessageAsToast(message, tags) {
-            console.log('Showing toast:', message, tags);
+            navOverlay.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    hamburgerBtn.classList.remove('active');
+                    this.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
 
-            let type = 'info';
-            if (tags.includes('success')) type = 'success';
-            else if (tags.includes('error')) type = 'error';
-            else if (tags.includes('warning')) type = 'warning';
-            else if (tags.includes('info')) type = 'info';
-
-            if (window.toast) {
-                window.toast[type](message, 4000);
-            } else {
-                console.error('Toast not initialized');
-            }
+            navOverlay.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', function() {
+                    hamburgerBtn.classList.remove('active');
+                    navOverlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                });
+            });
         }
 
-        const messages = document.querySelectorAll('.messages .alert, .message, [class*="alert-"]');
-        console.log('Found messages:', messages.length);
-
-        messages.forEach(msg => {
-            const message = msg.textContent.trim();
-            const classes = msg.className;
-            showMessageAsToast(message, classes);
-            msg.style.display = 'none';
+        // Form submission loading
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                const submitBtn = this.querySelector('button[type="submit"]');
+                if (submitBtn && !submitBtn.classList.contains('btn-loading')) {
+                    submitBtn.classList.add('btn-loading');
+                    submitBtn.disabled = true;
+                    if (this.id !== 'quickForm') showLoading('Processing...');
+                }
+            });
         });
 
-        const messageElements = document.querySelectorAll('[data-toast-message]');
-        messageElements.forEach(el => {
-            const message = el.dataset.toastMessage;
-            const type = el.dataset.toastType || 'info';
-            if (window.toast) {
-                window.toast[type](message, 4000);
+        // Reset loading on error
+        window.addEventListener('load', function() {
+            const hasErrors = document.querySelector('.alert-danger, .errorlist');
+            if (hasErrors) {
+                const submitBtn = document.querySelector('button[type="submit"].btn-loading');
+                if (submitBtn) {
+                    submitBtn.classList.remove('btn-loading');
+                    submitBtn.disabled = false;
+                    hideLoading();
+                }
             }
         });
-    });
 
-    window.showToast = function(message, type = 'info', duration = 4000) {
+        // Toast messages
         if (window.toast) {
-            window.toast[type](message, duration);
-        } else {
-            console.warn('Toast not ready, showing alert:', message);
-            alert(message);
+            document.querySelectorAll('#django-messages .message-item').forEach(msg => {
+                const message = msg.getAttribute('data-message') || msg.textContent.trim();
+                const tags = msg.getAttribute('data-tags') || 'info';
+                let type = 'info';
+                if (tags.includes('success')) type = 'success';
+                else if (tags.includes('error')) type = 'error';
+                else if (tags.includes('warning')) type = 'warning';
+                window.toast[type](message, 4000);
+            });
         }
-    };
 
-    window.showSuccess = (msg) => window.showToast(msg, 'success');
-    window.showError = (msg) => window.showToast(msg, 'error');
-    window.showWarning = (msg) => window.showToast(msg, 'warning');
-    window.showInfo = (msg) => window.showToast(msg, 'info');
+        // Global toast functions
+        window.showToast = function(message, type = 'info', duration = 4000) {
+            if (window.toast) window.toast[type](message, duration);
+            else console.warn('Toast not ready:', message);
+        };
+
+        window.showSuccess = (msg) => window.showToast(msg, 'success');
+        window.showError = (msg) => window.showToast(msg, 'error');
+        window.showWarning = (msg) => window.showToast(msg, 'warning');
+        window.showInfo = (msg) => window.showToast(msg, 'info');
+
+        // Lazy image loading
+        const lazyImages = document.querySelectorAll('.lazy-image');
+        const imageObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    const dataSrc = img.getAttribute('data-src');
+                    if (dataSrc) {
+                        img.src = dataSrc;
+                        img.classList.add('loaded');
+                        imageObserver.unobserve(img);
+                    }
+                }
+            });
+        });
+        lazyImages.forEach(img => imageObserver.observe(img));
+
+        // Additional scroll reinforcement to ensure navbar stays frozen
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar');
+            if (navbar && window.scrollY >= 0) {
+                navbar.style.transform = 'translateZ(0)';
+            }
+        });
     </script>
-
 
     {% block extra_js %}{% endblock %}
 </body>
