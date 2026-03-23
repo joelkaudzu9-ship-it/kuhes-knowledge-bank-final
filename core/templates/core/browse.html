@@ -1,113 +1,140 @@
 {% extends 'core/base.html' %}
 {% load static %}
+{% load random_images %}
 
-{% block title %}Discover Resources - KUHeS Knowledge Bank{% endblock %}
+{% block title %}Browse Resources - KUHeS Knowledge Bank{% endblock %}
 
 {% block extra_css %}
 <style>
     /* ============================================
-       MODERN BROWSE PAGE - COMPLETE REDESIGN
-       Clean, Beautiful, Professional
+       KUHeS OFFICIAL BRAND COLORS
+       Primary: #2A2E7C (Astronaut Blue)
+       Accent: #99674C (Cape Palliser Tan)
+       Floating Cards - No Background Mask
     ============================================ */
+
+    :root {
+        --kuhes-primary: #2A2E7C;
+        --kuhes-primary-dark: #1F2368;
+        --kuhes-primary-light: #3A3E8C;
+        --kuhes-accent: #99674C;
+        --kuhes-accent-dark: #7A4F3A;
+        --kuhes-accent-light: #B28063;
+        --kuhes-white: #FFFFFF;
+        --kuhes-card-bg: rgba(42, 46, 124, 0.92);
+        --kuhes-card-border: rgba(153, 103, 76, 0.45);
+    }
+
+    /* Browse Container */
+    .browse-container {
+        min-height: 100vh;
+        position: relative;
+    }
+
+    /* Background Image - Fully Visible */
+    .browse-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        z-index: 0;
+    }
+
+    /* No overlay mask */
+    .browse-container::before {
+        display: none;
+    }
+
+    /* Content Wrapper */
+    .browse-wrapper {
+        position: relative;
+        z-index: 1;
+        padding: 2rem 0;
+    }
 
     /* Hero Section */
     .browse-hero {
-        background: linear-gradient(135deg, #0033A0 0%, #00A5B0 100%);
-        padding: 3rem 2rem;
+        background: var(--kuhes-card-bg);
+        backdrop-filter: blur(0px);
+        border-radius: 24px;
+        padding: 2.5rem;
         margin-bottom: 2rem;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .browse-hero::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        right: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-        animation: rotate 30s linear infinite;
-    }
-
-    @keyframes rotate {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-    }
-
-    .hero-content {
-        max-width: 800px;
-        margin: 0 auto;
+        border: 1px solid var(--kuhes-card-border);
         text-align: center;
-        position: relative;
-        z-index: 1;
     }
 
-    .hero-content h1 {
-        font-size: 2.5rem;
+    .browse-hero h1 {
+        font-size: 2rem;
         font-weight: 700;
-        color: white;
-        margin-bottom: 1rem;
+        color: var(--kuhes-white);
+        margin-bottom: 0.5rem;
     }
 
-    .hero-content p {
+    .browse-hero p {
         font-size: 1rem;
-        color: rgba(255,255,255,0.9);
-        margin-bottom: 2rem;
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 1.5rem;
     }
 
     /* Search Bar */
-    .search-container {
-        max-width: 600px;
-        margin: 0 auto;
-    }
-
     .search-wrapper {
         display: flex;
-        background: white;
+        max-width: 600px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid var(--kuhes-card-border);
         border-radius: 60px;
         padding: 0.25rem;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s;
+    }
+
+    .search-wrapper:focus-within {
+        border-color: var(--kuhes-accent);
+        box-shadow: 0 0 0 3px rgba(153, 103, 76, 0.2);
     }
 
     .search-wrapper input {
         flex: 1;
-        padding: 1rem 1.5rem;
+        padding: 0.9rem 1.5rem;
         border: none;
         background: transparent;
-        font-size: 1rem;
+        font-size: 0.95rem;
         outline: none;
+        color: var(--kuhes-white);
+    }
+
+    .search-wrapper input::placeholder {
+        color: rgba(255, 255, 255, 0.5);
     }
 
     .search-wrapper button {
-        padding: 0.75rem 2rem;
-        background: #0033A0;
+        padding: 0.7rem 2rem;
+        background: var(--kuhes-primary);
         color: white;
         border: none;
         border-radius: 50px;
         font-weight: 600;
         cursor: pointer;
-        transition: all 0.2s;
+        transition: all 0.3s;
     }
 
     .search-wrapper button:hover {
-        background: #00247D;
+        background: var(--kuhes-primary-dark);
         transform: translateY(-1px);
     }
 
     /* Stats Bar */
     .stats-bar {
-        background: white;
-        border-bottom: 1px solid #E2E8F0;
-        padding: 1rem 0;
-        position: sticky;
-        top: var(--header-height);
-        z-index: 99;
-        backdrop-filter: blur(10px);
-        background: rgba(255, 255, 255, 0.95);
-    }
-
-    .stats-bar .container {
+        background: var(--kuhes-card-bg);
+        backdrop-filter: blur(0px);
+        border-radius: 16px;
+        padding: 1rem 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid var(--kuhes-card-border);
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -116,13 +143,13 @@
     }
 
     .results-count {
-        font-size: 0.9rem;
-        color: #4A5568;
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.8);
     }
 
     .results-count span {
         font-weight: 700;
-        color: #0033A0;
+        color: var(--kuhes-accent);
     }
 
     /* Filter Chips */
@@ -137,64 +164,92 @@
         border-radius: 40px;
         font-size: 0.8rem;
         font-weight: 500;
-        background: #F1F5F9;
-        color: #475569;
+        background: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.8);
         cursor: pointer;
         transition: all 0.2s;
-        border: none;
+        border: 1px solid transparent;
     }
 
     .chip:hover {
-        background: #E2E8F0;
+        background: rgba(153, 103, 76, 0.2);
+        border-color: var(--kuhes-accent);
     }
 
     .chip.active {
-        background: #0033A0;
+        background: var(--kuhes-accent);
         color: white;
     }
 
-    /* Sort Dropdown */
+    /* Sort Select */
     .sort-select {
         padding: 0.5rem 1rem;
-        border: 1px solid #E2E8F0;
+        border: 1px solid var(--kuhes-card-border);
         border-radius: 40px;
         font-size: 0.8rem;
-        background: white;
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--kuhes-white);
         cursor: pointer;
         outline: none;
+        transition: all 0.2s;
     }
 
-    /* Resource Grid */
+    .sort-select:hover {
+        border-color: var(--kuhes-accent);
+    }
+
+    .sort-select option {
+        background: var(--kuhes-primary);
+        color: white;
+    }
+
+    /* Active Filter Tags */
+    .active-filter {
+        background: rgba(153, 103, 76, 0.2);
+        border-color: var(--kuhes-accent);
+        color: var(--kuhes-accent-light);
+    }
+
+    .clear-filters {
+        background: rgba(220, 53, 69, 0.2);
+        color: #ff6b6b;
+    }
+
+    .clear-filters:hover {
+        background: rgba(220, 53, 69, 0.3);
+        border-color: #ff6b6b;
+    }
+
+    /* Resources Grid */
     .resources-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
         gap: 1.5rem;
-        padding: 2rem 0;
     }
 
-    /* Resource Card */
+    /* Resource Card - Branded Floating */
     .resource-card {
-        background: white;
+        background: var(--kuhes-card-bg);
         border-radius: 20px;
+        border: 1px solid var(--kuhes-card-border);
         overflow: hidden;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        border: 1px solid #E2E8F0;
-        position: relative;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
     .resource-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 20px 30px -12px rgba(0, 0, 0, 0.1);
-        border-color: #CBD5E1;
+        border-color: var(--kuhes-accent);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
     }
 
     /* Card Header */
     .card-header {
-        padding: 1.25rem;
-        border-bottom: 1px solid #F1F5F9;
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid rgba(153, 103, 76, 0.3);
         display: flex;
         justify-content: space-between;
-        align-items: flex-start;
+        align-items: center;
     }
 
     .resource-type {
@@ -202,20 +257,16 @@
         align-items: center;
         gap: 0.5rem;
         padding: 0.25rem 0.75rem;
-        background: #F1F5F9;
+        background: rgba(153, 103, 76, 0.2);
         border-radius: 30px;
         font-size: 0.7rem;
         font-weight: 600;
-        color: #475569;
-    }
-
-    .resource-type i {
-        font-size: 0.7rem;
+        color: var(--kuhes-accent-light);
     }
 
     .resource-date {
         font-size: 0.7rem;
-        color: #94A3B8;
+        color: rgba(255, 255, 255, 0.6);
     }
 
     /* Card Body */
@@ -226,7 +277,7 @@
     .resource-title {
         font-size: 1rem;
         font-weight: 700;
-        color: #0F172A;
+        color: var(--kuhes-white);
         margin-bottom: 0.5rem;
         line-height: 1.4;
     }
@@ -238,12 +289,12 @@
     }
 
     .resource-title a:hover {
-        color: #0033A0;
+        color: var(--kuhes-accent-light);
     }
 
     .resource-description {
         font-size: 0.85rem;
-        color: #64748B;
+        color: rgba(255, 255, 255, 0.7);
         line-height: 1.5;
         margin-bottom: 1rem;
         display: -webkit-box;
@@ -263,15 +314,15 @@
     .tag {
         font-size: 0.7rem;
         padding: 0.25rem 0.6rem;
-        background: #F1F5F9;
+        background: rgba(255, 255, 255, 0.1);
         border-radius: 30px;
-        color: #475569;
+        color: rgba(255, 255, 255, 0.7);
     }
 
     /* Card Footer */
     .card-footer {
         padding: 1rem 1.25rem;
-        border-top: 1px solid #F1F5F9;
+        border-top: 1px solid rgba(153, 103, 76, 0.3);
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -281,7 +332,7 @@
         display: flex;
         gap: 1rem;
         font-size: 0.7rem;
-        color: #94A3B8;
+        color: rgba(255, 255, 255, 0.6);
     }
 
     .resource-stats span {
@@ -291,7 +342,7 @@
     }
 
     .view-link {
-        color: #0033A0;
+        color: var(--kuhes-accent);
         font-size: 0.8rem;
         font-weight: 600;
         text-decoration: none;
@@ -303,6 +354,7 @@
 
     .view-link:hover {
         gap: 0.5rem;
+        color: var(--kuhes-accent-light);
     }
 
     /* Skeleton Loader */
@@ -310,18 +362,17 @@
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
         gap: 1.5rem;
-        padding: 2rem 0;
     }
 
     .skeleton-card {
-        background: white;
+        background: var(--kuhes-card-bg);
         border-radius: 20px;
-        border: 1px solid #E2E8F0;
+        border: 1px solid var(--kuhes-card-border);
         padding: 1.25rem;
     }
 
     .skeleton {
-        background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
+        background: linear-gradient(90deg, rgba(255,255,255,0.1) 25%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.1) 75%);
         background-size: 200% 100%;
         animation: shimmer 1.2s infinite;
         border-radius: 8px;
@@ -333,7 +384,7 @@
     }
 
     .skeleton-icon {
-        width: 60px;
+        width: 80px;
         height: 24px;
         border-radius: 30px;
     }
@@ -357,12 +408,15 @@
     .empty-state {
         text-align: center;
         padding: 4rem 2rem;
+        background: var(--kuhes-card-bg);
+        border-radius: 24px;
+        border: 1px solid var(--kuhes-card-border);
     }
 
     .empty-icon {
         width: 80px;
         height: 80px;
-        background: #F1F5F9;
+        background: rgba(255, 255, 255, 0.05);
         border-radius: 40px;
         display: inline-flex;
         align-items: center;
@@ -372,18 +426,18 @@
 
     .empty-icon i {
         font-size: 2rem;
-        color: #94A3B8;
+        color: rgba(255, 255, 255, 0.5);
     }
 
     .empty-state h3 {
         font-size: 1.25rem;
         font-weight: 600;
-        color: #1E293B;
+        color: var(--kuhes-white);
         margin-bottom: 0.5rem;
     }
 
     .empty-state p {
-        color: #64748B;
+        color: rgba(255, 255, 255, 0.7);
         margin-bottom: 1.5rem;
     }
 
@@ -393,50 +447,54 @@
         justify-content: center;
         gap: 0.5rem;
         padding: 2rem 0;
+        margin-top: 1rem;
     }
 
     .page-btn {
         padding: 0.5rem 1rem;
         border-radius: 10px;
-        background: white;
-        border: 1px solid #E2E8F0;
-        color: #475569;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid var(--kuhes-card-border);
+        color: rgba(255, 255, 255, 0.8);
         text-decoration: none;
         transition: all 0.2s;
     }
 
     .page-btn:hover {
-        background: #F1F5F9;
-        border-color: #CBD5E1;
+        background: rgba(153, 103, 76, 0.2);
+        border-color: var(--kuhes-accent);
     }
 
     .page-btn.active {
-        background: #0033A0;
+        background: var(--kuhes-accent);
         color: white;
-        border-color: #0033A0;
+        border-color: var(--kuhes-accent);
     }
 
     /* Mobile */
     @media (max-width: 768px) {
-        .browse-hero {
-            padding: 2rem 1rem;
+        .browse-wrapper {
+            padding: 1rem;
         }
-        .hero-content h1 {
-            font-size: 1.75rem;
+        .browse-hero {
+            padding: 1.5rem;
+        }
+        .browse-hero h1 {
+            font-size: 1.5rem;
         }
         .search-wrapper {
             flex-direction: column;
             border-radius: 20px;
         }
         .search-wrapper input {
-            padding: 1rem;
+            padding: 0.8rem;
             text-align: center;
         }
         .search-wrapper button {
             margin: 0.25rem;
             border-radius: 40px;
         }
-        .stats-bar .container {
+        .stats-bar {
             flex-direction: column;
             align-items: stretch;
         }
@@ -454,14 +512,18 @@
 {% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<section class="browse-hero">
-    <div class="hero-content">
-        <h1>Discover Academic Resources</h1>
-        <p>Access lecture notes, past papers, clinical guides, and more from your peers and lecturers</p>
+<!-- Background Image - Fully Visible -->
+<div class="browse-bg" style="background-image: url('{% random_kuhes_image_url %}');"></div>
 
-        <!-- Search Bar -->
-        <div class="search-container">
+<div class="browse-container">
+    <div class="container browse-wrapper">
+
+        <!-- Hero Section -->
+        <div class="browse-hero">
+            <h1>Discover Academic Resources</h1>
+            <p>Access lecture notes, past papers, clinical guides, and more from your peers and lecturers</p>
+
+            <!-- Search Bar -->
             <form method="get" id="searchForm">
                 <div class="search-wrapper">
                     <input type="text"
@@ -473,175 +535,159 @@
                 </div>
             </form>
         </div>
-    </div>
-</section>
 
-<!-- Stats & Filters Bar -->
-<div class="stats-bar">
-    <div class="container">
-        <div class="results-count">
-            <span id="resultCount">{{ resources|length }}</span> resources found
-        </div>
-
-        <div class="filter-chips">
-            <button class="chip {% if not selected_type %}active{% endif %}" onclick="applyFilter('type', '')">
-                All
-            </button>
-            <button class="chip {% if selected_type == 'handout' %}active{% endif %}" onclick="applyFilter('type', 'handout')">
-                Handouts
-            </button>
-            <button class="chip {% if selected_type == 'past_paper' %}active{% endif %}" onclick="applyFilter('type', 'past_paper')">
-                Past Papers
-            </button>
-            <button class="chip {% if selected_type == 'lecture_note' %}active{% endif %}" onclick="applyFilter('type', 'lecture_note')">
-                Lecture Notes
-            </button>
-            <button class="chip {% if selected_type == 'video' %}active{% endif %}" onclick="applyFilter('type', 'video')">
-                Videos
-            </button>
-            <button class="chip {% if selected_type == 'clinical_guide' %}active{% endif %}" onclick="applyFilter('type', 'clinical_guide')">
-                Clinical Guides
-            </button>
-        </div>
-
-        <select class="sort-select" id="sortSelect" onchange="applySort()">
-            <option value="-upload_date" {% if selected_sort == '-upload_date' %}selected{% endif %}>Newest First</option>
-            <option value="upload_date" {% if selected_sort == 'upload_date' %}selected{% endif %}>Oldest First</option>
-            <option value="-download_count" {% if selected_sort == '-download_count' %}selected{% endif %}>Most Downloaded</option>
-            <option value="title" {% if selected_sort == 'title' %}selected{% endif %}>Title A-Z</option>
-        </select>
-    </div>
-</div>
-
-<div class="container">
-    <!-- Active Filters Display -->
-    {% if query or selected_type or selected_level %}
-    <div class="filter-chips" style="margin: 1rem 0 0 0;">
-        {% if query %}
-        <span class="chip" style="background: #EFF6FF; color: #0033A0;">
-            <i class="fas fa-search me-1"></i>"{{ query }}"
-            <i class="fas fa-times ms-2" style="cursor: pointer;" onclick="removeFilter('q')"></i>
-        </span>
-        {% endif %}
-        {% if selected_type %}
-        <span class="chip" style="background: #EFF6FF; color: #0033A0;">
-            {{ selected_type|title }}
-            <i class="fas fa-times ms-2" style="cursor: pointer;" onclick="removeFilter('type')"></i>
-        </span>
-        {% endif %}
-        <a href="{% url 'browse_resources' %}" class="chip" style="background: #FEF2F2; color: #DC2626;">
-            <i class="fas fa-times me-1"></i>Clear All
-        </a>
-    </div>
-    {% endif %}
-
-    <!-- Resources Grid -->
-    <div id="resourcesContainer">
-        <!-- Skeleton Loader -->
-        <div id="skeletonLoader" class="skeleton-grid" style="display: none;">
-            {% for i in "123456" %}
-            <div class="skeleton-card">
-                <div class="skeleton skeleton-icon"></div>
-                <div class="skeleton skeleton-title"></div>
-                <div class="skeleton skeleton-text"></div>
-                <div class="skeleton skeleton-text short"></div>
-                <div class="skeleton skeleton-text" style="width: 40%;"></div>
+        <!-- Stats & Filters Bar -->
+        <div class="stats-bar">
+            <div class="results-count">
+                <span id="resultCount">{{ resources|length }}</span> resources found
             </div>
-            {% endfor %}
+
+            <div class="filter-chips">
+                <button class="chip {% if not selected_type %}active{% endif %}" onclick="applyFilter('type', '')">All</button>
+                <button class="chip {% if selected_type == 'handout' %}active{% endif %}" onclick="applyFilter('type', 'handout')">Handouts</button>
+                <button class="chip {% if selected_type == 'past_paper' %}active{% endif %}" onclick="applyFilter('type', 'past_paper')">Past Papers</button>
+                <button class="chip {% if selected_type == 'lecture_note' %}active{% endif %}" onclick="applyFilter('type', 'lecture_note')">Lecture Notes</button>
+                <button class="chip {% if selected_type == 'video' %}active{% endif %}" onclick="applyFilter('type', 'video')">Videos</button>
+                <button class="chip {% if selected_type == 'clinical_guide' %}active{% endif %}" onclick="applyFilter('type', 'clinical_guide')">Clinical Guides</button>
+            </div>
+
+            <select class="sort-select" id="sortSelect" onchange="applySort()">
+                <option value="-upload_date" {% if selected_sort == '-upload_date' %}selected{% endif %}>Newest First</option>
+                <option value="upload_date" {% if selected_sort == 'upload_date' %}selected{% endif %}>Oldest First</option>
+                <option value="-download_count" {% if selected_sort == '-download_count' %}selected{% endif %}>Most Downloaded</option>
+                <option value="title" {% if selected_sort == 'title' %}selected{% endif %}>Title A-Z</option>
+            </select>
         </div>
 
-        <!-- Actual Resources -->
-        <div id="resourcesContent">
-            {% if resources %}
-            <div class="resources-grid">
-                {% for resource in resources %}
-                <div class="resource-card">
-                    <div class="card-header">
-                        <span class="resource-type">
-                            <i class="fas
-                                {% if resource.resource_type == 'handout' %}fa-file-pdf
-                                {% elif resource.resource_type == 'past_paper' %}fa-file-alt
-                                {% elif resource.resource_type == 'lecture_note' %}fa-book
-                                {% elif resource.resource_type == 'video' %}fa-video
-                                {% elif resource.resource_type == 'clinical_guide' %}fa-stethoscope
-                                {% else %}fa-file{% endif %}">
-                            </i>
-                            {{ resource.get_resource_type_display }}
-                        </span>
-                        <span class="resource-date">{{ resource.upload_date|date:"M d, Y" }}</span>
-                    </div>
+        <!-- Active Filters Display -->
+        {% if query or selected_type %}
+        <div class="filter-chips" style="margin-bottom: 1.5rem;">
+            {% if query %}
+            <span class="chip active-filter">
+                <i class="fas fa-search me-1"></i>"{{ query }}"
+                <i class="fas fa-times ms-2" style="cursor: pointer;" onclick="removeFilter('q')"></i>
+            </span>
+            {% endif %}
+            {% if selected_type %}
+            <span class="chip active-filter">
+                {{ selected_type|title }}
+                <i class="fas fa-times ms-2" style="cursor: pointer;" onclick="removeFilter('type')"></i>
+            </span>
+            {% endif %}
+            <a href="{% url 'browse_resources' %}" class="chip clear-filters">
+                <i class="fas fa-times me-1"></i>Clear All
+            </a>
+        </div>
+        {% endif %}
 
-                    <div class="card-body">
-                        <h3 class="resource-title">
-                            <a href="{% url 'resource_detail' resource.id %}" data-loading="true">
-                                {{ resource.title }}
+        <!-- Resources Grid -->
+        <div id="resourcesContainer">
+            <!-- Skeleton Loader -->
+            <div id="skeletonLoader" class="skeleton-grid" style="display: none;">
+                {% for i in "123456" %}
+                <div class="skeleton-card">
+                    <div class="skeleton skeleton-icon"></div>
+                    <div class="skeleton skeleton-title"></div>
+                    <div class="skeleton skeleton-text"></div>
+                    <div class="skeleton skeleton-text short"></div>
+                    <div class="skeleton skeleton-text" style="width: 40%;"></div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Actual Resources -->
+            <div id="resourcesContent">
+                {% if resources %}
+                <div class="resources-grid">
+                    {% for resource in resources %}
+                    <div class="resource-card">
+                        <div class="card-header">
+                            <span class="resource-type">
+                                <i class="fas
+                                    {% if resource.resource_type == 'handout' %}fa-file-pdf
+                                    {% elif resource.resource_type == 'past_paper' %}fa-file-alt
+                                    {% elif resource.resource_type == 'lecture_note' %}fa-book
+                                    {% elif resource.resource_type == 'video' %}fa-video
+                                    {% elif resource.resource_type == 'clinical_guide' %}fa-stethoscope
+                                    {% else %}fa-file{% endif %}">
+                                </i>
+                                {{ resource.get_resource_type_display }}
+                            </span>
+                            <span class="resource-date">{{ resource.upload_date|date:"M d, Y" }}</span>
+                        </div>
+
+                        <div class="card-body">
+                            <h3 class="resource-title">
+                                <a href="{% url 'resource_detail' resource.id %}" data-loading="true">
+                                    {{ resource.title }}
+                                </a>
+                            </h3>
+                            <p class="resource-description">
+                                {{ resource.description|truncatechars:100 }}
+                            </p>
+
+                            {% if resource.tags %}
+                            <div class="resource-tags">
+                                {% for tag in resource.tags.split|slice:":3" %}
+                                <span class="tag">#{{ tag }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="card-footer">
+                            <div class="resource-stats">
+                                <span><i class="fas fa-download"></i> {{ resource.download_count }}</span>
+                                <span><i class="fas fa-eye"></i> {{ resource.views_count|default:0 }}</span>
+                                <span><i class="fas fa-user"></i> {{ resource.uploader.username|truncatechars:12 }}</span>
+                            </div>
+                            <a href="{% url 'resource_detail' resource.id %}" class="view-link" data-loading="true">
+                                View <i class="fas fa-arrow-right"></i>
                             </a>
-                        </h3>
-                        <p class="resource-description">
-                            {{ resource.description|truncatechars:100 }}
-                        </p>
-
-                        {% if resource.tags %}
-                        <div class="resource-tags">
-                            {% for tag in resource.tags.split|slice:":3" %}
-                            <span class="tag">#{{ tag }}</span>
-                            {% endfor %}
                         </div>
-                        {% endif %}
                     </div>
-
-                    <div class="card-footer">
-                        <div class="resource-stats">
-                            <span><i class="fas fa-download"></i> {{ resource.download_count }}</span>
-                            <span><i class="fas fa-eye"></i> {{ resource.view_count|default:0 }}</span>
-                            <span><i class="fas fa-user"></i> {{ resource.uploader.username|truncatechars:12 }}</span>
-                        </div>
-                        <a href="{% url 'resource_detail' resource.id %}" class="view-link" data-loading="true">
-                            View <i class="fas fa-arrow-right"></i>
-                        </a>
-                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
-            </div>
 
-            <!-- Pagination -->
-            {% if resources.has_other_pages %}
-            <div class="pagination">
-                {% if resources.has_previous %}
-                <a href="?page={{ resources.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="page-btn" data-loading="true">
-                    <i class="fas fa-chevron-left"></i>
-                </a>
-                {% endif %}
-
-                {% for i in resources.paginator.page_range %}
-                    {% if resources.number == i %}
-                    <span class="page-btn active">{{ i }}</span>
-                    {% elif i > resources.number|add:'-3' and i < resources.number|add:'3' %}
-                    <a href="?page={{ i }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="page-btn" data-loading="true">{{ i }}</a>
+                <!-- Pagination -->
+                {% if resources.has_other_pages %}
+                <div class="pagination">
+                    {% if resources.has_previous %}
+                    <a href="?page={{ resources.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="page-btn" data-loading="true">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
                     {% endif %}
-                {% endfor %}
 
-                {% if resources.has_next %}
-                <a href="?page={{ resources.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="page-btn" data-loading="true">
-                    <i class="fas fa-chevron-right"></i>
-                </a>
+                    {% for i in resources.paginator.page_range %}
+                        {% if resources.number == i %}
+                        <span class="page-btn active">{{ i }}</span>
+                        {% elif i > resources.number|add:'-3' and i < resources.number|add:'3' %}
+                        <a href="?page={{ i }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="page-btn" data-loading="true">{{ i }}</a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if resources.has_next %}
+                    <a href="?page={{ resources.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="page-btn" data-loading="true">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% else %}
+                <!-- Empty State -->
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3>No resources found</h3>
+                    <p>Try adjusting your search or filter to find what you're looking for.</p>
+                    <a href="{% url 'browse_resources' %}" class="view-link" style="color: var(--kuhes-accent);">
+                        Clear all filters <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
                 {% endif %}
             </div>
-            {% endif %}
-
-            {% else %}
-            <!-- Empty State -->
-            <div class="empty-state">
-                <div class="empty-icon">
-                    <i class="fas fa-search"></i>
-                </div>
-                <h3>No resources found</h3>
-                <p>Try adjusting your search or filter to find what you're looking for.</p>
-                <a href="{% url 'browse_resources' %}" class="view-link" style="color: #0033A0;">
-                    Clear all filters <i class="fas fa-arrow-right"></i>
-                </a>
-            </div>
-            {% endif %}
         </div>
     </div>
 </div>

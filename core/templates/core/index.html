@@ -1,21 +1,25 @@
 {% extends 'core/base.html' %}
 {% load static %}
+{% load random_images %}
 
 {% block title %}KUHeS Knowledge Bank - Your Gateway to Academic Excellence{% endblock %}
 
 {% block extra_css %}
 <style>
     /* ============================================
-       INDEX PAGE - ULTRA POLISH
-       Glass Morphism + Smooth Animations
-       Lighter Background - Image Visible
+       KUHeS OFFICIAL BRAND COLORS
+       Primary: #2A2E7C (Astronaut Blue)
+       Accent: #99674C (Cape Palliser Tan/Gold)
     ============================================ */
 
     :root {
-        --kuhes-gold: #FFB81C;
-        --kuhes-blue: #0066CC;
-        --kuhes-blue-dark: #0052A3;
-        --kuhes-teal: #00A5B0;
+        --kuhes-primary: #2A2E7C;
+        --kuhes-primary-dark: #1F2368;
+        --kuhes-primary-light: #3A3E8C;
+        --kuhes-accent: #99674C;
+        --kuhes-accent-dark: #7A4F3A;
+        --kuhes-accent-light: #B28063;
+        --kuhes-white: #FFFFFF;
         --kuhes-dark: #0F172A;
         --kuhes-darker: #0A0F1F;
         --kuhes-card-bg: #1E293B;
@@ -37,7 +41,7 @@
         background: var(--kuhes-darker);
     }
 
-    /* Animated Background Gradient - Lighter */
+    /* Animated Background Gradient */
     .hero-section::before {
         content: '';
         position: absolute;
@@ -45,7 +49,7 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: radial-gradient(circle at 20% 50%, rgba(0, 102, 204, 0.2), transparent 60%);
+        background: radial-gradient(circle at 20% 50%, rgba(42, 46, 124, 0.25), transparent 60%);
         animation: pulseGlow 8s ease-in-out infinite;
         z-index: 0;
     }
@@ -55,18 +59,17 @@
         50% { opacity: 0.7; transform: scale(1.05); }
     }
 
-    /* Background Image - More Visible */
+    /* Random KUHeS Campus Background */
     .hero-bg {
         position: absolute;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background-image: url('{% static "core/images/university-library.jpg" %}');
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
-        opacity: 0.45;
+        opacity: 0.4;
         z-index: 0;
         animation: slowZoom 30s ease-in-out infinite;
     }
@@ -76,7 +79,7 @@
         50% { transform: scale(1.05); }
     }
 
-    /* Glass Morphism Overlay - Lighter */
+    /* Glass Morphism Overlay - KUHeS Colors */
     .hero-overlay {
         position: absolute;
         top: 0;
@@ -84,9 +87,9 @@
         width: 100%;
         height: 100%;
         background: linear-gradient(135deg,
-            rgba(10, 15, 31, 0.75) 0%,
-            rgba(0, 102, 204, 0.6) 50%,
-            rgba(10, 15, 31, 0.75) 100%);
+            rgba(10, 15, 31, 0.8) 0%,
+            rgba(42, 46, 124, 0.75) 50%,
+            rgba(153, 103, 76, 0.65) 100%);
         backdrop-filter: blur(2px);
         z-index: 1;
     }
@@ -101,12 +104,12 @@
         padding: 2rem;
     }
 
-    /* Animated Badge - Glass Morphism */
+    /* Animated Badge - KUHeS Accent */
     .hero-badge {
         display: inline-flex;
         align-items: center;
         gap: 0.75rem;
-        background: rgba(255, 255, 255, 0.1);
+        background: rgba(153, 103, 76, 0.15);
         backdrop-filter: blur(12px);
         padding: 0.6rem 1.2rem;
         border-radius: 60px;
@@ -114,19 +117,19 @@
         font-weight: 500;
         color: rgba(255, 255, 255, 0.95);
         margin-bottom: 1.5rem;
-        border: 1px solid rgba(255, 184, 28, 0.25);
+        border: 1px solid rgba(153, 103, 76, 0.4);
         animation: fadeInUp 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.1);
         transition: all 0.3s;
     }
 
     .hero-badge:hover {
-        background: rgba(255, 255, 255, 0.15);
-        border-color: rgba(255, 184, 28, 0.4);
+        background: rgba(153, 103, 76, 0.25);
+        border-color: var(--kuhes-accent);
         transform: translateY(-2px);
     }
 
     .hero-badge i {
-        color: rgba(255, 184, 28, 0.9);
+        color: var(--kuhes-accent);
         animation: gentlePulse 2s ease-in-out infinite;
     }
 
@@ -135,7 +138,7 @@
         50% { opacity: 1; transform: scale(1.05); }
     }
 
-    /* Main Heading with Glitch Effect on Hover */
+    /* Main Heading */
     .hero-title {
         font-size: 3.2rem;
         font-weight: 700;
@@ -143,8 +146,6 @@
         margin-bottom: 1.5rem;
         color: white;
         animation: fadeInUp 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.1) 0.1s both;
-        position: relative;
-        display: inline-block;
     }
 
     .hero-title span {
@@ -153,7 +154,7 @@
         font-size: 1.3rem;
         display: block;
         margin-top: 0.5rem;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 184, 28, 0.7));
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), var(--kuhes-accent-light));
         -webkit-background-clip: text;
         background-clip: text;
         color: transparent;
@@ -171,7 +172,7 @@
         animation: fadeInUp 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.1) 0.2s both;
     }
 
-    /* Stats Row with Glass Cards */
+    /* Stats Row */
     .hero-stats {
         display: flex;
         justify-content: center;
@@ -183,18 +184,18 @@
 
     .stat-item {
         text-align: center;
-        background: rgba(255, 255, 255, 0.05);
+        background: rgba(42, 46, 124, 0.3);
         backdrop-filter: blur(8px);
         padding: 1rem 1.8rem;
         border-radius: 30px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(153, 103, 76, 0.3);
         transition: all 0.3s;
     }
 
     .stat-item:hover {
         transform: translateY(-5px);
-        background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 184, 28, 0.25);
+        background: rgba(42, 46, 124, 0.4);
+        border-color: var(--kuhes-accent);
     }
 
     .stat-number {
@@ -206,11 +207,11 @@
 
     .stat-label {
         font-size: 0.75rem;
-        color: rgba(255, 255, 255, 0.7);
+        color: rgba(255, 255, 255, 0.8);
         margin-top: 0.25rem;
     }
 
-    /* Buttons with Glass Effect */
+    /* Buttons */
     .hero-buttons {
         display: flex;
         justify-content: center;
@@ -220,7 +221,7 @@
     }
 
     .btn-primary {
-        background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-blue-dark));
+        background: linear-gradient(135deg, var(--kuhes-primary), var(--kuhes-primary-dark));
         border: none;
         padding: 0.9rem 2.2rem;
         font-weight: 500;
@@ -251,12 +252,12 @@
 
     .btn-primary:hover {
         transform: translateY(-3px);
-        box-shadow: 0 10px 25px rgba(0, 102, 204, 0.4);
+        box-shadow: 0 10px 25px rgba(42, 46, 124, 0.4);
     }
 
     .btn-outline-light {
-        border: 1px solid rgba(255, 255, 255, 0.35);
-        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(153, 103, 76, 0.5);
+        background: rgba(153, 103, 76, 0.1);
         backdrop-filter: blur(4px);
         padding: 0.9rem 2.2rem;
         font-weight: 500;
@@ -266,15 +267,15 @@
     }
 
     .btn-outline-light:hover {
-        background: rgba(255, 255, 255, 0.12);
-        border-color: rgba(255, 184, 28, 0.5);
+        background: rgba(153, 103, 76, 0.2);
+        border-color: var(--kuhes-accent);
         transform: translateY(-3px);
     }
 
-    /* Floating Shapes Animation */
+    /* Floating Shapes - KUHeS Accent */
     .floating-shape {
         position: absolute;
-        background: radial-gradient(circle, rgba(255, 184, 28, 0.1), transparent);
+        background: radial-gradient(circle, rgba(153, 103, 76, 0.12), transparent);
         border-radius: 50%;
         pointer-events: none;
         animation: floatShape 12s ease-in-out infinite;
@@ -306,8 +307,8 @@
     }
 
     @keyframes floatShape {
-        0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.35; }
-        50% { transform: translate(30px, -30px) scale(1.1); opacity: 0.55; }
+        0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.4; }
+        50% { transform: translate(30px, -30px) scale(1.1); opacity: 0.6; }
     }
 
     @keyframes fadeInUp {
@@ -321,7 +322,7 @@
         }
     }
 
-    /* Features Section - Glass Morphism Cards */
+    /* Features Section */
     .features-section {
         background: var(--kuhes-dark);
         padding: 5rem 1.5rem;
@@ -335,7 +336,7 @@
         left: 0;
         right: 0;
         height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(255, 184, 28, 0.35), transparent);
+        background: linear-gradient(90deg, transparent, var(--kuhes-accent), transparent);
     }
 
     .section-title {
@@ -348,14 +349,26 @@
         font-weight: 600;
         color: white;
         margin-bottom: 0.5rem;
-        animation: fadeInUp 0.6s ease-out;
+        position: relative;
+        display: inline-block;
+    }
+
+    .section-title h2:after {
+        content: '';
+        position: absolute;
+        bottom: -12px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 3px;
+        background: var(--kuhes-accent);
+        border-radius: 2px;
     }
 
     .section-title p {
         color: rgba(255, 255, 255, 0.65);
         max-width: 600px;
-        margin: 0 auto;
-        animation: fadeInUp 0.6s ease-out 0.1s both;
+        margin: 1.5rem auto 0;
     }
 
     .features-grid {
@@ -373,7 +386,7 @@
         padding: 1.8rem 1.5rem;
         text-align: center;
         transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(153, 103, 76, 0.2);
         opacity: 0;
         transform: translateY(30px);
         animation: fadeInUp 0.6s cubic-bezier(0.2, 0.9, 0.4, 1.1) forwards;
@@ -386,14 +399,14 @@
 
     .feature-card:hover {
         transform: translateY(-8px) scale(1.02);
-        border-color: rgba(255, 184, 28, 0.35);
+        border-color: var(--kuhes-accent);
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
     }
 
     .feature-icon {
         width: 70px;
         height: 70px;
-        background: rgba(255, 184, 28, 0.1);
+        background: rgba(153, 103, 76, 0.15);
         border-radius: 20px;
         display: flex;
         align-items: center;
@@ -403,13 +416,13 @@
     }
 
     .feature-card:hover .feature-icon {
-        background: rgba(255, 184, 28, 0.2);
+        background: rgba(153, 103, 76, 0.25);
         transform: scale(1.05);
     }
 
     .feature-icon i {
         font-size: 1.8rem;
-        color: rgba(255, 184, 28, 0.75);
+        color: var(--kuhes-accent);
     }
 
     .feature-card h3 {
@@ -421,7 +434,7 @@
 
     .feature-card p {
         font-size: 0.85rem;
-        color: rgba(255, 255, 255, 0.55);
+        color: rgba(255, 255, 255, 0.6);
         line-height: 1.5;
     }
 
@@ -471,14 +484,14 @@
         }
     }
 
-    /* CTA Section - Glass Morphism */
+    /* CTA Section */
     .cta-section {
-        background: rgba(10, 15, 31, 0.9);
+        background: rgba(10, 15, 31, 0.95);
         backdrop-filter: blur(10px);
         padding: 4rem 1.5rem;
         text-align: center;
-        border-top: 1px solid rgba(255, 184, 28, 0.2);
-        border-bottom: 1px solid rgba(255, 184, 28, 0.2);
+        border-top: 1px solid rgba(153, 103, 76, 0.3);
+        border-bottom: 1px solid rgba(153, 103, 76, 0.3);
     }
 
     .cta-section h3 {
@@ -486,13 +499,11 @@
         font-weight: 600;
         color: white;
         margin-bottom: 1rem;
-        animation: fadeInUp 0.6s ease-out;
     }
 
     .cta-section p {
-        color: rgba(255, 255, 255, 0.65);
+        color: rgba(255, 255, 255, 0.7);
         margin-bottom: 2rem;
-        animation: fadeInUp 0.6s ease-out 0.1s both;
     }
 
     /* Recent Resources Section */
@@ -513,7 +524,7 @@
         background: rgba(30, 41, 59, 0.7);
         backdrop-filter: blur(8px);
         border-radius: 16px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(153, 103, 76, 0.2);
         padding: 1.25rem;
         transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
         cursor: pointer;
@@ -528,14 +539,14 @@
 
     .resource-card:hover {
         transform: translateY(-5px);
-        border-color: rgba(255, 184, 28, 0.3);
+        border-color: var(--kuhes-accent);
         box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25);
     }
 
     .resource-icon {
         width: 45px;
         height: 45px;
-        background: rgba(255, 184, 28, 0.1);
+        background: rgba(153, 103, 76, 0.15);
         border-radius: 12px;
         display: flex;
         align-items: center;
@@ -545,13 +556,13 @@
     }
 
     .resource-card:hover .resource-icon {
-        background: rgba(255, 184, 28, 0.2);
+        background: rgba(153, 103, 76, 0.25);
         transform: scale(1.05);
     }
 
     .resource-icon i {
         font-size: 1.2rem;
-        color: rgba(255, 184, 28, 0.7);
+        color: var(--kuhes-accent);
     }
 
     .resource-title {
@@ -566,7 +577,7 @@
         justify-content: space-between;
         align-items: center;
         font-size: 0.65rem;
-        color: rgba(255, 255, 255, 0.55);
+        color: rgba(255, 255, 255, 0.6);
     }
 
     .resource-meta .badge {
@@ -576,18 +587,18 @@
     }
 
     .badge-gold {
-        background: rgba(255, 184, 28, 0.2);
-        color: rgba(255, 184, 28, 0.85);
+        background: rgba(153, 103, 76, 0.25);
+        color: var(--kuhes-accent-light);
     }
 
-    .badge-blue {
-        background: rgba(0, 102, 204, 0.25);
-        color: var(--kuhes-blue);
+    .badge-primary {
+        background: rgba(42, 46, 124, 0.3);
+        color: var(--kuhes-primary-light);
     }
 
     .badge-teal {
         background: rgba(0, 165, 176, 0.25);
-        color: var(--kuhes-teal);
+        color: #00A5B0;
     }
 
     @media (max-width: 992px) {
@@ -613,7 +624,7 @@
 
     /* Mobile App Banner */
     .app-banner {
-        background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-blue-dark));
+        background: linear-gradient(135deg, var(--kuhes-primary), var(--kuhes-primary-dark));
         padding: 1rem 1.5rem;
         position: relative;
         overflow: hidden;
@@ -626,7 +637,7 @@
         left: -50%;
         width: 200%;
         height: 200%;
-        background: radial-gradient(circle, rgba(255, 184, 28, 0.15), transparent);
+        background: radial-gradient(circle, rgba(153, 103, 76, 0.2), transparent);
         animation: rotateGlow 20s linear infinite;
     }
 
@@ -652,12 +663,12 @@
     }
 
     .app-banner p i {
-        color: rgba(255, 184, 28, 0.95);
+        color: var(--kuhes-accent);
     }
 
     .app-banner .btn {
-        background: white;
-        color: var(--kuhes-blue);
+        background: var(--kuhes-accent);
+        color: white;
         padding: 0.6rem 1.6rem;
         border-radius: 40px;
         font-weight: 500;
@@ -667,14 +678,15 @@
 
     .app-banner .btn:hover {
         transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        background: var(--kuhes-accent-dark);
+        box-shadow: 0 5px 15px rgba(153, 103, 76, 0.3);
     }
 
     /* Browse All Button */
     .btn-outline-browse {
-        border: 1px solid rgba(255, 255, 255, 0.25);
+        border: 1px solid var(--kuhes-accent);
         background: transparent;
-        color: white;
+        color: var(--kuhes-accent);
         border-radius: 40px;
         padding: 0.8rem 2.2rem;
         font-weight: 500;
@@ -685,9 +697,10 @@
     }
 
     .btn-outline-browse:hover {
-        background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 184, 28, 0.4);
+        background: var(--kuhes-accent);
+        color: white;
         transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(153, 103, 76, 0.3);
     }
 
     /* Back to Top Button */
@@ -697,7 +710,7 @@
         right: 30px;
         width: 50px;
         height: 50px;
-        background: rgba(0, 102, 204, 0.9);
+        background: var(--kuhes-primary);
         backdrop-filter: blur(8px);
         border-radius: 50%;
         display: flex;
@@ -708,7 +721,7 @@
         opacity: 0;
         visibility: hidden;
         transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-        border: 1px solid rgba(255, 184, 28, 0.35);
+        border: 1px solid var(--kuhes-accent);
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     }
 
@@ -719,8 +732,8 @@
 
     .back-to-top:hover {
         transform: translateY(-5px) scale(1.05);
-        background: var(--kuhes-blue);
-        box-shadow: 0 8px 25px rgba(0, 102, 204, 0.5);
+        background: var(--kuhes-primary-dark);
+        box-shadow: 0 8px 25px rgba(42, 46, 124, 0.5);
     }
 
     .back-to-top i {
@@ -748,9 +761,9 @@
 {% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
+<!-- Hero Section with Random KUHeS Campus Background -->
 <section class="hero-section" id="home">
-    <div class="hero-bg"></div>
+    <div class="hero-bg" style="background-image: url('{% random_kuhes_image_url %}');"></div>
     <div class="hero-overlay"></div>
     <div class="floating-shape shape-1"></div>
     <div class="floating-shape shape-2"></div>
@@ -839,7 +852,7 @@
     </div>
 </section>
 
-<!-- Recent Resources Section -->
+<!-- Recent Resources Section (for logged out users) -->
 {% if not user.is_authenticated %}
 <section class="recent-section">
     <div class="section-title">
@@ -865,7 +878,7 @@
             <div class="resource-title">Clinical Skills - Blood Pressure</div>
             <div class="resource-meta">
                 <span><i class="fas fa-eye"></i> 1.2K views</span>
-                <span class="badge badge-blue">Video</span>
+                <span class="badge badge-primary">Video</span>
             </div>
         </div>
         <div class="resource-card" onclick="window.location.href='{% url 'browse_resources' %}'">
@@ -886,7 +899,7 @@
 </section>
 {% endif %}
 
-<!-- CTA Section -->
+<!-- CTA Section (for logged out users) -->
 {% if not user.is_authenticated %}
 <section class="cta-section">
     <div class="container">

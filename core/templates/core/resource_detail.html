@@ -1,161 +1,198 @@
 {% extends 'core/base.html' %}
 {% load static %}
+{% load random_images %}
 
 {% block title %}{{ resource.title }} - KUHeS Knowledge Bank{% endblock %}
 
 {% block extra_css %}
 <style>
     /* ============================================
-       MODERN RESOURCE DETAIL - GLASS MORPHISM
+       KUHeS OFFICIAL BRAND COLORS
+       Primary: #2A2E7C (Astronaut Blue)
+       Accent: #99674C (Cape Palliser Tan)
+       Floating Cards - No Background Mask
     ============================================ */
 
-    /* Floating Shapes */
-    .floating-shape {
+    :root {
+        --kuhes-primary: #2A2E7C;
+        --kuhes-primary-dark: #1F2368;
+        --kuhes-primary-light: #3A3E8C;
+        --kuhes-accent: #99674C;
+        --kuhes-accent-dark: #7A4F3A;
+        --kuhes-accent-light: #B28063;
+        --kuhes-white: #FFFFFF;
+        --kuhes-card-bg: rgba(42, 46, 124, 0.92);
+        --kuhes-card-border: rgba(153, 103, 76, 0.45);
+    }
+
+    /* Resource Detail Container */
+    .resource-container {
+        min-height: calc(100vh - var(--header-height));
+        position: relative;
+        padding: 2rem;
+    }
+
+    /* Background Image - Fully Visible */
+    .resource-bg {
         position: fixed;
-        background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
-        border-radius: 50%;
-        filter: blur(80px);
-        opacity: 0.06;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
         z-index: 0;
-        animation: floatDetail 15s ease-in-out infinite;
-        pointer-events: none;
     }
 
-    @keyframes floatDetail {
-        0%, 100% { transform: translate(0, 0) scale(1); }
-        50% { transform: translate(40px, -30px) scale(1.1); }
+    /* No overlay mask */
+    .resource-container::before {
+        display: none;
     }
 
-    /* Main Card - Glass Morphism */
-    .glass-card-detail {
-        background: rgba(255, 255, 255, 0.92);
-        backdrop-filter: blur(20px);
-        border-radius: 32px;
-        border: 1px solid rgba(255, 255, 255, 0.4);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
-        transition: all 0.3s ease;
-        overflow: hidden;
+    /* Content Wrapper */
+    .resource-wrapper {
+        position: relative;
+        z-index: 1;
+        max-width: 1000px;
+        margin: 0 auto;
     }
 
-    .glass-card-detail:hover {
-        box-shadow: 0 24px 48px rgba(0, 51, 160, 0.12);
-    }
-
-    /* Breadcrumb Glass */
+    /* Breadcrumb */
     .breadcrumb-glass {
-        background: rgba(255, 255, 255, 0.8);
-        backdrop-filter: blur(12px);
-        padding: 10px 20px;
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(0px);
+        padding: 0.5rem 1rem;
         border-radius: 40px;
         display: inline-flex;
-        border: 1px solid rgba(255, 255, 255, 0.5);
+        border: 1px solid var(--kuhes-card-border);
+        margin-bottom: 1.5rem;
+    }
+
+    .breadcrumb-glass .breadcrumb-item {
+        color: rgba(255, 255, 255, 0.7);
     }
 
     .breadcrumb-glass .breadcrumb-item a {
         text-decoration: none;
-        color: var(--kuhes-blue);
+        color: var(--kuhes-accent-light);
         font-weight: 500;
-        transition: all 0.2s ease;
     }
 
     .breadcrumb-glass .breadcrumb-item a:hover {
-        color: var(--kuhes-teal);
-        transform: translateX(-2px);
+        color: var(--kuhes-accent);
     }
 
-    /* Info Table Glass */
-    .info-table-glass {
-        background: rgba(0, 51, 160, 0.03);
-        border-radius: 20px;
+    .breadcrumb-glass .breadcrumb-item.active {
+        color: var(--kuhes-white);
+    }
+
+    /* Main Card */
+    .detail-card {
+        background: var(--kuhes-card-bg);
+        border-radius: 28px;
+        border: 1px solid var(--kuhes-card-border);
         overflow: hidden;
-        backdrop-filter: blur(4px);
+        transition: all 0.3s;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
     }
 
-    .info-table-glass td, .info-table-glass th {
-        padding: 14px 18px;
-        border-bottom: 1px solid rgba(0, 51, 160, 0.08);
-    }
-
-    .info-table-glass tr:last-child td,
-    .info-table-glass tr:last-child th {
-        border-bottom: none;
-    }
-
-    .info-table-glass th {
-        font-weight: 600;
-        color: var(--kuhes-blue);
-        width: 40%;
+    .detail-card:hover {
+        border-color: var(--kuhes-accent);
     }
 
     /* Status Banner */
-    .status-banner-glass {
-        background: linear-gradient(135deg, rgba(239, 68, 68, 0.95), rgba(220, 38, 38, 0.95));
-        backdrop-filter: blur(12px);
-        border-radius: 20px;
-        padding: 1rem 1.5rem;
-        animation: slideDown 0.5s ease;
-        border: 1px solid rgba(255, 255, 255, 0.2);
+    .status-banner {
+        background: rgba(220, 53, 69, 0.15);
+        border-left: 3px solid #dc3545;
+        border-radius: 16px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
     }
 
-    @keyframes slideDown {
-        from {
-            opacity: 0;
-            transform: translateY(-30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+    .status-banner h4 {
+        color: #ff6b6b;
+        font-size: 1rem;
+        margin-bottom: 0.25rem;
     }
 
-    /* Tags */
-    .tag-glass {
+    .status-banner p {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.85rem;
+        margin: 0;
+    }
+
+    /* Card Header */
+    .card-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid rgba(153, 103, 76, 0.3);
+    }
+
+    .card-header h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--kuhes-white);
+        margin: 0;
+    }
+
+    .status-badge {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
-        padding: 8px 16px;
-        background: rgba(0, 51, 160, 0.08);
-        backdrop-filter: blur(4px);
-        border-radius: 40px;
-        font-size: 0.8rem;
-        color: var(--kuhes-blue);
-        transition: all 0.3s ease;
-        margin: 4px;
-        text-decoration: none;
+        gap: 0.5rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 30px;
+        font-size: 0.7rem;
+        font-weight: 600;
     }
 
-    .tag-glass:hover {
-        background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
-        color: white;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 51, 160, 0.2);
+    .status-badge.approved { background: rgba(40, 167, 69, 0.2); color: #48c774; }
+    .status-badge.pending { background: rgba(255, 193, 7, 0.2); color: #ffc107; }
+    .status-badge.rejected { background: rgba(220, 53, 69, 0.2); color: #ff6b6b; }
+
+    /* Info Grid */
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-bottom: 1.5rem;
     }
 
-    /* Rating Stars */
-    .rating-stars-modern {
+    .info-card {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 16px;
+        padding: 1rem;
+    }
+
+    .info-row {
         display: flex;
-        gap: 8px;
-        background: rgba(0, 51, 160, 0.05);
-        padding: 8px 16px;
-        border-radius: 40px;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(153, 103, 76, 0.2);
     }
 
-    .rating-star {
-        cursor: pointer;
-        transition: all 0.2s ease;
-        font-size: 1.2rem;
+    .info-row:last-child {
+        border-bottom: none;
     }
 
-    .rating-star:hover {
-        transform: scale(1.2);
+    .info-label {
+        width: 100px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .info-value {
+        flex: 1;
+        font-size: 0.85rem;
+        color: var(--kuhes-white);
+        font-weight: 500;
     }
 
     /* Video Container */
-    .video-container-glass {
-        border-radius: 24px;
+    .video-container {
+        border-radius: 20px;
         overflow: hidden;
+        margin-bottom: 1.5rem;
         background: #000;
-        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
     }
 
     .ratio-16x9 {
@@ -173,574 +210,545 @@
         border: none;
     }
 
-    /* Modern Buttons */
-    .btn-modern-detail {
-        border-radius: 16px;
-        padding: 12px 28px;
-        font-weight: 600;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        position: relative;
-        overflow: hidden;
+    /* Description */
+    .description-box {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
     }
 
-    .btn-modern-detail::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 0;
-        height: 0;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.3);
-        transform: translate(-50%, -50%);
-        transition: width 0.6s, height 0.6s;
+    .description-box p {
+        color: rgba(255, 255, 255, 0.8);
+        line-height: 1.6;
+        margin: 0;
     }
 
-    .btn-modern-detail:active::before {
-        width: 300px;
-        height: 300px;
+    /* Tags */
+    .tags-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
     }
 
-    .btn-modern-detail:hover {
-        transform: translateY(-2px);
+    .tag {
+        background: rgba(153, 103, 76, 0.15);
+        padding: 0.25rem 0.75rem;
+        border-radius: 30px;
+        font-size: 0.7rem;
+        color: var(--kuhes-accent-light);
+        text-decoration: none;
+        transition: all 0.2s;
     }
 
+    .tag:hover {
+        background: rgba(153, 103, 76, 0.25);
+        transform: translateY(-1px);
+    }
+
+    /* Rating Section */
+    .rating-section {
+        background: rgba(153, 103, 76, 0.1);
+        border-radius: 20px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .rating-stars {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .stars {
+        display: flex;
+        gap: 0.25rem;
+    }
+
+    .stars i {
+        font-size: 1rem;
+        color: #ffc107;
+    }
+
+    .rating-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--kuhes-white);
+    }
+
+    .rating-count {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.75rem;
+    }
+
+    /* Buttons */
     .btn-primary {
-        background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
-        color: white;
+        background: linear-gradient(135deg, var(--kuhes-primary), var(--kuhes-primary-dark));
         border: none;
+        border-radius: 40px;
+        padding: 0.7rem 1.5rem;
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
     .btn-primary:hover {
-        box-shadow: 0 8px 20px rgba(0, 51, 160, 0.3);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(42, 46, 124, 0.4);
+    }
+
+    .btn-outline {
+        background: transparent;
+        border: 1px solid var(--kuhes-card-border);
+        border-radius: 40px;
+        padding: 0.7rem 1.5rem;
+        font-weight: 500;
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.8);
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-outline:hover {
+        border-color: var(--kuhes-accent);
+        color: var(--kuhes-accent-light);
+        transform: translateY(-2px);
     }
 
     .btn-outline-warning {
-        border: 2px solid var(--kuhes-gold);
         background: transparent;
-        color: var(--kuhes-gold);
+        border: 1px solid var(--kuhes-accent);
+        border-radius: 40px;
+        padding: 0.7rem 1.5rem;
+        font-weight: 500;
+        font-size: 0.85rem;
+        color: var(--kuhes-accent);
+        cursor: pointer;
+        transition: all 0.3s;
     }
 
     .btn-outline-warning:hover {
-        background: linear-gradient(135deg, var(--kuhes-gold), #FFD700);
-        border-color: transparent;
-        color: var(--kuhes-blue);
-    }
-
-    /* Button Loading State */
-    .btn-loading {
-        pointer-events: none;
-        opacity: 0.8;
-    }
-
-    .btn-loading .btn-text {
-        visibility: visible;
-    }
-
-    .btn-loading .spinner-small {
-        display: inline-block;
-        width: 18px;
-        height: 18px;
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        border-top-color: white;
-        border-radius: 50%;
-        animation: spin 0.6s linear infinite;
-        margin-right: 8px;
-    }
-
-    @keyframes spin {
-        to { transform: rotate(360deg); }
-    }
-
-    /* Request Card */
-    .request-card-glass {
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(8px);
-        border-radius: 20px;
-        padding: 1.25rem;
-        margin-bottom: 1rem;
-        transition: all 0.3s ease;
-        border: 1px solid rgba(0, 51, 160, 0.1);
-    }
-
-    .request-card-glass:hover {
-        transform: translateX(6px);
-        border-color: var(--kuhes-blue);
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-    }
-
-    /* Urgency Badges */
-    .badge-urgency {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 6px 14px;
-        border-radius: 40px;
-        font-size: 0.75rem;
-        font-weight: 600;
-    }
-
-    .badge-urgency.urgent { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; }
-    .badge-urgency.high { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; }
-    .badge-urgency.medium { background: linear-gradient(135deg, #ffc107, #e6b800); color: #856404; }
-    .badge-urgency.low { background: linear-gradient(135deg, #10b981, #059669); color: white; }
-
-    /* Upvote Button */
-    .upvote-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 16px;
-        background: rgba(0, 0, 0, 0.05);
-        border-radius: 40px;
-        transition: all 0.3s ease;
-        cursor: pointer;
-        font-weight: 500;
-    }
-
-    .upvote-btn:hover {
-        background: var(--kuhes-blue);
+        background: var(--kuhes-accent);
         color: white;
         transform: translateY(-2px);
     }
 
-    .upvote-btn.upvoted {
-        background: var(--kuhes-blue);
-        color: white;
+    /* Button Group */
+    .button-group {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin: 1.5rem 0;
     }
 
-    /* Skeleton Loader */
-    .skeleton-detail {
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(8px);
-        border-radius: 32px;
-        padding: 2rem;
+    /* Alert Message */
+    .alert-pending {
+        background: rgba(255, 193, 7, 0.15);
+        border-left: 3px solid #ffc107;
+        border-radius: 16px;
+        padding: 1rem;
+        margin-top: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
     }
 
-    .skeleton-line {
-        height: 14px;
-        background: linear-gradient(90deg, #e2e8f0 0%, #f1f5f9 50%, #e2e8f0 100%);
+    .alert-pending i {
+        font-size: 1.5rem;
+        color: #ffc107;
+    }
+
+    .alert-pending strong {
+        color: #ffc107;
+    }
+
+    .alert-pending small {
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    /* Footer */
+    .card-footer {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid rgba(153, 103, 76, 0.3);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .footer-meta {
+        font-size: 0.7rem;
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    /* Skeleton */
+    .skeleton-card {
+        background: var(--kuhes-card-bg);
+        border-radius: 28px;
+        border: 1px solid var(--kuhes-card-border);
+        padding: 1.5rem;
+    }
+
+    .skeleton {
+        background: linear-gradient(90deg, rgba(255,255,255,0.08) 25%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.08) 75%);
         background-size: 200% 100%;
-        animation: shimmer 1.5s infinite;
+        animation: shimmer 1.2s infinite;
         border-radius: 8px;
-        margin: 12px 0;
     }
-
-    .skeleton-line.short { width: 40%; }
-    .skeleton-line.medium { width: 60%; }
-    .skeleton-line.long { width: 100%; }
-    .skeleton-title { height: 32px; width: 70%; margin-bottom: 20px; }
 
     @keyframes shimmer {
         0% { background-position: 200% 0; }
         100% { background-position: -200% 0; }
     }
 
-    /* Mobile Optimizations */
-    @media (max-width: 768px) {
-        .container {
-            padding: 16px;
-        }
-        .glass-card-detail .card-body {
-            padding: 1.5rem !important;
-        }
-        .info-table-glass td, .info-table-glass th {
-            padding: 10px 12px;
-            font-size: 0.85rem;
-        }
-        .btn-modern-detail {
-            padding: 10px 20px;
-            font-size: 0.9rem;
-        }
-        .breadcrumb-glass {
-            padding: 6px 14px;
-            font-size: 0.8rem;
-        }
+    .skeleton-title {
+        height: 28px;
+        width: 60%;
+        margin-bottom: 1rem;
     }
 
-    /* Animation for view count */
-    @keyframes countPop {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.2); color: var(--kuhes-blue); }
-        100% { transform: scale(1); }
+    .skeleton-line {
+        height: 12px;
+        margin: 0.5rem 0;
     }
 
-    .view-count-animation {
-        animation: countPop 0.4s ease;
+    .skeleton-line.short { width: 40%; }
+    .skeleton-line.medium { width: 70%; }
+    .skeleton-line.long { width: 100%; }
+
+    /* Loading State */
+    .btn-loading {
+        pointer-events: none;
+        opacity: 0.7;
+    }
+
+    .btn-loading .spinner-small {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+        margin-right: 6px;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
     }
 
     /* Bookmark Animation */
     @keyframes bookmarkPop {
         0% { transform: scale(1); }
-        50% { transform: scale(1.3); color: var(--kuhes-gold); }
+        50% { transform: scale(1.2); }
         100% { transform: scale(1); }
     }
 
     .bookmark-animation {
         animation: bookmarkPop 0.3s ease;
     }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+        .resource-container {
+            padding: 1rem;
+        }
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+        .card-header h2 {
+            font-size: 1.2rem;
+        }
+        .button-group {
+            flex-direction: column;
+        }
+        .button-group .btn {
+            width: 100%;
+            justify-content: center;
+        }
+        .rating-section {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- Floating Shapes -->
-<div class="floating-shape" style="width: 500px; height: 500px; top: -200px; right: -200px;"></div>
-<div class="floating-shape" style="width: 400px; height: 400px; bottom: -150px; left: -150px;"></div>
+<!-- Background Image - Fully Visible -->
+<div class="resource-bg" style="background-image: url('{% random_kuhes_image_url %}');"></div>
 
-<div class="container mt-4">
-    <!-- Skeleton Loader -->
-    <div id="resourceSkeleton" style="display: none;">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="skeleton-detail">
-                    <div class="skeleton-title"></div>
-                    <div class="skeleton-line long"></div>
-                    <div class="skeleton-line medium"></div>
-                    <div class="skeleton-line short"></div>
-                    <div class="row mt-4">
-                        <div class="col-md-6"><div class="skeleton-line long"></div></div>
-                        <div class="col-md-6"><div class="skeleton-line long"></div></div>
-                    </div>
-                </div>
+<div class="resource-container">
+    <div class="resource-wrapper">
+
+        <!-- Skeleton Loader -->
+        <div id="skeletonLoader" class="skeleton-card" style="display: none;">
+            <div class="skeleton skeleton-title"></div>
+            <div class="skeleton skeleton-line long"></div>
+            <div class="skeleton skeleton-line medium"></div>
+            <div class="skeleton skeleton-line short"></div>
+            <div class="row mt-4">
+                <div class="col-md-6"><div class="skeleton skeleton-line long"></div></div>
+                <div class="col-md-6"><div class="skeleton skeleton-line long"></div></div>
             </div>
         </div>
-    </div>
 
-    <!-- Actual Content -->
-    <div id="resourceContent">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <!-- Breadcrumb -->
-                <nav aria-label="breadcrumb" class="mb-3">
-                    <ol class="breadcrumb-glass">
-                        <li class="breadcrumb-item"><a href="{% url 'browse_resources' %}" data-loading="true">Browse</a></li>
-                        <li class="breadcrumb-item active text-truncate" style="max-width: 300px;">{{ resource.title|truncatechars:40 }}</li>
-                    </ol>
-                </nav>
+        <!-- Actual Content -->
+        <div id="resourceContent">
 
-                <!-- Status Banner for Rejected Resources -->
-                {% if resource.status == 'rejected' %}
-                <div class="status-banner-glass text-white mb-4">
-                    <div class="d-flex align-items-center gap-3">
-                        <i class="fas fa-exclamation-triangle fa-2x"></i>
-                        <div class="flex-grow-1">
-                            <h4 class="mb-1 fw-bold">Resource Rejected</h4>
-                            <p class="mb-0 opacity-90"><strong>Reason:</strong> {{ resource.rejection_reason|default:"Does not meet KUHeS Knowledge Bank guidelines." }}</p>
-                        </div>
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb-glass">
+                    <li class="breadcrumb-item"><a href="{% url 'browse_resources' %}" data-loading="true">Browse</a></li>
+                    <li class="breadcrumb-item active">{{ resource.title|truncatechars:40 }}</li>
+                </ol>
+            </nav>
+
+            <!-- Status Banner for Rejected Resources -->
+            {% if resource.status == 'rejected' %}
+            <div class="status-banner">
+                <h4><i class="fas fa-exclamation-triangle me-2"></i>Resource Rejected</h4>
+                <p><strong>Reason:</strong> {{ resource.rejection_reason|default:"Does not meet KUHeS Knowledge Bank guidelines." }}</p>
+            </div>
+            {% endif %}
+
+            <!-- Main Resource Card -->
+            <div class="detail-card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                        <h2>{{ resource.title }}</h2>
+                        <span class="status-badge {{ resource.status }}">
+                            <i class="fas
+                                {% if resource.status == 'approved' %}fa-check-circle
+                                {% elif resource.status == 'pending' %}fa-clock
+                                {% else %}fa-times-circle{% endif %}">
+                            </i>
+                            {{ resource.get_status_display }}
+                        </span>
                     </div>
                 </div>
-                {% endif %}
 
-                <!-- Main Resource Card -->
-                <div class="glass-card-detail">
-                    <div class="card-body p-4 p-lg-5">
-                        <!-- Header -->
-                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
-                            <h2 class="h2 fw-bold gradient-text mb-0">{{ resource.title }}</h2>
-                            <span class="badge
-                                {% if resource.status == 'approved' %}bg-success
-                                {% elif resource.status == 'pending' %}bg-warning text-dark
-                                {% elif resource.status == 'rejected' %}bg-danger
-                                {% else %}bg-secondary{% endif %} px-3 py-2 rounded-pill fs-6">
-                                <i class="fas
-                                    {% if resource.status == 'approved' %}fa-check-circle
-                                    {% elif resource.status == 'pending' %}fa-clock
-                                    {% elif resource.status == 'rejected' %}fa-times-circle
-                                    {% else %}fa-circle{% endif %} me-1"></i>
-                                {{ resource.get_status_display }}
-                            </span>
-                        </div>
-
-                        <!-- Metadata Tables -->
-                        <div class="row g-4 mb-5">
-                            <div class="col-md-6">
-                                <div class="info-table-glass">
-                                    <table class="table table-sm mb-0">
-                                        <tr>
-                                            <th><i class="fas fa-graduation-cap me-2"></i>Level:</th>
-                                            <td>{{ resource.get_level_display }}</td>
-                                        </tr>
-                                        {% if resource.level == 'premed' and resource.premed_subject %}
-                                        <tr>
-                                            <th><i class="fas fa-book me-2"></i>Subject:</th>
-                                            <td>{{ resource.get_premed_subject_display }}</td>
-                                        </tr>
-                                        {% endif %}
-                                        {% if resource.school %}
-                                        <tr>
-                                            <th><i class="fas fa-university me-2"></i>School:</th>
-                                            <td>{{ resource.get_school_display|truncatechars:30 }}</td>
-                                        </tr>
-                                        {% endif %}
-                                        {% if resource.programme %}
-                                        <tr>
-                                            <th><i class="fas fa-certificate me-2"></i>Programme:</th>
-                                            <td>{{ resource.programme }}</td>
-                                        </tr>
-                                        {% endif %}
-                                    </table>
-                                </div>
+                <div class="card-body p-4">
+                    <!-- Info Grid -->
+                    <div class="info-grid">
+                        <div class="info-card">
+                            <div class="info-row">
+                                <div class="info-label"><i class="fas fa-graduation-cap me-2"></i>Level</div>
+                                <div class="info-value">{{ resource.get_level_display }}</div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="info-table-glass">
-                                    <table class="table table-sm mb-0">
-                                        <tr>
-                                            <th><i class="fas fa-user me-2"></i>Uploaded by:</th>
-                                            <td>{{ resource.uploader.get_full_name|default:resource.uploader.username }}</td>
-                                        </tr>
-                                        <tr>
-                                            <th><i class="fas fa-calendar me-2"></i>Date:</th>
-                                            <td>{{ resource.upload_date|date:"F j, Y" }}</td>
-                                        </tr>
-                                        <tr>
-                                            <th><i class="fas fa-download me-2"></i>Downloads:</th>
-                                            <td><strong id="downloadCount">{{ resource.download_count }}</strong></td>
-                                        </tr>
-                                        <tr>
-                                            <th><i class="fas fa-eye me-2"></i>Views:</th>
-                                            <td><strong id="viewCount">{{ resource.view_count|default:0 }}</strong></td>
-                                        </tr>
-                                    </table>
-                                </div>
+                            {% if resource.level == 'premed' and resource.premed_subject %}
+                            <div class="info-row">
+                                <div class="info-label"><i class="fas fa-book me-2"></i>Subject</div>
+                                <div class="info-value">{{ resource.get_premed_subject_display }}</div>
+                            </div>
+                            {% endif %}
+                            {% if resource.school %}
+                            <div class="info-row">
+                                <div class="info-label"><i class="fas fa-university me-2"></i>School</div>
+                                <div class="info-value">{{ resource.get_school_display|truncatechars:30 }}</div>
+                            </div>
+                            {% endif %}
+                            {% if resource.programme %}
+                            <div class="info-row">
+                                <div class="info-label"><i class="fas fa-certificate me-2"></i>Programme</div>
+                                <div class="info-value">{{ resource.programme }}</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="info-card">
+                            <div class="info-row">
+                                <div class="info-label"><i class="fas fa-user me-2"></i>Uploader</div>
+                                <div class="info-value">{{ resource.uploader.get_full_name|default:resource.uploader.username }}</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label"><i class="fas fa-calendar me-2"></i>Date</div>
+                                <div class="info-value">{{ resource.upload_date|date:"F j, Y" }}</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label"><i class="fas fa-download me-2"></i>Downloads</div>
+                                <div class="info-value"><strong id="downloadCount">{{ resource.download_count }}</strong></div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label"><i class="fas fa-eye me-2"></i>Views</div>
+                                <div class="info-value"><strong id="viewCount">{{ resource.views_count|default:0 }}</strong></div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Video Embed -->
-                        {% if resource.resource_type == 'video' and resource.video_link %}
-                        <div class="mb-5">
-                            <h5 class="fw-bold mb-3"><i class="fas fa-video me-2" style="color: var(--kuhes-blue);"></i>Video Preview</h5>
-                            <div class="video-container-glass">
-                                <div class="ratio ratio-16x9">
-                                    {% if 'youtube.com' in resource.video_link or 'youtu.be' in resource.video_link %}
-                                        {% with video_id=resource.video_link|cut:'https://www.youtube.com/watch?v='|cut:'https://youtu.be/'|cut:'https://m.youtube.com/watch?v=' %}
-                                            <iframe src="https://www.youtube.com/embed/{{ video_id }}?rel=0&modestbranding=1&autoplay=0"
-                                                    allowfullscreen
-                                                    loading="lazy"
-                                                    title="{{ resource.title }}"></iframe>
-                                        {% endwith %}
-                                    {% elif 'vimeo.com' in resource.video_link %}
-                                        <iframe src="{{ resource.video_link }}" allowfullscreen loading="lazy"></iframe>
-                                    {% else %}
-                                        <div class="d-flex align-items-center justify-content-center bg-light h-100">
-                                            <a href="{{ resource.video_link }}" target="_blank" class="btn btn-primary btn-modern-detail" data-loading="true">
-                                                <i class="fas fa-play me-2"></i>Watch Video
-                                            </a>
-                                        </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                        {% endif %}
-
-                        <!-- Description -->
-                        {% if resource.description %}
-                        <div class="mb-5">
-                            <h5 class="fw-bold mb-3"><i class="fas fa-align-left me-2" style="color: var(--kuhes-blue);"></i>Description</h5>
-                            <div class="p-4 rounded-4" style="background: rgba(0, 51, 160, 0.03);">
-                                <p class="mb-0" style="white-space: pre-wrap; line-height: 1.7;">{{ resource.description|linebreaks }}</p>
-                            </div>
-                        </div>
-                        {% endif %}
-
-                        <!-- Tags -->
-                        {% if resource.tags %}
-                        <div class="mb-5">
-                            <h5 class="fw-bold mb-3"><i class="fas fa-tags me-2" style="color: var(--kuhes-blue);"></i>Tags</h5>
-                            <div class="d-flex flex-wrap gap-2">
-                                {% for tag in resource.tags.split %}
-                                    <a href="{% url 'browse_resources' %}?q={{ tag }}" class="tag-glass" data-loading="true">
-                                        <i class="fas fa-hashtag fa-xs"></i>{{ tag }}
+                    <!-- Video Embed -->
+                    {% if resource.resource_type == 'video' and resource.video_link %}
+                    <div class="video-container">
+                        <div class="ratio-16x9">
+                            {% if 'youtube.com' in resource.video_link or 'youtu.be' in resource.video_link %}
+                                {% with video_id=resource.video_link|cut:'https://www.youtube.com/watch?v='|cut:'https://youtu.be/'|cut:'https://m.youtube.com/watch?v=' %}
+                                    <iframe src="https://www.youtube.com/embed/{{ video_id }}?rel=0&modestbranding=1"
+                                            allowfullscreen
+                                            loading="lazy"
+                                            title="{{ resource.title }}"></iframe>
+                                {% endwith %}
+                            {% elif 'vimeo.com' in resource.video_link %}
+                                <iframe src="{{ resource.video_link }}" allowfullscreen loading="lazy"></iframe>
+                            {% else %}
+                                <div class="d-flex align-items-center justify-content-center h-100 bg-dark">
+                                    <a href="{{ resource.video_link }}" target="_blank" class="btn-primary" data-loading="true">
+                                        <i class="fas fa-play me-2"></i>Watch Video
                                     </a>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        {% endif %}
-
-                        <!-- Rating Section -->
-                        {% if resource.status == 'approved' %}
-                        <div class="mb-5">
-                            <h5 class="fw-bold mb-3"><i class="fas fa-star me-2" style="color: var(--kuhes-gold);"></i>Rating</h5>
-                            <div class="d-flex align-items-center flex-wrap gap-4">
-                                <div class="d-flex align-items-center gap-3">
-                                    {% with avg_rating=resource.average_rating %}
-                                        <div class="rating-stars-modern">
-                                            {% for i in "12345"|make_list %}
-                                                {% if forloop.counter <= avg_rating|floatformat:0 %}
-                                                    <i class="fas fa-star text-warning"></i>
-                                                {% elif forloop.counter <= avg_rating|add:0.5 %}
-                                                    <i class="fas fa-star-half-alt text-warning"></i>
-                                                {% else %}
-                                                    <i class="far fa-star text-warning"></i>
-                                                {% endif %}
-                                            {% endfor %}
-                                        </div>
-                                        <div>
-                                            <span class="fw-bold fs-3 me-1">{{ avg_rating|floatformat:1 }}</span>
-                                            <small class="text-muted">({{ resource.total_ratings|default:0 }} rating{{ resource.total_ratings|pluralize }})</small>
-                                        </div>
-                                    {% endwith %}
                                 </div>
-
-                                {% if user.is_authenticated and user != resource.uploader %}
-                                <div class="dropdown">
-                                    <button class="btn btn-outline-warning btn-modern-detail dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                        <i class="fas fa-star me-2"></i>Rate this resource
-                                    </button>
-                                    <ul class="dropdown-menu p-3" style="min-width: 220px;">
-                                        <li>
-                                            <form method="post" action="{% url 'rate_resource' resource.id %}" id="ratingForm">
-                                                {% csrf_token %}
-                                                <div class="d-flex flex-column gap-2 mb-3">
-                                                    {% for i in "54321"|make_list %}
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="radio" name="rating" value="{{ i }}" id="star{{ i }}" {% if user_rating == i|add:0 %}checked{% endif %}>
-                                                            <label class="form-check-label" for="star{{ i }}">
-                                                                {% for s in "12345"|make_list %}
-                                                                    {% if forloop.counter <= i|add:0 %}
-                                                                        <i class="fas fa-star text-warning"></i>
-                                                                    {% else %}
-                                                                        <i class="far fa-star text-warning"></i>
-                                                                    {% endif %}
-                                                                {% endfor %}
-                                                            </label>
-                                                        </div>
-                                                    {% endfor %}
-                                                </div>
-                                                <button type="submit" class="btn btn-warning w-100 rounded-pill" id="submitRatingBtn">
-                                                    <span class="btn-text">Submit Rating</span>
-                                                </button>
-                                            </form>
-                                        </li>
-                                    </ul>
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        {% endif %}
-
-                        <!-- Action Buttons -->
-                        <div class="d-flex flex-wrap gap-3 justify-content-center mt-4 pt-3">
-                            <!-- Download Button -->
-                            {% if can_download and resource.file %}
-                                <a href="{% url 'download_resource' resource.id %}"
-                                   data-loading="true"
-                                   class="btn btn-primary btn-modern-detail px-5"
-                                   id="downloadBtn">
-                                    <span class="spinner-small"></span>
-                                    <span class="btn-text">
-                                        <i class="fas fa-download me-2"></i>Download
-                                        {% if resource.status != 'approved' %}
-                                            <span class="badge bg-light text-dark ms-2 rounded-pill">Review Copy</span>
-                                        {% endif %}
-                                    </span>
-                                </a>
-                            {% elif not can_download and resource.file %}
-                                <button class="btn btn-secondary btn-modern-detail px-5" disabled>
-                                    <i class="fas fa-lock me-2"></i>Download Unavailable
-                                </button>
                             {% endif %}
-
-                            <!-- Bookmark Button -->
-                            {% if can_interact and resource.status == 'approved' %}
-                                <a href="{% url 'toggle_bookmark' resource.id %}"
-                                   data-loading="true"
-                                   class="btn btn-outline-warning btn-modern-detail px-4"
-                                   id="bookmarkBtn">
-                                    <span class="btn-text">
-                                        {% if user in resource.bookmarked_by.all %}
-                                            <i class="fas fa-bookmark me-2"></i>Bookmarked
-                                        {% else %}
-                                            <i class="far fa-bookmark me-2"></i>Bookmark
-                                        {% endif %}
-                                    </span>
-                                </a>
-                            {% endif %}
-
-                            <!-- Back Button -->
-                            <button class="btn btn-outline-secondary btn-modern-detail px-4" onclick="goBack()">
-                                <i class="fas fa-arrow-left me-2"></i>Back
-                            </button>
-                        </div>
-
-                        <!-- Uploader Message for Pending Resources -->
-                        {% if user == resource.uploader and resource.status == 'pending' %}
-                            <div class="alert alert-warning mt-4 rounded-4" style="background: rgba(255, 193, 7, 0.15); border: none;">
-                                <div class="d-flex align-items-center gap-3">
-                                    <i class="fas fa-clock fa-2x text-warning"></i>
-                                    <div>
-                                        <strong class="d-block">Pending Review</strong>
-                                        <small class="text-muted">Your resource is awaiting moderator approval. You'll be notified once reviewed.</small>
-                                    </div>
-                                </div>
-                            </div>
-                        {% endif %}
-                    </div>
-
-                    <!-- Footer Stats -->
-                    <div class="card-footer bg-transparent border-0 pb-4 pt-0">
-                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                            <small class="text-muted">
-                                <i class="fas fa-info-circle me-1"></i>
-                                Downloaded <strong>{{ resource.download_count }}</strong> times
-                            </small>
-                            <small class="text-muted">
-                                <i class="fas fa-clock me-1"></i>
-                                Uploaded {{ resource.upload_date|timesince }} ago
-                            </small>
-                            <small class="text-muted">
-                                <i class="fas fa-file me-1"></i>
-                                {{ resource.file_type|upper|default:"DOCUMENT" }}
-                            </small>
                         </div>
                     </div>
-                </div>
+                    {% endif %}
 
-                <!-- Resource Requests Section -->
-                {% if resource.requests.exists %}
-                <div class="glass-card-detail mt-4">
-                    <div class="card-body p-4">
-                        <h5 class="fw-bold mb-3">
-                            <i class="fas fa-hands-helping me-2" style="color: var(--kuhes-blue);"></i>
-                            Related Requests ({{ resource.requests.count }})
-                        </h5>
-                        {% for resource_request in resource.requests.all %}
-                        <div class="request-card-glass">
-                            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
-                                <span class="badge-urgency {{ resource_request.urgency }}">
-                                    <i class="fas
-                                        {% if resource_request.urgency == 'urgent' %}fa-exclamation-circle
-                                        {% elif resource_request.urgency == 'high' %}fa-arrow-up
-                                        {% elif resource_request.urgency == 'medium' %}fa-minus
-                                        {% else %}fa-arrow-down{% endif %} me-1">
-                                    </i>
-                                    {{ resource_request.get_urgency_display }}
-                                </span>
-                                <div class="d-flex gap-3">
-                                    <span class="text-muted small">
-                                        <i class="far fa-user me-1"></i>{{ resource_request.requester.get_full_name|default:resource_request.requester.username }}
-                                    </span>
-                                    <span class="text-muted small">
-                                        <i class="far fa-clock me-1"></i>{{ resource_request.created_at|timesince }} ago
-                                    </span>
-                                </div>
-                            </div>
-                            <p class="mb-2 text-muted">{{ resource_request.message|truncatechars:200 }}</p>
-                            <div class="d-flex justify-content-between align-items-center mt-2">
-                                <div class="d-flex gap-2">
-                                    <button class="upvote-btn" data-request-id="{{ resource_request.id }}">
-                                        <i class="fas fa-arrow-up"></i>
-                                        <span class="upvote-count">{{ resource_request.upvotes }}</span>
-                                    </button>
-                                </div>
-                                <small class="text-muted">
-                                    <i class="fas fa-comment me-1"></i>{{ resource_request.comments.count|default:0 }} comments
-                                </small>
-                            </div>
-                        </div>
+                    <!-- Description -->
+                    {% if resource.description %}
+                    <div class="description-box">
+                        <p>{{ resource.description|linebreaks }}</p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Tags -->
+                    {% if resource.tags %}
+                    <div class="tags-container">
+                        {% for tag in resource.tags.split %}
+                            <a href="{% url 'browse_resources' %}?q={{ tag }}" class="tag" data-loading="true">
+                                <i class="fas fa-hashtag fa-xs me-1"></i>{{ tag }}
+                            </a>
                         {% endfor %}
                     </div>
+                    {% endif %}
+
+                    <!-- Rating Section -->
+                    {% if resource.status == 'approved' %}
+                    <div class="rating-section">
+                        <div class="rating-stars">
+                            <div class="stars">
+                                {% with avg_rating=resource.average_rating %}
+                                    {% for i in "12345"|make_list %}
+                                        {% if forloop.counter <= avg_rating|floatformat:0 %}
+                                            <i class="fas fa-star"></i>
+                                        {% elif forloop.counter <= avg_rating|add:0.5 %}
+                                            <i class="fas fa-star-half-alt"></i>
+                                        {% else %}
+                                            <i class="far fa-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endwith %}
+                            </div>
+                            <div>
+                                <span class="rating-number">{{ resource.average_rating|floatformat:1 }}</span>
+                                <span class="rating-count">({{ resource.total_ratings|default:0 }} ratings)</span>
+                            </div>
+                        </div>
+
+                        {% if user.is_authenticated and user != resource.uploader %}
+                        <div class="dropdown">
+                            <button class="btn-outline-warning dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-star me-2"></i>Rate this resource
+                            </button>
+                            <ul class="dropdown-menu p-3" style="min-width: 220px; background: var(--kuhes-card-bg); border: 1px solid var(--kuhes-card-border);">
+                                <li>
+                                    <form method="post" action="{% url 'rate_resource' resource.id %}" id="ratingForm">
+                                        {% csrf_token %}
+                                        <div class="d-flex flex-column gap-2 mb-3">
+                                            {% for i in "54321"|make_list %}
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="rating" value="{{ i }}" id="star{{ i }}" {% if user_rating == i|add:0 %}checked{% endif %}>
+                                                    <label class="form-check-label" for="star{{ i }}">
+                                                        {% for s in "12345"|make_list %}
+                                                            {% if forloop.counter <= i|add:0 %}
+                                                                <i class="fas fa-star text-warning"></i>
+                                                            {% else %}
+                                                                <i class="far fa-star text-warning"></i>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    </label>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                        <button type="submit" class="btn-primary w-100" id="submitRatingBtn">
+                                            <span class="btn-text">Submit Rating</span>
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Action Buttons -->
+                    <div class="button-group">
+                        {% if can_download and resource.file %}
+                            <a href="{% url 'download_resource' resource.id %}" class="btn-primary" id="downloadBtn" data-loading="true">
+                                <span class="spinner-small"></span>
+                                <i class="fas fa-download me-2"></i>Download
+                                {% if resource.status != 'approved' %}
+                                    <span class="badge bg-light text-dark ms-2">Review Copy</span>
+                                {% endif %}
+                            </a>
+                        {% elif not can_download and resource.file %}
+                            <button class="btn-outline" disabled>
+                                <i class="fas fa-lock me-2"></i>Download Unavailable
+                            </button>
+                        {% endif %}
+
+                        {% if can_interact and resource.status == 'approved' %}
+                            <a href="{% url 'toggle_bookmark' resource.id %}" class="btn-outline-warning" id="bookmarkBtn" data-loading="true">
+                                {% if user in resource.bookmarked_by.all %}
+                                    <i class="fas fa-bookmark me-2"></i>Bookmarked
+                                {% else %}
+                                    <i class="far fa-bookmark me-2"></i>Bookmark
+                                {% endif %}
+                            </a>
+                        {% endif %}
+
+                        <button class="btn-outline" onclick="goBack()">
+                            <i class="fas fa-arrow-left me-2"></i>Back
+                        </button>
+                    </div>
+
+                    <!-- Uploader Message for Pending Resources -->
+                    {% if user == resource.uploader and resource.status == 'pending' %}
+                    <div class="alert-pending">
+                        <i class="fas fa-clock"></i>
+                        <div>
+                            <strong>Pending Review</strong>
+                            <small class="d-block">Your resource is awaiting moderator approval. You'll be notified once reviewed.</small>
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
-                {% endif %}
+
+                <!-- Footer -->
+                <div class="card-footer">
+                    <div class="footer-meta">
+                        <i class="fas fa-info-circle me-1"></i>Downloaded <strong>{{ resource.download_count }}</strong> times
+                    </div>
+                    <div class="footer-meta">
+                        <i class="fas fa-clock me-1"></i>Uploaded {{ resource.upload_date|timesince }} ago
+                    </div>
+                    <div class="footer-meta">
+                        <i class="fas fa-file me-1"></i>{{ resource.file_type|upper|default:"DOCUMENT" }}
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -748,7 +756,7 @@
 
 <script>
     // ============================================
-    // MODERN RESOURCE DETAIL INTERACTIONS
+    // RESOURCE DETAIL INTERACTIONS
     // ============================================
 
     // Go back with fallback
@@ -760,7 +768,7 @@
         }
     }
 
-    // Rating form with loading state
+    // Rating form loading
     const ratingForm = document.getElementById('ratingForm');
     if (ratingForm) {
         ratingForm.addEventListener('submit', function(e) {
@@ -777,7 +785,6 @@
     if (downloadBtn) {
         downloadBtn.addEventListener('click', function(e) {
             this.classList.add('btn-loading');
-            this.querySelector('.spinner-small')?.classList.add('d-inline-block');
         });
     }
 
@@ -793,34 +800,7 @@
         });
     }
 
-    // Upvote functionality
-    document.querySelectorAll('.upvote-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const requestId = this.dataset.requestId;
-            const url = `/upvote-request/${requestId}/`;
-
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}',
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.upvoted) {
-                    btn.classList.add('upvoted');
-                } else {
-                    btn.classList.remove('upvoted');
-                }
-                const countSpan = btn.querySelector('.upvote-count');
-                if (countSpan) countSpan.textContent = data.count;
-            })
-            .catch(console.error);
-        });
-    });
-
-    // Animate view count on load
+    // Animate view count
     const viewCountElement = document.getElementById('viewCount');
     if (viewCountElement && !sessionStorage.getItem(`viewed_{{ resource.id }}`)) {
         viewCountElement.classList.add('view-count-animation');
@@ -828,9 +808,9 @@
         sessionStorage.setItem(`viewed_{{ resource.id }}`, 'true');
     }
 
-    // Skeleton loader for slow connections
+    // Skeleton loader
     if (document.readyState === 'loading') {
-        const skeleton = document.getElementById('resourceSkeleton');
+        const skeleton = document.getElementById('skeletonLoader');
         const content = document.getElementById('resourceContent');
         if (skeleton && content) {
             skeleton.style.display = 'block';
@@ -845,7 +825,7 @@
 
     // Auto-dismiss alerts
     setTimeout(() => {
-        document.querySelectorAll('.alert:not(.status-banner-glass)').forEach(alert => {
+        document.querySelectorAll('.alert:not(.status-banner)').forEach(alert => {
             if (alert && alert.parentElement) {
                 alert.style.opacity = '0';
                 alert.style.transition = 'opacity 0.3s';
@@ -854,10 +834,11 @@
         });
     }, 5000);
 
-    // Handle data-loading links
+    // Loading states for navigation
     document.querySelectorAll('a[data-loading="true"]').forEach(link => {
         link.addEventListener('click', function(e) {
-            if (!this.getAttribute('href') || this.getAttribute('href') === '#') return;
+            const href = this.getAttribute('href');
+            if (!href || href === '#') return;
             if (window.loadingManager) window.loadingManager.showGlobal('Loading...');
         });
     });

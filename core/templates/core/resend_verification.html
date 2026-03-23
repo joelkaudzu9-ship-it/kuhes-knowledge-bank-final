@@ -1,136 +1,199 @@
 {% extends 'core/base.html' %}
 {% load static %}
+{% load random_images %}
 
 {% block title %}Resend Verification - KUHeS Knowledge Bank{% endblock %}
 
 {% block extra_css %}
 <style>
-    /* Page-specific animations with glass morphism */
-    .verify-card {
-        animation: slideUpFade 0.5s ease-out;
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border-radius: 24px;
-        border: 1px solid rgba(255, 184, 28, 0.2);
-        overflow: hidden;
+    /* ============================================
+       KUHeS OFFICIAL BRAND COLORS
+       Primary: #2A2E7C (Astronaut Blue)
+       Accent: #99674C (Cape Palliser Tan)
+       Floating Cards - No Background Mask
+    ============================================ */
+
+    :root {
+        --kuhes-primary: #2A2E7C;
+        --kuhes-primary-dark: #1F2368;
+        --kuhes-primary-light: #3A3E8C;
+        --kuhes-accent: #99674C;
+        --kuhes-accent-dark: #7A4F3A;
+        --kuhes-accent-light: #B28063;
+        --kuhes-white: #FFFFFF;
+        --kuhes-card-bg: rgba(42, 46, 124, 0.92);
+        --kuhes-card-border: rgba(153, 103, 76, 0.45);
     }
 
-    @keyframes slideUpFade {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    /* Floating shapes animation */
-    .floating-shape {
-        position: fixed;
-        background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
-        border-radius: 50%;
-        filter: blur(60px);
-        opacity: 0.1;
-        z-index: 0;
-        animation: floatShape 8s ease-in-out infinite;
-        pointer-events: none;
-    }
-
-    .floating-shape:nth-child(2) {
-        animation-delay: -4s;
-        background: linear-gradient(135deg, var(--kuhes-gold), var(--kuhes-teal));
-    }
-
-    @keyframes floatShape {
-        0%, 100% {
-            transform: translate(0, 0) scale(1);
-        }
-        50% {
-            transform: translate(20px, -20px) scale(1.1);
-        }
-    }
-
-    /* Card header with gradient */
-    .card-header {
-        background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
-        border: none;
-        padding: 1.5rem;
+    /* Resend Verification Container */
+    .resend-container {
+        min-height: calc(100vh - var(--header-height));
         position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+    }
+
+    /* Background Image - Fully Visible */
+    .resend-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        z-index: 0;
+    }
+
+    /* No overlay mask */
+    .resend-container::before {
+        display: none;
+    }
+
+    /* Content Wrapper */
+    .resend-wrapper {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        max-width: 480px;
+    }
+
+    /* Resend Card - Branded Dark Blue */
+    .resend-card {
+        background: var(--kuhes-card-bg);
+        border-radius: 28px;
+        border: 1px solid var(--kuhes-card-border);
         overflow: hidden;
+        transition: all 0.3s;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
     }
 
-    .card-header::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-        animation: rotate 20s linear infinite;
+    .resend-card:hover {
+        border-color: var(--kuhes-accent);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
     }
 
-    @keyframes rotate {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
+    /* Card Header */
+    .card-header {
+        background: linear-gradient(135deg, var(--kuhes-primary), var(--kuhes-accent));
+        padding: 1.25rem 1.5rem;
+        border-bottom: none;
     }
 
     .card-header h4 {
-        position: relative;
-        z-index: 1;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: white;
+        margin: 0;
     }
 
-    /* Form controls with glass morphism */
+    .card-header h4 i {
+        margin-right: 0.5rem;
+    }
+
+    /* Card Body */
+    .card-body {
+        padding: 1.75rem;
+    }
+
+    /* Description */
+    .description {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.7);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .description i {
+        color: var(--kuhes-accent);
+    }
+
+    /* Form Controls */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: rgba(255, 255, 255, 0.7);
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
     .form-control {
-        border: 2px solid rgba(0, 51, 160, 0.1);
-        border-radius: 12px;
-        padding: 12px 16px;
-        transition: all 0.3s ease;
-        background: rgba(255, 255, 255, 0.9);
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--kuhes-card-border);
+        border-radius: 14px;
+        font-size: 0.9rem;
+        transition: all 0.3s;
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--kuhes-white);
     }
 
     .form-control:focus {
-        border-color: var(--kuhes-blue);
-        box-shadow: 0 0 0 4px rgba(0, 51, 160, 0.1);
-        background: white;
-        transform: translateX(5px);
+        outline: none;
+        border-color: var(--kuhes-accent);
+        box-shadow: 0 0 0 3px rgba(153, 103, 76, 0.2);
+        background: rgba(255, 255, 255, 0.12);
+    }
+
+    .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.4);
     }
 
     .form-control.is-valid {
         border-color: #28a745;
-        animation: validPulse 0.5s ease;
     }
 
     .form-control.is-invalid {
         border-color: #dc3545;
-        animation: shake 0.5s ease;
     }
 
-    @keyframes validPulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.02); }
-        100% { transform: scale(1); }
+    /* Help Text */
+    .help-text {
+        font-size: 0.7rem;
+        color: rgba(255, 255, 255, 0.5);
+        margin-top: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
     }
 
-    @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        25% { transform: translateX(-5px); }
-        75% { transform: translateX(5px); }
+    .help-text i {
+        font-size: 0.65rem;
     }
 
-    /* Button styling */
+    .help-text.valid {
+        color: #48c774;
+    }
+
+    .help-text.invalid {
+        color: #ff6b6b;
+    }
+
+    /* Buttons */
     .btn-primary {
-        background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
+        background: linear-gradient(135deg, var(--kuhes-primary), var(--kuhes-primary-dark));
         border: none;
-        border-radius: 12px;
-        padding: 12px 24px;
+        border-radius: 14px;
+        padding: 0.75rem;
         font-weight: 600;
-        transition: all 0.3s ease;
+        font-size: 0.9rem;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s;
         position: relative;
         overflow: hidden;
+        width: 100%;
     }
 
     .btn-primary::before {
@@ -141,79 +204,98 @@
         width: 0;
         height: 0;
         border-radius: 50%;
-        background: rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.2);
         transform: translate(-50%, -50%);
         transition: width 0.6s, height 0.6s;
     }
 
-    .btn-primary:active::before {
+    .btn-primary:hover::before {
         width: 300px;
         height: 300px;
     }
 
     .btn-primary:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0, 51, 160, 0.3);
+        box-shadow: 0 8px 20px rgba(42, 46, 124, 0.4);
     }
 
-    .btn-outline-secondary {
-        border: 2px solid #6c757d;
-        border-radius: 12px;
-        padding: 12px 24px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        background: transparent;
+    .btn-primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
     }
 
-    .btn-outline-secondary:hover {
-        transform: translateY(-2px);
-        background: linear-gradient(135deg, #6c757d, #5a6268);
-        border-color: transparent;
-        color: white;
-    }
-
-    /* Loading state for button */
-    .btn-loading {
-        position: relative;
+    .btn-primary.loading {
         pointer-events: none;
-        opacity: 0.8;
     }
 
-    .btn-loading .btn-text {
-        visibility: hidden;
-    }
-
-    .btn-loading::after {
-        content: '';
-        position: absolute;
-        width: 20px;
-        height: 20px;
-        top: 50%;
-        left: 50%;
-        margin-left: -10px;
-        margin-top: -10px;
-        border: 2px solid rgba(255,255,255,0.3);
+    .btn-primary .spinner-small {
+        display: none;
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
         border-top-color: white;
         border-radius: 50%;
-        animation: spin 0.8s linear infinite;
+        animation: spin 0.6s linear infinite;
+        margin-right: 8px;
+    }
+
+    .btn-primary.loading .spinner-small {
+        display: inline-block;
     }
 
     @keyframes spin {
         to { transform: rotate(360deg); }
     }
 
-    /* Alert styling with glass morphism */
+    .btn-outline {
+        background: transparent;
+        border: 1px solid var(--kuhes-card-border);
+        border-radius: 14px;
+        padding: 0.75rem;
+        font-weight: 500;
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.8);
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        width: 100%;
+    }
+
+    .btn-outline:hover {
+        border-color: var(--kuhes-accent);
+        color: var(--kuhes-accent-light);
+        transform: translateY(-2px);
+    }
+
+    /* Button Group */
+    .d-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-top: 0.5rem;
+    }
+
+    /* Alert Messages */
     .alert {
-        backdrop-filter: blur(10px);
-        border: none;
-        border-radius: 12px;
-        animation: slideDown 0.4s ease-out;
+        border-radius: 14px;
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        animation: slideDown 0.3s ease;
     }
 
     @keyframes slideDown {
         from {
             opacity: 0;
-            transform: translateY(-20px);
+            transform: translateY(-10px);
         }
         to {
             opacity: 1;
@@ -222,285 +304,207 @@
     }
 
     .alert-success {
-        background: linear-gradient(135deg, #d4edda, #c3e6cb);
-        color: #155724;
-        border-left: 4px solid #28a745;
+        background: rgba(40, 167, 69, 0.15);
+        border-left: 3px solid #28a745;
+        color: #48c774;
     }
 
     .alert-danger {
-        background: linear-gradient(135deg, #f8d7da, #f5c6cb);
-        color: #721c24;
-        border-left: 4px solid #dc3545;
+        background: rgba(220, 53, 69, 0.15);
+        border-left: 3px solid #dc3545;
+        color: #ff6b6b;
     }
 
-    .alert-warning {
-        background: linear-gradient(135deg, #fff3cd, #ffeeba);
-        color: #856404;
-        border-left: 4px solid #ffc107;
+    .alert-info {
+        background: rgba(23, 162, 184, 0.15);
+        border-left: 3px solid #17a2b8;
+        color: #5bc0de;
     }
 
-    /* Icon animations */
-    .fa-paper-plane {
-        transition: transform 0.3s ease;
+    /* Footer Link */
+    .footer-link {
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(153, 103, 76, 0.3);
+        text-align: center;
     }
 
-    .btn-primary:hover .fa-paper-plane {
-        transform: translateX(5px) translateY(-3px);
+    .footer-link a {
+        color: var(--kuhes-accent);
+        text-decoration: none;
+        font-size: 0.8rem;
+        transition: color 0.2s;
     }
 
-    .fa-arrow-left {
-        transition: transform 0.3s ease;
+    .footer-link a:hover {
+        color: var(--kuhes-accent-light);
+        text-decoration: underline;
     }
 
-    .btn-outline-secondary:hover .fa-arrow-left {
-        transform: translateX(-5px);
-    }
-
-    /* Skeleton loader */
-    .skeleton-circle {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-        background-size: 200% 100%;
-        animation: skeleton-loading 1.5s infinite;
-        margin: 0 auto 20px;
-    }
-
-    .skeleton-line {
-        height: 16px;
-        border-radius: 8px;
-        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-        background-size: 200% 100%;
-        animation: skeleton-loading 1.5s infinite;
-        margin: 12px 0;
-    }
-
+    /* Skeleton */
     .skeleton-card {
-        padding: 24px;
+        background: var(--kuhes-card-bg);
+        border-radius: 28px;
+        border: 1px solid var(--kuhes-card-border);
+        padding: 1.75rem;
     }
 
-    @keyframes skeleton-loading {
+    .skeleton {
+        background: linear-gradient(90deg, rgba(255,255,255,0.08) 25%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.08) 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.2s infinite;
+        border-radius: 8px;
+    }
+
+    @keyframes shimmer {
         0% { background-position: 200% 0; }
         100% { background-position: -200% 0; }
     }
 
-    /* Mobile optimizations */
-    @media (max-width: 768px) {
-        .container {
-            padding: 16px;
-        }
+    .skeleton-circle {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        margin: 0 auto;
+    }
 
-        .card-header {
+    .skeleton-title {
+        height: 24px;
+        width: 60%;
+        margin: 1rem auto;
+    }
+
+    .skeleton-line {
+        height: 14px;
+        margin: 0.75rem 0;
+    }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+        .resend-container {
             padding: 1rem;
         }
-
-        .card-header h4 {
-            font-size: 1.25rem;
-        }
-
         .card-body {
-            padding: 24px 20px !important;
+            padding: 1.25rem;
         }
-
-        .verify-card {
-            border-radius: 20px;
-        }
-
-        .form-control {
-            padding: 10px 14px;
-        }
-
-        .btn {
-            padding: 10px 20px;
-        }
-
-        .floating-shape {
-            filter: blur(40px);
-        }
-    }
-
-    /* Touch-friendly tap targets */
-    @media (max-width: 768px) {
-        .btn,
-        .form-control {
-            cursor: pointer;
-            touch-action: manipulation;
-        }
-
-        .btn:active {
-            transform: scale(0.97);
-        }
-    }
-
-    /* Link styling */
-    .back-link {
-        transition: all 0.3s ease;
-        position: relative;
-        display: inline-block;
-    }
-
-    .back-link::after {
-        content: '';
-        position: absolute;
-        bottom: -2px;
-        left: 0;
-        width: 0;
-        height: 2px;
-        background: var(--kuhes-blue);
-        transition: width 0.3s ease;
-    }
-
-    .back-link:hover::after {
-        width: 100%;
-    }
-
-    .back-link:hover {
-        transform: translateX(-5px);
-    }
-
-    /* Email hint styling */
-    .email-hint {
-        font-size: 0.75rem;
-        margin-top: 4px;
-    }
-
-    .email-hint.valid {
-        color: #28a745;
-    }
-
-    .email-hint.invalid {
-        color: #dc3545;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- Background decorative elements -->
-<div class="floating-shape" style="width: 400px; height: 400px; top: -150px; right: -150px;"></div>
-<div class="floating-shape" style="width: 300px; height: 300px; bottom: -100px; left: -100px;"></div>
+<!-- Background Image - Fully Visible -->
+<div class="resend-bg" style="background-image: url('{% random_kuhes_image_url %}');"></div>
 
-<div class="container mt-5 pt-3">
-    <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-5">
-            <!-- Skeleton Loader -->
-            <div id="verifySkeleton" style="display: none;">
-                <div class="text-center mb-4">
-                    <div class="skeleton-circle mx-auto"></div>
-                    <div class="skeleton-line mx-auto mt-3" style="width: 200px; height: 28px;"></div>
-                </div>
-                <div class="card skeleton-card">
-                    <div class="skeleton-line" style="height: 50px; margin-bottom: 16px;"></div>
-                    <div class="skeleton-line" style="height: 45px;"></div>
-                </div>
-            </div>
+<div class="resend-container">
+    <div class="resend-wrapper">
 
-            <!-- Actual Content -->
-            <div id="verifyContent">
-                <div class="verify-card card shadow-lg">
-                    <div class="card-header text-white">
-                        <h4 class="mb-0">
-                            <i class="fas fa-envelope me-2"></i>
-                            Resend Verification Email
-                        </h4>
+        <!-- Skeleton Loader -->
+        <div id="skeletonLoader" class="skeleton-card" style="display: none;">
+            <div class="skeleton skeleton-circle"></div>
+            <div class="skeleton skeleton-title"></div>
+            <div class="skeleton skeleton-line"></div>
+            <div class="skeleton skeleton-line" style="width: 80%;"></div>
+        </div>
+
+        <!-- Actual Content -->
+        <div id="resendContent">
+            <div class="resend-card">
+                <div class="card-header">
+                    <h4><i class="fas fa-envelope"></i> Resend Verification Email</h4>
+                </div>
+
+                <div class="card-body">
+                    <div class="description">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Enter your email to receive a new verification link.</span>
                     </div>
-                    <div class="card-body p-4">
-                        <p class="text-muted mb-4">
-                            <i class="fas fa-shield-alt me-2" style="color: var(--kuhes-blue);"></i>
-                            Enter your email to receive a new verification link.
-                        </p>
 
-                        <!-- Success/Error Messages -->
-                        {% if messages %}
-                            {% for message in messages %}
-                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                                    <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% else %}info-circle{% endif %} me-2"></i>
-                                    {{ message }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                </div>
-                            {% endfor %}
-                        {% endif %}
-
-                        <form method="post" id="verifyForm" novalidate>
-                            {% csrf_token %}
-
-                            <div class="mb-4">
-                                <label for="email" class="form-label fw-semibold">
-                                    <i class="fas fa-envelope me-2" style="color: var(--kuhes-blue);"></i>
-                                    Email Address
-                                </label>
-                                <input type="email"
-                                       name="email"
-                                       id="email"
-                                       class="form-control"
-                                       placeholder="your.name@kuhes.ac.mw"
-                                       autocomplete="email"
-                                       required>
-                                <div class="invalid-feedback" id="emailFeedback"></div>
-                                <div class="email-hint" id="emailHint">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Enter your institutional email (@kuhes.ac.mw)
-                                </div>
+                    <!-- Django Messages -->
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">
+                                <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% else %}info-circle{% endif %}"></i>
+                                {{ message }}
                             </div>
+                        {% endfor %}
+                    {% endif %}
 
-                            <div class="d-grid gap-3">
-                                <button type="submit" class="btn btn-primary" id="sendBtn">
-                                    <span class="btn-text">
-                                        <i class="fas fa-paper-plane me-2"></i>
-                                        Send Verification Email
-                                    </span>
-                                </button>
-                                <a href="{% url 'login' %}" data-replace="true" class="btn btn-outline-secondary back-link">
-                                    <i class="fas fa-arrow-left me-2"></i>
-                                    Back to Login
-                                </a>
+                    <form method="post" id="verifyForm" novalidate>
+                        {% csrf_token %}
+
+                        <div class="form-group">
+                            <label class="form-label">EMAIL ADDRESS</label>
+                            <input type="email"
+                                   name="email"
+                                   id="email"
+                                   class="form-control"
+                                   placeholder="your.name@kuhes.ac.mw"
+                                   autocomplete="email"
+                                   required>
+                            <div class="invalid-feedback" id="emailFeedback"></div>
+                            <div class="help-text" id="emailHint">
+                                <i class="fas fa-info-circle"></i>
+                                <span>Enter your institutional email (@kuhes.ac.mw)</span>
                             </div>
-                        </form>
-
-                        <!-- Help Section -->
-                        <div class="mt-4 pt-3 text-center border-top">
-                            <p class="small text-muted mb-0">
-                                <i class="fas fa-question-circle me-1"></i>
-                                Didn't receive the email?
-                                <a href="#" data-replace="true" class="text-decoration-none" style="color: var(--kuhes-teal);">
-                                    Check spam folder
-                                </a>
-                                or
-                                <a href="#" data-replace="true" class="text-decoration-none" style="color: var(--kuhes-teal);">
-                                    Contact Support
-                                </a>
-                            </p>
                         </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn-primary" id="sendBtn">
+                                <span class="spinner-small"></span>
+                                <span class="btn-text"><i class="fas fa-paper-plane me-2"></i>Send Verification Email</span>
+                            </button>
+                            <a href="{% url 'login' %}" class="btn-outline">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Login
+                            </a>
+                        </div>
+                    </form>
+
+                    <div class="footer-link">
+                        <a href="#">
+                            <i class="fas fa-question-circle me-1"></i>Didn't receive the email? Check spam folder
+                        </a>
+                        <span class="mx-2">|</span>
+                        <a href="#">
+                            <i class="fas fa-headset me-1"></i>Contact Support
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
+
     </div>
 </div>
 
 <script>
-    // Email validation
+    // ============================================
+    // RESEND VERIFICATION INTERACTIONS
+    // ============================================
+
     const emailInput = document.getElementById('email');
     const emailFeedback = document.getElementById('emailFeedback');
     const emailHint = document.getElementById('emailHint');
+    const verifyForm = document.getElementById('verifyForm');
+    const sendBtn = document.getElementById('sendBtn');
 
+    // Email validation
     function validateEmail() {
         const email = emailInput.value.trim();
         const isValidDomain = email.includes('@kuhes.ac.mw');
+        const isValidFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-        if (email.length === 0) {
+        if (!email) {
             emailInput.classList.remove('is-valid', 'is-invalid');
             emailFeedback.textContent = '';
-            emailHint.innerHTML = '<i class="fas fa-info-circle me-1"></i> Enter your institutional email (@kuhes.ac.mw)';
+            emailHint.innerHTML = '<i class="fas fa-info-circle"></i><span>Enter your institutional email (@kuhes.ac.mw)</span>';
             emailHint.classList.remove('valid', 'invalid');
             return false;
         }
 
-        if (isValidDomain && email.includes('@') && email.length > 10) {
+        if (isValidDomain && isValidFormat) {
             emailInput.classList.add('is-valid');
             emailInput.classList.remove('is-invalid');
             emailFeedback.textContent = '';
-            emailHint.innerHTML = '<i class="fas fa-check-circle me-1"></i> Valid KUHeS email address';
+            emailHint.innerHTML = '<i class="fas fa-check-circle" style="color: #48c774;"></i><span>Valid KUHeS email address</span>';
             emailHint.classList.add('valid');
             emailHint.classList.remove('invalid');
             return true;
@@ -508,89 +512,59 @@
             emailInput.classList.add('is-invalid');
             emailInput.classList.remove('is-valid');
             emailFeedback.textContent = 'Please use your @kuhes.ac.mw email address';
-            emailHint.innerHTML = '<i class="fas fa-exclamation-circle me-1"></i> Must be @kuhes.ac.mw';
+            emailHint.innerHTML = '<i class="fas fa-exclamation-circle" style="color: #ff6b6b;"></i><span>Must be @kuhes.ac.mw</span>';
             emailHint.classList.add('invalid');
             emailHint.classList.remove('valid');
             return false;
         } else {
             emailInput.classList.remove('is-valid', 'is-invalid');
             emailFeedback.textContent = '';
-            emailHint.innerHTML = '<i class="fas fa-info-circle me-1"></i> Enter your institutional email (@kuhes.ac.mw)';
+            emailHint.innerHTML = '<i class="fas fa-info-circle"></i><span>Enter your institutional email (@kuhes.ac.mw)</span>';
             emailHint.classList.remove('valid', 'invalid');
             return false;
         }
     }
 
-    // Real-time validation
-    emailInput.addEventListener('input', validateEmail);
-
     // Email domain auto-suggestion
-    emailInput.addEventListener('blur', function() {
-        const email = this.value.trim();
-        if (email && !email.includes('@') && !email.includes(' ') && email.length > 0) {
-            const suggested = email + '@kuhes.ac.mw';
-            if (confirm(`Did you mean: ${suggested}?`)) {
-                this.value = suggested;
+    function suggestEmailDomain() {
+        const value = emailInput.value.trim();
+        if (value && !value.includes('@') && !value.includes(' ') && value.length > 2) {
+            const suggested = value + '@kuhes.ac.mw';
+            if (confirm(`💡 Did you mean: ${suggested}?`)) {
+                emailInput.value = suggested;
                 validateEmail();
             }
         }
-    });
+    }
 
-    // Form submission with loading state
-    document.getElementById('verifyForm').addEventListener('submit', function(e) {
-        const sendBtn = document.getElementById('sendBtn');
+    // Event listeners
+    emailInput.addEventListener('input', validateEmail);
+    emailInput.addEventListener('blur', suggestEmailDomain);
 
-        // Validate email before submission
+    // Form submission
+    verifyForm.addEventListener('submit', function(e) {
         if (!validateEmail()) {
             e.preventDefault();
+            emailInput.classList.add('is-invalid');
             emailInput.focus();
-            showToast('Please enter a valid @kuhes.ac.mw email address', 'error');
+            if (window.toast) window.toast.error('Please enter a valid @kuhes.ac.mw email address');
             return;
         }
 
-        // Add loading state
-        sendBtn.classList.add('btn-loading');
+        sendBtn.classList.add('loading');
         sendBtn.disabled = true;
     });
 
-    // Show toast notification
-    function showToast(message, type = 'info') {
-        if (window.toast) {
-            window.toast[type](message);
-        } else if (window.showToast) {
-            window.showToast(message, type);
-        } else {
-            console.log(`${type}: ${message}`);
-        }
-    }
-
-    // Auto-dismiss alerts after 5 seconds
+    // Auto-dismiss alerts
     document.querySelectorAll('.alert').forEach(alert => {
         setTimeout(() => {
-            if (alert && alert.parentElement) {
-                alert.style.opacity = '0';
-                alert.style.transition = 'opacity 0.3s ease';
-                setTimeout(() => {
-                    if (alert && alert.remove) alert.remove();
-                }, 300);
-            }
+            alert.style.opacity = '0';
+            alert.style.transition = 'opacity 0.3s';
+            setTimeout(() => alert.remove(), 300);
         }, 5000);
     });
 
-    // Add loading state for data-replace links
-    document.querySelectorAll('a[data-replace="true"]').forEach(link => {
-        link.addEventListener('click', function(e) {
-            if (!this.getAttribute('href') || this.getAttribute('href') === '#') return;
-
-            // Show loading overlay if exists
-            const loadingOverlay = document.getElementById('loading-overlay');
-            if (loadingOverlay && window.showLoading) {
-                window.showLoading('Loading...');
-            }
-        });
-    });
-
-    // Smooth focus effect for input
+    // Smooth focus effect
     emailInput.addEventListener('focus', function() {
         this.style.transform = 'scale(1.02)';
         this.style.transition = 'transform 0.2s ease';
@@ -604,31 +578,27 @@
     document.addEventListener('keydown', function(e) {
         if (e.ctrlKey && e.key === 'Enter') {
             e.preventDefault();
-            const form = document.getElementById('verifyForm');
-            if (form && validateEmail()) {
-                form.submit();
+            if (validateEmail()) {
+                verifyForm.submit();
             }
         }
     });
 
-    // Show skeleton loader on slow connections
-    if (document.readyState === 'loading') {
-        const skeleton = document.getElementById('verifySkeleton');
-        const content = document.getElementById('verifyContent');
+    // Skeleton loader
+    const skeleton = document.getElementById('skeletonLoader');
+    const content = document.getElementById('resendContent');
 
-        if (skeleton && content) {
-            skeleton.style.display = 'block';
-            content.style.opacity = '0';
-
-            setTimeout(() => {
-                skeleton.style.display = 'none';
-                content.style.opacity = '1';
-                content.style.transition = 'opacity 0.3s ease';
-            }, 500);
-        }
+    if (skeleton && content) {
+        skeleton.style.display = 'block';
+        content.style.opacity = '0';
+        setTimeout(() => {
+            skeleton.style.display = 'none';
+            content.style.opacity = '1';
+            content.style.transition = 'opacity 0.3s ease';
+        }, 400);
     }
 
-    // Pre-fill email from URL parameter if present
+    // Pre-fill email from URL parameter
     const urlParams = new URLSearchParams(window.location.search);
     const emailParam = urlParams.get('email');
     if (emailParam) {

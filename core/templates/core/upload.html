@@ -1,87 +1,101 @@
 {% extends 'core/base.html' %}
 {% load static %}
+{% load random_images %}
 
 {% block title %}Upload Resource - KUHeS Knowledge Bank{% endblock %}
 
 {% block extra_css %}
 <style>
-    /* Modern Upload Page - Glass Morphism */
+    /* ============================================
+       KUHeS OFFICIAL BRAND COLORS
+       Primary: #2A2E7C (Astronaut Blue)
+       Accent: #99674C (Cape Palliser Tan)
+       Floating Cards - No Background Mask
+    ============================================ */
+
+    :root {
+        --kuhes-primary: #2A2E7C;
+        --kuhes-primary-dark: #1F2368;
+        --kuhes-primary-light: #3A3E8C;
+        --kuhes-accent: #99674C;
+        --kuhes-accent-dark: #7A4F3A;
+        --kuhes-accent-light: #B28063;
+        --kuhes-white: #FFFFFF;
+        --kuhes-card-bg: rgba(42, 46, 124, 0.92);
+        --kuhes-card-border: rgba(153, 103, 76, 0.45);
+    }
+
+    /* Upload Container */
     .upload-container {
-        min-height: calc(100vh - var(--header-height) - 80px);
-        padding: 2rem;
+        min-height: calc(100vh - var(--header-height));
         position: relative;
-        overflow: hidden;
+        padding: 2rem;
     }
 
-    /* Floating Shapes */
-    .floating-shape {
+    /* Background Image - Fully Visible */
+    .upload-bg {
         position: fixed;
-        background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
-        border-radius: 50%;
-        filter: blur(60px);
-        opacity: 0.08;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
         z-index: 0;
-        animation: floatShape 12s ease-in-out infinite;
-        pointer-events: none;
     }
 
-    @keyframes floatShape {
-        0%, 100% { transform: translate(0, 0) scale(1); }
-        50% { transform: translate(30px, -20px) scale(1.1); }
+    /* No overlay mask */
+    .upload-container::before {
+        display: none;
     }
 
-    /* Main Card */
-    .upload-card {
-        background: rgba(255, 255, 255, 0.92);
-        backdrop-filter: blur(20px);
-        border-radius: 32px;
-        border: 1px solid rgba(255, 255, 255, 0.4);
+    /* Content Wrapper */
+    .upload-wrapper {
         position: relative;
         z-index: 1;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-        animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    /* Upload Card - Branded Dark Blue */
+    .upload-card {
+        background: var(--kuhes-card-bg);
+        border-radius: 28px;
+        border: 1px solid var(--kuhes-card-border);
+        overflow: hidden;
+        transition: all 0.3s;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
     }
 
     .upload-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 30px 60px -12px rgba(0, 51, 160, 0.2);
-    }
-
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        border-color: var(--kuhes-accent);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
     }
 
     /* Card Header */
-    .card-header-modern {
-        background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
+    .card-header {
+        background: linear-gradient(135deg, var(--kuhes-primary), var(--kuhes-accent));
         padding: 1.5rem;
-        position: relative;
-        overflow: hidden;
-        border-radius: 32px 32px 0 0;
+        border-bottom: none;
     }
 
-    .card-header-modern::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
-        animation: rotate 25s linear infinite;
+    .card-header h4 {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 0.25rem;
     }
 
-    @keyframes rotate {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
+    .card-header p {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.8);
+        margin: 0;
+    }
+
+    /* Card Body */
+    .card-body {
+        padding: 1.75rem;
     }
 
     /* Form Controls */
@@ -89,86 +103,92 @@
         margin-bottom: 1.25rem;
     }
 
-    .form-label-modern {
+    .form-label {
         font-size: 0.7rem;
-        font-weight: 700;
+        font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 1px;
-        color: #475569;
-        margin-bottom: 6px;
+        letter-spacing: 0.5px;
+        color: rgba(255, 255, 255, 0.7);
+        margin-bottom: 0.5rem;
         display: block;
     }
 
-    .form-label-modern.required::after {
+    .form-label.required::after {
         content: '*';
-        color: #ef4444;
+        color: var(--kuhes-accent);
         margin-left: 4px;
     }
 
-    .form-control-modern,
-    .form-select-modern {
+    .form-control, .form-select {
         width: 100%;
-        padding: 12px 16px;
-        border: 1.5px solid rgba(0, 51, 160, 0.15);
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--kuhes-card-border);
         border-radius: 14px;
         font-size: 0.9rem;
-        transition: all 0.3s ease;
-        background: rgba(255, 255, 255, 0.9);
-        font-family: inherit;
+        transition: all 0.3s;
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--kuhes-white);
     }
 
-    .form-control-modern:focus,
-    .form-select-modern:focus {
+    .form-control:focus, .form-select:focus {
         outline: none;
-        border-color: var(--kuhes-blue);
-        box-shadow: 0 0 0 4px rgba(0, 51, 160, 0.1);
-        background: white;
+        border-color: var(--kuhes-accent);
+        box-shadow: 0 0 0 3px rgba(153, 103, 76, 0.2);
+        background: rgba(255, 255, 255, 0.12);
     }
 
-    textarea.form-control-modern {
+    .form-control::placeholder, .form-select::placeholder {
+        color: rgba(255, 255, 255, 0.4);
+    }
+
+    textarea.form-control {
         resize: vertical;
         min-height: 100px;
     }
 
     /* Drop Zone */
     .drop-zone {
-        border: 2px dashed rgba(0, 51, 160, 0.3);
+        border: 2px dashed var(--kuhes-card-border);
         border-radius: 20px;
         padding: 2rem;
         text-align: center;
-        transition: all 0.3s ease;
-        background: rgba(0, 51, 160, 0.02);
+        transition: all 0.3s;
+        background: rgba(255, 255, 255, 0.03);
         cursor: pointer;
     }
 
-    .drop-zone:hover,
-    .drop-zone.drag-over {
-        border-color: var(--kuhes-blue);
-        background: rgba(0, 51, 160, 0.05);
+    .drop-zone:hover, .drop-zone.drag-over {
+        border-color: var(--kuhes-accent);
+        background: rgba(153, 103, 76, 0.1);
         transform: scale(1.02);
     }
 
     .drop-zone i {
-        font-size: 3rem;
-        color: var(--kuhes-blue);
-        margin-bottom: 1rem;
-        transition: all 0.3s ease;
+        font-size: 2.5rem;
+        color: var(--kuhes-accent);
+        margin-bottom: 0.75rem;
+        transition: all 0.3s;
     }
 
     .drop-zone:hover i {
         transform: translateY(-5px);
     }
 
+    .drop-zone p {
+        margin-bottom: 0.25rem;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
     /* File Preview */
     .file-preview {
         display: none;
-        background: rgba(0, 51, 160, 0.05);
+        background: rgba(153, 103, 76, 0.15);
         border-radius: 14px;
-        padding: 12px 16px;
-        margin-top: 12px;
+        padding: 0.75rem 1rem;
+        margin-top: 0.75rem;
         align-items: center;
-        gap: 12px;
-        animation: fadeInUp 0.3s ease;
+        gap: 0.75rem;
+        animation: fadeIn 0.3s ease;
     }
 
     .file-preview.show {
@@ -176,28 +196,50 @@
     }
 
     .file-preview i {
-        font-size: 1.5rem;
-        color: var(--kuhes-blue);
+        font-size: 1.2rem;
+        color: var(--kuhes-accent);
+    }
+
+    .file-preview button {
+        background: transparent;
+        border: none;
+        color: rgba(255, 255, 255, 0.6);
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+
+    .file-preview button:hover {
+        color: #ff6b6b;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-5px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 
     /* Dynamic Sections */
     .dynamic-section {
-        background: rgba(0, 51, 160, 0.03);
+        background: rgba(153, 103, 76, 0.08);
         border-radius: 20px;
         padding: 1rem;
         margin: 1rem 0;
+        border: 1px solid rgba(153, 103, 76, 0.2);
         animation: fadeIn 0.3s ease;
     }
 
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
+    .dynamic-section h6 {
+        color: var(--kuhes-accent-light);
+        font-size: 0.85rem;
+        margin-bottom: 1rem;
     }
 
     /* Progress Bar */
     .upload-progress {
         display: none;
         margin-bottom: 1.5rem;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 1rem;
         animation: slideDown 0.3s ease;
     }
 
@@ -206,50 +248,58 @@
     }
 
     @keyframes slideDown {
-        from {
-            opacity: 0;
-            transform: translateY(-10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 
     .progress {
         height: 6px;
         border-radius: 3px;
-        background: rgba(0, 0, 0, 0.1);
+        background: rgba(255, 255, 255, 0.2);
         overflow: hidden;
     }
 
     .progress-bar {
-        background: linear-gradient(90deg, var(--kuhes-blue), var(--kuhes-teal));
+        background: linear-gradient(90deg, var(--kuhes-accent), var(--kuhes-accent-light));
         transition: width 0.3s ease;
         width: 0%;
     }
 
     .progress-status {
-        font-size: 0.75rem;
-        margin-top: 8px;
+        font-size: 0.7rem;
+        margin-top: 0.5rem;
         display: flex;
         justify-content: space-between;
-        color: #64748b;
+        color: rgba(255, 255, 255, 0.6);
     }
 
-    /* Upload Button */
+    /* Help Text */
+    .help-text {
+        font-size: 0.7rem;
+        color: rgba(255, 255, 255, 0.5);
+        margin-top: 0.25rem;
+    }
+
+    /* Divider */
+    hr {
+        background: rgba(153, 103, 76, 0.3);
+        margin: 1.5rem 0;
+    }
+
+    /* Buttons */
     .btn-upload {
-        background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
+        background: linear-gradient(135deg, var(--kuhes-primary), var(--kuhes-primary-dark));
         border: none;
         border-radius: 14px;
-        padding: 12px 24px;
+        padding: 0.85rem;
         font-weight: 600;
-        font-size: 1rem;
+        font-size: 0.95rem;
         color: white;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: all 0.3s;
         position: relative;
         overflow: hidden;
+        width: 100%;
     }
 
     .btn-upload::before {
@@ -260,7 +310,7 @@
         width: 0;
         height: 0;
         border-radius: 50%;
-        background: rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.2);
         transform: translate(-50%, -50%);
         transition: width 0.6s, height 0.6s;
     }
@@ -272,7 +322,7 @@
 
     .btn-upload:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(0, 51, 160, 0.3);
+        box-shadow: 0 8px 20px rgba(42, 46, 124, 0.4);
     }
 
     .btn-upload:disabled {
@@ -304,23 +354,53 @@
         to { transform: rotate(360deg); }
     }
 
-    /* Help Text */
-    .help-text {
-        font-size: 0.7rem;
-        color: #94a3b8;
-        margin-top: 4px;
+    .btn-outline {
+        background: transparent;
+        border: 1px solid var(--kuhes-card-border);
+        border-radius: 14px;
+        padding: 0.85rem;
+        font-weight: 500;
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.8);
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
     }
 
-    /* Mobile */
+    .btn-outline:hover {
+        border-color: var(--kuhes-accent);
+        color: var(--kuhes-accent-light);
+        transform: translateY(-2px);
+    }
+
+    /* Row */
+    .row {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .col-md-6 {
+        flex: 1;
+        min-width: calc(50% - 0.5rem);
+    }
+
     @media (max-width: 768px) {
         .upload-container {
             padding: 1rem;
         }
         .card-body {
-            padding: 1.5rem !important;
+            padding: 1.25rem;
+        }
+        .col-md-6 {
+            min-width: 100%;
         }
         .drop-zone {
-            padding: 1.5rem;
+            padding: 1.25rem;
         }
         .drop-zone i {
             font-size: 2rem;
@@ -330,234 +410,228 @@
 {% endblock %}
 
 {% block content %}
-<!-- Floating Shapes -->
-<div class="floating-shape" style="width: 500px; height: 500px; top: -200px; right: -200px;"></div>
-<div class="floating-shape" style="width: 350px; height: 350px; bottom: -150px; left: -150px;"></div>
+<!-- Background Image - Fully Visible -->
+<div class="upload-bg" style="background-image: url('{% random_kuhes_image_url %}');"></div>
 
 <div class="upload-container">
-    <div class="row justify-content-center">
-        <div class="col-md-10 col-lg-8">
-            <div class="upload-card">
-                <div class="card-header-modern text-white">
-                    <h4 class="mb-0 fw-bold">
-                        <i class="fas fa-upload me-2"></i>
-                        Upload Resource
-                    </h4>
-                    <p class="mb-0 mt-2 small opacity-75">Share your knowledge with the KUHeS community</p>
+    <div class="upload-wrapper">
+
+        <div class="upload-card">
+            <div class="card-header">
+                <h4><i class="fas fa-upload me-2"></i>Upload Resource</h4>
+                <p>Share your knowledge with the KUHeS community</p>
+            </div>
+
+            <div class="card-body">
+                <!-- Progress Bar -->
+                <div class="upload-progress" id="uploadProgress">
+                    <div class="progress">
+                        <div class="progress-bar" id="progressBar"></div>
+                    </div>
+                    <div class="progress-status">
+                        <span id="progressText">Preparing upload...</span>
+                        <span id="progressPercent">0%</span>
+                    </div>
                 </div>
 
-                <div class="card-body p-4 p-md-5">
-                    <!-- Progress Bar -->
-                    <div class="upload-progress" id="uploadProgress">
-                        <div class="progress">
-                            <div class="progress-bar" id="progressBar"></div>
+                <form method="post" enctype="multipart/form-data" id="uploadForm">
+                    {% csrf_token %}
+
+                    <!-- Title -->
+                    <div class="form-group">
+                        <label class="form-label required">TITLE</label>
+                        <input type="text" name="title" id="id_title" class="form-control"
+                               placeholder="e.g., Introduction to Human Anatomy" required>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="form-group">
+                        <label class="form-label">DESCRIPTION</label>
+                        <textarea name="description" id="id_description" class="form-control" rows="3"
+                                  placeholder="Describe what this resource covers, key topics, and intended audience..."></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label required">RESOURCE TYPE</label>
+                                <select name="resource_type" id="id_resource_type" class="form-select" required>
+                                    <option value="">Select type...</option>
+                                    <option value="handout">📄 Handout</option>
+                                    <option value="past_paper">📝 Past Paper</option>
+                                    <option value="lecture_note">📚 Lecture Note</option>
+                                    <option value="research">🔬 Research Article</option>
+                                    <option value="clinical_guide">🩺 Clinical Guide</option>
+                                    <option value="video">🎥 Video</option>
+                                    <option value="study_set">📋 Study Set</option>
+                                    <option value="summary">📊 Summary Sheet</option>
+                                    <option value="lab_manual">🧪 Lab Manual</option>
+                                    <option value="case_study">🏥 Case Study</option>
+                                    <option value="formula_sheet">📐 Formula Sheet</option>
+                                    <option value="diagram">📊 Diagram</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="progress-status">
-                            <span id="progressText">Preparing upload...</span>
-                            <span id="progressPercent">0%</span>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label required">ACADEMIC LEVEL</label>
+                                <select name="level" id="id_level" class="form-select" required>
+                                    <option value="">Select level...</option>
+                                    <option value="premed">🎓 Pre-Med</option>
+                                    <option value="undergraduate">📘 Undergraduate</option>
+                                    <option value="postgraduate">📚 Postgraduate</option>
+                                    <option value="diploma">📖 Diploma</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
-                    <form method="post" enctype="multipart/form-data" id="uploadForm">
-                        {% csrf_token %}
-
-                        <!-- Title -->
-                        <div class="form-group">
-                            <label class="form-label-modern required">TITLE</label>
-                            <input type="text" name="title" id="id_title" class="form-control-modern"
-                                   placeholder="e.g., Introduction to Human Anatomy" required>
+                    <!-- Pre-Med Section -->
+                    <div id="premedSection" class="dynamic-section" style="display: none;">
+                        <h6><i class="fas fa-microscope me-2"></i>Pre-Med Details</h6>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <label class="form-label">Pre-Med Subject</label>
+                                <select name="premed_subject" id="id_premed_subject" class="form-select">
+                                    <option value="">Select subject...</option>
+                                    <option value="biology">🧬 Biology</option>
+                                    <option value="chemistry">🧪 Chemistry</option>
+                                    <option value="physics">⚡ Physics</option>
+                                    <option value="mathematics">📐 Mathematics</option>
+                                    <option value="ict">💻 ICT</option>
+                                    <option value="communication">🗣️ Communication</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Semester</label>
+                                <select name="semester" id="id_premed_semester" class="form-select">
+                                    <option value="">Select...</option>
+                                    <option value="1">Semester 1</option>
+                                    <option value="2">Semester 2</option>
+                                </select>
+                            </div>
                         </div>
+                    </div>
 
-                        <!-- Description -->
-                        <div class="form-group">
-                            <label class="form-label-modern">DESCRIPTION</label>
-                            <textarea name="description" id="id_description" class="form-control-modern" rows="3"
-                                      placeholder="Describe what this resource covers, key topics, and intended audience..."></textarea>
-                        </div>
-
+                    <!-- Undergraduate Section -->
+                    <div id="undergradSection" class="dynamic-section" style="display: none;">
+                        <h6><i class="fas fa-university me-2"></i>Undergraduate Details</h6>
                         <div class="row">
                             <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="form-label-modern required">RESOURCE TYPE</label>
-                                    <select name="resource_type" id="id_resource_type" class="form-select-modern" required>
-                                        <option value="">Select type...</option>
-                                        <option value="handout">📄 Handout</option>
-                                        <option value="past_paper">📝 Past Paper</option>
-                                        <option value="lecture_note">📚 Lecture Note</option>
-                                        <option value="research">🔬 Research Article</option>
-                                        <option value="clinical_guide">🩺 Clinical Guide</option>
-                                        <option value="video">🎥 Video</option>
-                                        <option value="study_set">📋 Study Set</option>
-                                        <option value="summary">📊 Summary Sheet</option>
-                                        <option value="lab_manual">🧪 Lab Manual</option>
-                                        <option value="case_study">🏥 Case Study</option>
-                                        <option value="formula_sheet">📐 Formula Sheet</option>
-                                        <option value="diagram">📊 Diagram</option>
-                                    </select>
-                                </div>
+                                <label class="form-label">School</label>
+                                <select name="school" id="id_school" class="form-select">
+                                    <option value="">Select school...</option>
+                                    <option value="medicine">Medicine and Oral Health</option>
+                                    <option value="nursing">Nursing</option>
+                                    <option value="maternal">Maternal, Neonatal and Reproductive Health</option>
+                                    <option value="life_sciences">Life Sciences and Allied Health Professions</option>
+                                    <option value="public_health">Global and Public Health</option>
+                                </select>
                             </div>
                             <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="form-label-modern required">ACADEMIC LEVEL</label>
-                                    <select name="level" id="id_level" class="form-select-modern" required>
-                                        <option value="">Select level...</option>
-                                        <option value="premed">🎓 Pre-Med</option>
-                                        <option value="undergraduate">📘 Undergraduate</option>
-                                        <option value="postgraduate">📚 Postgraduate</option>
-                                        <option value="diploma">📖 Diploma</option>
-                                    </select>
-                                </div>
+                                <label class="form-label">Programme</label>
+                                <input type="text" name="programme" id="id_programme" class="form-control"
+                                       placeholder="e.g., MBBS, BNS, BPharm">
                             </div>
                         </div>
-
-                        <!-- Pre-Med Section -->
-                        <div id="premedSection" class="dynamic-section" style="display: none;">
-                            <h6 class="fw-bold mb-3"><i class="fas fa-microscope me-2"></i>Pre-Med Details</h6>
-                            <div class="row">
-                                <div class="col-md-8">
-                                    <label class="form-label-modern">Pre-Med Subject</label>
-                                    <select name="premed_subject" id="id_premed_subject" class="form-select-modern">
-                                        <option value="">Select subject...</option>
-                                        <option value="biology">🧬 Biology</option>
-                                        <option value="chemistry">🧪 Chemistry</option>
-                                        <option value="physics">⚡ Physics</option>
-                                        <option value="mathematics">📐 Mathematics</option>
-                                        <option value="ict">💻 ICT</option>
-                                        <option value="communication">🗣️ Communication</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label-modern">Semester</label>
-                                    <select name="semester" id="id_premed_semester" class="form-select-modern">
-                                        <option value="">Select...</option>
-                                        <option value="1">Semester 1</option>
-                                        <option value="2">Semester 2</option>
-                                    </select>
-                                </div>
+                        <div class="row mt-2">
+                            <div class="col-md-4">
+                                <label class="form-label">Year of Study</label>
+                                <input type="number" name="year_of_study" id="id_year_of_study" class="form-control" min="1" max="6">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Semester</label>
+                                <select name="semester" id="id_semester" class="form-select">
+                                    <option value="">Select...</option>
+                                    <option value="1">Semester 1</option>
+                                    <option value="2">Semester 2</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Academic Year</label>
+                                <input type="text" name="academic_year" id="id_academic_year" class="form-control"
+                                       placeholder="e.g., 2024/2025">
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Undergraduate Section -->
-                        <div id="undergradSection" class="dynamic-section" style="display: none;">
-                            <h6 class="fw-bold mb-3"><i class="fas fa-university me-2"></i>Undergraduate Details</h6>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <label class="form-label-modern">School</label>
-                                    <select name="school" id="id_school" class="form-select-modern">
-                                        <option value="">Select school...</option>
-                                        <option value="medicine">Medicine and Oral Health</option>
-                                        <option value="nursing">Nursing</option>
-                                        <option value="maternal">Maternal, Neonatal and Reproductive Health</option>
-                                        <option value="life_sciences">Life Sciences and Allied Health Professions</option>
-                                        <option value="public_health">Global and Public Health</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label-modern">Programme</label>
-                                    <input type="text" name="programme" id="id_programme" class="form-control-modern"
-                                           placeholder="e.g., MBBS, BNS, BPharm">
-                                </div>
-                            </div>
-                            <div class="row mt-2">
-                                <div class="col-md-4">
-                                    <label class="form-label-modern">Year of Study</label>
-                                    <input type="number" name="year_of_study" id="id_year_of_study" class="form-control-modern" min="1" max="6">
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label-modern">Semester</label>
-                                    <select name="semester" id="id_semester" class="form-select-modern">
-                                        <option value="">Select...</option>
-                                        <option value="1">Semester 1</option>
-                                        <option value="2">Semester 2</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label-modern">Academic Year</label>
-                                    <input type="text" name="academic_year" id="id_academic_year" class="form-control-modern"
-                                           placeholder="e.g., 2024/2025">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Common Fields -->
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="form-label-modern">LECTURER</label>
-                                    <input type="text" name="lecturer" id="id_lecturer" class="form-control-modern"
-                                           placeholder="e.g., Dr. Banda">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="form-label-modern">COURSE CODE</label>
-                                    <input type="text" name="course_code" id="id_course_code" class="form-control-modern"
-                                           placeholder="e.g., PRE101, MED202">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Tags -->
-                        <div class="form-group">
-                            <label class="form-label-modern">TAGS</label>
-                            <input type="text" name="tags" id="id_tags" class="form-control-modern"
-                                   placeholder="e.g., biology, cells, mitosis, anatomy">
-                            <div class="help-text">Separate tags with commas for better discoverability</div>
-                        </div>
-
-                        <!-- File Upload Section -->
-                        <div id="fileUploadSection">
-                            <label class="form-label-modern required">FILE</label>
-                            <div class="drop-zone" id="dropZone">
-                                <i class="fas fa-cloud-upload-alt"></i>
-                                <p class="mb-1">Drag and drop your file here, or click to select</p>
-                                <div class="help-text">PDF, PPT, DOC, JPG, PNG (Max 25MB)</div>
-                                <input type="file" name="file" id="id_file" class="d-none">
-                            </div>
-                            <div class="file-preview" id="filePreview">
-                                <i class="fas fa-file-alt"></i>
-                                <span id="fileName"></span>
-                                <span class="ms-auto" id="fileSize"></span>
-                                <button type="button" class="btn btn-sm btn-link text-danger" onclick="clearFile()">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Video Link Section -->
-                        <div id="videoLinkSection" style="display: none;">
+                    <!-- Common Fields -->
+                    <div class="row">
+                        <div class="col-md-6">
                             <div class="form-group">
-                                <label class="form-label-modern required">VIDEO LINK</label>
-                                <input type="url" name="video_link" id="id_video_link" class="form-control-modern"
-                                       placeholder="https://www.youtube.com/watch?v=...">
-                                <div class="help-text">Supports YouTube, Vimeo, and other video platforms</div>
+                                <label class="form-label">LECTURER</label>
+                                <input type="text" name="lecturer" id="id_lecturer" class="form-control"
+                                       placeholder="e.g., Dr. Banda">
                             </div>
                         </div>
-
-                        <hr class="my-4">
-
-                        <div class="d-flex gap-3 flex-wrap">
-                            <button type="submit" class="btn-upload flex-grow-1" id="uploadBtn">
-                                <span class="spinner-small"></span>
-                                <span class="btn-text">
-                                    <i class="fas fa-cloud-upload-alt me-2"></i>
-                                    Upload Resource
-                                </span>
-                            </button>
-                            <a href="{% url 'dashboard' %}" data-loading="true" class="btn btn-outline-secondary btn-lg px-4" style="border-radius: 14px;">
-                                <i class="fas fa-times me-2"></i>Cancel
-                            </a>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">COURSE CODE</label>
+                                <input type="text" name="course_code" id="id_course_code" class="form-control"
+                                       placeholder="e.g., PRE101, MED202">
+                            </div>
                         </div>
-                    </form>
-                </div>
+                    </div>
+
+                    <!-- Tags -->
+                    <div class="form-group">
+                        <label class="form-label">TAGS</label>
+                        <input type="text" name="tags" id="id_tags" class="form-control"
+                               placeholder="e.g., biology, cells, mitosis, anatomy">
+                        <div class="help-text">Separate tags with commas for better discoverability</div>
+                    </div>
+
+                    <!-- File Upload Section -->
+                    <div id="fileUploadSection">
+                        <label class="form-label required">FILE</label>
+                        <div class="drop-zone" id="dropZone">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Drag and drop your file here, or click to select</p>
+                            <div class="help-text">PDF, PPT, DOC, JPG, PNG (Max 25MB)</div>
+                            <input type="file" name="file" id="id_file" class="d-none">
+                        </div>
+                        <div class="file-preview" id="filePreview">
+                            <i class="fas fa-file-alt"></i>
+                            <span id="fileName"></span>
+                            <span class="ms-auto" id="fileSize"></span>
+                            <button type="button" onclick="clearFile()"><i class="fas fa-times"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Video Link Section -->
+                    <div id="videoLinkSection" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label required">VIDEO LINK</label>
+                            <input type="url" name="video_link" id="id_video_link" class="form-control"
+                                   placeholder="https://www.youtube.com/watch?v=...">
+                            <div class="help-text">Supports YouTube, Vimeo, and other video platforms</div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex gap-3 flex-wrap">
+                        <button type="submit" class="btn-upload" id="uploadBtn">
+                            <span class="spinner-small"></span>
+                            <span class="btn-text">
+                                <i class="fas fa-cloud-upload-alt me-2"></i>
+                                Upload Resource
+                            </span>
+                        </button>
+                        <a href="{% url 'dashboard' %}" class="btn-outline" data-loading="true">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                    </div>
+                </form>
             </div>
         </div>
+
     </div>
 </div>
 
 <script>
     // ============================================
-    // MODERN UPLOAD INTERACTIONS
+    // UPLOAD INTERACTIONS
     // ============================================
 
     const levelSelect = document.getElementById('id_level');
@@ -589,16 +663,10 @@
 
         if (level === 'premed') {
             premedSection.style.display = 'block';
-            document.getElementById('id_premed_subject').required = true;
-        } else {
-            document.getElementById('id_premed_subject').required = false;
         }
 
         if (level === 'undergraduate') {
             undergradSection.style.display = 'block';
-            document.getElementById('id_school').required = true;
-        } else {
-            document.getElementById('id_school').required = false;
         }
 
         // Toggle file vs video
@@ -697,7 +765,7 @@
         }
     }
 
-    // Form submission with proper loading state
+    // Form submission
     uploadForm.addEventListener('submit', function(e) {
         const resourceType = resourceTypeSelect.value;
 
@@ -723,12 +791,10 @@
             }
         }
 
-        // Show progress and loading state
         uploadProgress.classList.add('show');
         uploadBtn.classList.add('loading');
         uploadBtn.disabled = true;
 
-        // Simulate progress (actual progress would come from XHR)
         let progress = 0;
         const interval = setInterval(() => {
             progress += Math.random() * 12;
@@ -739,7 +805,6 @@
             updateProgress(Math.min(progress, 95));
         }, 200);
 
-        // Store interval to clear if needed
         window._uploadInterval = interval;
     });
 

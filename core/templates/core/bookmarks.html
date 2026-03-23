@@ -1,37 +1,61 @@
 {% extends 'core/base.html' %}
 {% load static %}
+{% load random_images %}
 
 {% block title %}My Bookmarks - KUHeS Knowledge Bank{% endblock %}
 
 {% block extra_css %}
 <style>
     /* ============================================
-       POLISHED BOOKMARKS PAGE - MODERN & CLEAN
+       KUHeS OFFICIAL BRAND COLORS
+       Primary: #2A2E7C (Astronaut Blue)
+       Accent: #99674C (Cape Palliser Tan)
+       Floating Cards - No Background Mask
     ============================================ */
 
-    /* Container */
+    :root {
+        --kuhes-primary: #2A2E7C;
+        --kuhes-primary-dark: #1F2368;
+        --kuhes-primary-light: #3A3E8C;
+        --kuhes-accent: #99674C;
+        --kuhes-accent-dark: #7A4F3A;
+        --kuhes-accent-light: #B28063;
+        --kuhes-white: #FFFFFF;
+        --kuhes-card-bg: rgba(42, 46, 124, 0.92);
+        --kuhes-card-border: rgba(153, 103, 76, 0.45);
+    }
+
+    /* Bookmarks Container */
     .bookmarks-container {
-        max-width: 1400px;
+        min-height: calc(100vh - var(--header-height));
+        position: relative;
+        padding: 2rem;
+    }
+
+    /* Background Image - Fully Visible */
+    .bookmarks-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        z-index: 0;
+    }
+
+    /* No overlay mask */
+    .bookmarks-container::before {
+        display: none;
+    }
+
+    /* Content Wrapper */
+    .bookmarks-wrapper {
+        position: relative;
+        z-index: 1;
+        max-width: 1200px;
         margin: 0 auto;
-        padding: 1.5rem;
-        animation: fadeInContainer 0.5s ease-out;
-    }
-
-    @keyframes fadeInContainer {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    @media (max-width: 768px) {
-        .bookmarks-container {
-            padding: 1rem;
-        }
     }
 
     /* Header */
@@ -47,43 +71,33 @@
     .bookmarks-header h1 {
         font-size: 1.75rem;
         font-weight: 700;
-        background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
+        background: linear-gradient(135deg, var(--kuhes-primary-light), var(--kuhes-accent-light));
         -webkit-background-clip: text;
         background-clip: text;
         color: transparent;
         margin: 0;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
     }
 
     .bookmarks-header h1 i {
         background: none;
-        -webkit-text-fill-color: #f59e0b;
+        -webkit-text-fill-color: var(--kuhes-accent);
     }
 
     .bookmark-stats {
-        color: #6c757d;
         font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.7);
     }
 
     .bookmark-stats .count {
         font-weight: 700;
-        color: var(--kuhes-blue);
-    }
-
-    @media (max-width: 768px) {
-        .bookmarks-header {
-            flex-direction: column;
-            text-align: center;
-        }
+        color: var(--kuhes-accent-light);
     }
 
     /* Quick Actions Toolbar */
     .quick-actions {
-        background: white;
+        background: var(--kuhes-card-bg);
         border-radius: 20px;
-        border: 1px solid #eef2f6;
+        border: 1px solid var(--kuhes-card-border);
         padding: 0.75rem 1rem;
         margin-bottom: 1.5rem;
         display: flex;
@@ -91,7 +105,6 @@
         align-items: center;
         flex-wrap: wrap;
         gap: 1rem;
-        transition: all 0.2s ease;
     }
 
     .items-count {
@@ -99,11 +112,11 @@
         align-items: center;
         gap: 0.5rem;
         font-size: 0.85rem;
-        color: #6c757d;
+        color: rgba(255, 255, 255, 0.7);
     }
 
     .items-count i {
-        color: var(--kuhes-blue);
+        color: var(--kuhes-accent);
     }
 
     .action-buttons {
@@ -117,20 +130,21 @@
         border-radius: 30px;
         font-size: 0.75rem;
         font-weight: 500;
-        transition: all 0.2s ease;
-        background: #f8f9fa;
-        border: 1px solid #eef2f6;
-        color: #495057;
+        transition: all 0.2s;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid var(--kuhes-card-border);
+        color: rgba(255, 255, 255, 0.8);
+        cursor: pointer;
     }
 
     .btn-sm-modern:hover {
-        background: var(--kuhes-blue);
-        color: white;
+        background: rgba(153, 103, 76, 0.2);
+        border-color: var(--kuhes-accent);
         transform: translateY(-1px);
     }
 
     .btn-sm-modern.active {
-        background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
+        background: var(--kuhes-accent);
         color: white;
         border-color: transparent;
     }
@@ -150,26 +164,26 @@
         border-radius: 40px;
         font-size: 0.8rem;
         font-weight: 500;
-        background: #f8f9fa;
-        color: #6c757d;
+        background: rgba(255, 255, 255, 0.08);
+        color: rgba(255, 255, 255, 0.7);
         cursor: pointer;
-        transition: all 0.2s ease;
+        transition: all 0.2s;
         white-space: nowrap;
-        border: 1px solid #eef2f6;
+        border: 1px solid var(--kuhes-card-border);
     }
 
     .folder-tab:hover {
-        background: #e9ecef;
+        background: rgba(153, 103, 76, 0.15);
         transform: translateY(-1px);
     }
 
     .folder-tab.active {
-        background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
+        background: var(--kuhes-accent);
         color: white;
         border-color: transparent;
     }
 
-    /* Bookmark Cards */
+    /* Bookmarks Grid */
     .bookmarks-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
@@ -179,20 +193,20 @@
     @media (max-width: 768px) {
         .bookmarks-grid {
             grid-template-columns: 1fr;
-            gap: 1rem;
         }
     }
 
+    /* Bookmark Card */
     .bookmark-card {
-        background: white;
+        background: var(--kuhes-card-bg);
         border-radius: 20px;
-        border: 1px solid #eef2f6;
+        border: 1px solid var(--kuhes-card-border);
         overflow: hidden;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.3s;
+        position: relative;
         animation: fadeInUp 0.5s ease forwards;
         opacity: 0;
         transform: translateY(20px);
-        position: relative;
     }
 
     .bookmark-card:nth-child(1) { animation-delay: 0.05s; }
@@ -211,8 +225,8 @@
 
     .bookmark-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
-        border-color: rgba(0, 51, 160, 0.2);
+        border-color: var(--kuhes-accent);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
     }
 
     .bookmark-card.removing {
@@ -232,8 +246,8 @@
     }
 
     .selection-mode .bookmark-card.selected {
-        border: 2px solid var(--kuhes-blue);
-        background: rgba(0, 51, 160, 0.02);
+        border: 2px solid var(--kuhes-accent);
+        background: rgba(153, 103, 76, 0.08);
     }
 
     .select-checkbox {
@@ -274,55 +288,55 @@
         align-items: center;
         justify-content: center;
         font-size: 1rem;
-        transition: all 0.3s ease;
+        transition: all 0.3s;
     }
 
     .bookmark-card:hover .type-icon {
         transform: scale(1.05) rotate(5deg);
     }
 
-    .type-icon.handout { background: #e8f0fe; color: #1a73e8; }
-    .type-icon.past_paper { background: #fff3e0; color: #e67700; }
-    .type-icon.lecture_note { background: #e6f4ea; color: #1e7e34; }
-    .type-icon.video { background: #f3e5f5; color: #6a1b9a; }
-    .type-icon.clinical_guide { background: #fee2e2; color: #d93025; }
+    .type-icon.handout { background: rgba(153, 103, 76, 0.2); color: var(--kuhes-accent-light); }
+    .type-icon.past_paper { background: rgba(153, 103, 76, 0.2); color: var(--kuhes-accent-light); }
+    .type-icon.lecture_note { background: rgba(153, 103, 76, 0.2); color: var(--kuhes-accent-light); }
+    .type-icon.video { background: rgba(153, 103, 76, 0.2); color: var(--kuhes-accent-light); }
+    .type-icon.clinical_guide { background: rgba(153, 103, 76, 0.2); color: var(--kuhes-accent-light); }
 
     .resource-type-label {
         font-size: 0.7rem;
         padding: 0.2rem 0.6rem;
         border-radius: 30px;
-        background: #f0f2f5;
-        color: #6c757d;
+        background: rgba(255, 255, 255, 0.08);
+        color: rgba(255, 255, 255, 0.6);
         font-weight: 500;
     }
 
     .bookmark-time {
         font-size: 0.7rem;
-        color: #9aa6b5;
+        color: rgba(255, 255, 255, 0.5);
     }
 
     .bookmark-title {
         font-size: 1rem;
         font-weight: 600;
-        color: #1a2c3e;
+        color: var(--kuhes-white);
         margin-bottom: 0.5rem;
         display: block;
         text-decoration: none;
-        transition: color 0.2s ease;
+        transition: color 0.2s;
     }
 
     .bookmark-title:hover {
-        color: var(--kuhes-blue);
+        color: var(--kuhes-accent-light);
     }
 
     .bookmark-description {
         font-size: 0.8rem;
-        color: #6c757d;
+        color: rgba(255, 255, 255, 0.7);
         margin-bottom: 1rem;
         line-height: 1.5;
     }
 
-    /* Tags & Badges */
+    /* Badges */
     .badge-group {
         display: flex;
         flex-wrap: wrap;
@@ -334,8 +348,8 @@
         font-size: 0.65rem;
         padding: 0.25rem 0.6rem;
         border-radius: 30px;
-        background: #f8f9fa;
-        color: #6c757d;
+        background: rgba(255, 255, 255, 0.08);
+        color: rgba(255, 255, 255, 0.6);
         display: inline-flex;
         align-items: center;
         gap: 0.25rem;
@@ -352,12 +366,12 @@
         align-items: center;
         margin-top: 1rem;
         padding-top: 0.75rem;
-        border-top: 1px solid #eef2f6;
+        border-top: 1px solid rgba(153, 103, 76, 0.3);
     }
 
     .uploader-info {
         font-size: 0.7rem;
-        color: #9aa6b5;
+        color: rgba(255, 255, 255, 0.5);
     }
 
     .action-buttons-card {
@@ -374,19 +388,19 @@
         justify-content: center;
         background: transparent;
         border: none;
-        color: #9aa6b5;
+        color: rgba(255, 255, 255, 0.5);
         cursor: pointer;
-        transition: all 0.2s ease;
+        transition: all 0.2s;
     }
 
     .icon-btn:hover {
-        background: #f0f2f5;
-        color: var(--kuhes-blue);
+        background: rgba(153, 103, 76, 0.15);
+        color: var(--kuhes-accent-light);
         transform: scale(1.05);
     }
 
     .icon-btn.danger:hover {
-        color: #dc2626;
+        color: #ff6b6b;
     }
 
     /* Bookmark Ribbon */
@@ -407,9 +421,9 @@
         right: -28px;
         width: 70px;
         height: 28px;
-        background: linear-gradient(135deg, #f59e0b, #e67700);
+        background: linear-gradient(135deg, var(--kuhes-accent), var(--kuhes-accent-dark));
         transform: rotate(45deg);
-        box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+        box-shadow: 0 2px 8px rgba(153, 103, 76, 0.3);
     }
 
     .bookmark-ribbon i {
@@ -428,13 +442,13 @@
         bottom: 0;
         left: 0;
         right: 0;
-        background: white;
-        border-top: 2px solid var(--kuhes-blue);
-        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+        background: var(--kuhes-card-bg);
+        border-top: 2px solid var(--kuhes-accent);
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
         z-index: 1000;
         padding: 0.75rem 1.5rem;
         transform: translateY(100%);
-        transition: transform 0.3s ease;
+        transition: transform 0.3s;
     }
 
     .bulk-actions-bar.show {
@@ -442,7 +456,7 @@
     }
 
     .bulk-content {
-        max-width: 1400px;
+        max-width: 1200px;
         margin: 0 auto;
         display: flex;
         justify-content: space-between;
@@ -453,11 +467,12 @@
 
     .selected-info {
         font-weight: 500;
+        color: rgba(255, 255, 255, 0.8);
     }
 
     .selected-info span {
         font-weight: 700;
-        color: var(--kuhes-blue);
+        color: var(--kuhes-accent-light);
     }
 
     .bulk-buttons {
@@ -469,21 +484,15 @@
     .empty-state {
         text-align: center;
         padding: 3rem;
-        background: white;
+        background: var(--kuhes-card-bg);
         border-radius: 24px;
-        border: 1px solid #eef2f6;
-        animation: fadeIn 0.5s ease;
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
+        border: 1px solid var(--kuhes-card-border);
     }
 
     .empty-icon {
         width: 80px;
         height: 80px;
-        background: rgba(245, 158, 11, 0.1);
+        background: rgba(153, 103, 76, 0.15);
         border-radius: 40px;
         display: flex;
         align-items: center;
@@ -499,33 +508,38 @@
 
     .empty-icon i {
         font-size: 2rem;
-        color: #f59e0b;
+        color: var(--kuhes-accent);
     }
 
     .empty-state h3 {
         font-size: 1.25rem;
         font-weight: 600;
+        color: var(--kuhes-white);
         margin-bottom: 0.5rem;
-        color: #1a2c3e;
     }
 
     /* Skeleton Loader */
+    .skeleton-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 1.5rem;
+    }
+
     .skeleton-card {
-        background: white;
+        background: var(--kuhes-card-bg);
         border-radius: 20px;
-        border: 1px solid #eef2f6;
+        border: 1px solid var(--kuhes-card-border);
         padding: 1.25rem;
-        margin-bottom: 1rem;
     }
 
     .skeleton {
-        background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+        background: linear-gradient(90deg, rgba(255,255,255,0.08) 25%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.08) 75%);
         background-size: 200% 100%;
-        animation: skeletonLoading 1.2s infinite;
+        animation: shimmer 1.2s infinite;
         border-radius: 8px;
     }
 
-    @keyframes skeletonLoading {
+    @keyframes shimmer {
         0% { background-position: 200% 0; }
         100% { background-position: -200% 0; }
     }
@@ -548,60 +562,64 @@
 
     /* Modal */
     .modal-content {
+        background: var(--kuhes-card-bg);
+        border: 1px solid var(--kuhes-card-border);
         border-radius: 24px;
-        border: none;
-        overflow: hidden;
     }
 
     .modal-header {
-        background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
-        color: white;
+        background: linear-gradient(135deg, var(--kuhes-primary), var(--kuhes-accent));
         border: none;
         padding: 1rem 1.5rem;
     }
 
-    /* Floating Shapes */
-    .floating-shape {
-        position: fixed;
-        background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
-        border-radius: 50%;
-        filter: blur(80px);
-        opacity: 0.06;
-        z-index: -1;
-        pointer-events: none;
-        animation: floatShape 15s ease-in-out infinite;
+    .modal-header .modal-title {
+        color: white;
     }
 
-    @keyframes floatShape {
-        0%, 100% { transform: translate(0, 0) scale(1); }
-        50% { transform: translate(40px, -30px) scale(1.1); }
+    /* Mobile */
+    @media (max-width: 768px) {
+        .bookmarks-container {
+            padding: 1rem;
+        }
+        .bookmarks-header {
+            flex-direction: column;
+            text-align: center;
+        }
+        .quick-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .action-buttons {
+            justify-content: center;
+        }
+        .folder-tabs {
+            justify-content: center;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- Floating Shapes -->
-<div class="floating-shape" style="width: 500px; height: 500px; top: -200px; right: -200px;"></div>
-<div class="floating-shape" style="width: 400px; height: 400px; bottom: -150px; left: -150px; background: linear-gradient(135deg, #f59e0b, #e67700);"></div>
+<!-- Background Image - Fully Visible -->
+<div class="bookmarks-bg" style="background-image: url('{% random_kuhes_image_url %}');"></div>
 
 <div class="bookmarks-container">
-    <!-- Header -->
-    <div class="bookmarks-header">
-        <h1>
-            <i class="fas fa-bookmark"></i>
-            My Bookmarks
-        </h1>
-        <div class="bookmark-stats">
-            <span class="count" id="bookmarkCount">{{ bookmarks|length }}</span> saved resources
-            {% if bookmarks %}
-            • Last added <span id="lastAddedTime">{{ bookmarks.0.created_at|timesince }}</span> ago
-            {% endif %}
-        </div>
-    </div>
+    <div class="bookmarks-wrapper">
 
-    <!-- Skeleton Loader -->
-    <div id="skeletonLoader" style="display: none;">
-        <div class="bookmarks-grid">
+        <!-- Header -->
+        <div class="bookmarks-header">
+            <h1><i class="fas fa-bookmark me-2"></i>My Bookmarks</h1>
+            <div class="bookmark-stats">
+                <span class="count" id="bookmarkCount">{{ bookmarks|length }}</span> saved resources
+                {% if bookmarks %}
+                • Last added <span id="lastAddedTime">{{ bookmarks.0.created_at|timesince }}</span> ago
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Skeleton Loader -->
+        <div id="skeletonLoader" class="skeleton-grid" style="display: none;">
             {% for i in "123456" %}
             <div class="skeleton-card">
                 <div class="d-flex gap-3 mb-3">
@@ -620,241 +638,202 @@
             </div>
             {% endfor %}
         </div>
-    </div>
 
-    <!-- Actual Content -->
-    <div id="bookmarksContent">
-        {% if bookmarks %}
-            <!-- Quick Actions Toolbar -->
-            <div class="quick-actions">
-                <div class="items-count">
-                    <i class="fas fa-layer-group"></i>
-                    <span id="itemCount">{{ bookmarks|length }}</span> items
-                </div>
-                <div class="action-buttons">
-                    <button class="btn-sm-modern" onclick="sortBookmarks('recent')" id="sortRecentBtn">
-                        <i class="fas fa-clock me-1"></i>Recent
-                    </button>
-                    <button class="btn-sm-modern" onclick="sortBookmarks('title')" id="sortTitleBtn">
-                        <i class="fas fa-sort-alpha-down me-1"></i>Title
-                    </button>
-                    <button class="btn-sm-modern" onclick="toggleSelectionMode()" id="selectModeBtn">
-                        <i class="fas fa-check-square me-1"></i>Select
-                    </button>
-                    <div class="dropdown d-inline-block">
-                        <button class="btn-sm-modern dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-ellipsis-h"></i>
+        <!-- Actual Content -->
+        <div id="bookmarksContent">
+            {% if bookmarks %}
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <div class="items-count">
+                        <i class="fas fa-layer-group"></i>
+                        <span id="itemCount">{{ bookmarks|length }}</span> items
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn-sm-modern" onclick="sortBookmarks('recent')" id="sortRecentBtn">
+                            <i class="fas fa-clock me-1"></i>Recent
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="#" onclick="exportBookmarks()"><i class="fas fa-download me-2"></i>Export List</a></li>
-                            <li><a class="dropdown-item" href="#" onclick="shareAll()"><i class="fas fa-share-alt me-2"></i>Share Collection</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-danger" href="#" onclick="clearAllBookmarks()"><i class="fas fa-trash me-2"></i>Clear All</a></li>
-                        </ul>
+                        <button class="btn-sm-modern" onclick="sortBookmarks('title')" id="sortTitleBtn">
+                            <i class="fas fa-sort-alpha-down me-1"></i>Title
+                        </button>
+                        <button class="btn-sm-modern" onclick="toggleSelectionMode()" id="selectModeBtn">
+                            <i class="fas fa-check-square me-1"></i>Select
+                        </button>
+                        <div class="dropdown d-inline-block">
+                            <button class="btn-sm-modern dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="#" onclick="exportBookmarks()"><i class="fas fa-download me-2"></i>Export List</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="shareAll()"><i class="fas fa-share-alt me-2"></i>Share Collection</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="#" onclick="clearAllBookmarks()"><i class="fas fa-trash me-2"></i>Clear All</a></li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Folder Tabs -->
-            <div class="folder-tabs">
-                <span class="folder-tab active" onclick="filterFolder('all')" id="filterAll">All Items</span>
-                <span class="folder-tab" onclick="filterFolder('recent')" id="filterRecent">Recently Added</span>
-                <span class="folder-tab" onclick="filterFolder('handouts')" id="filterHandouts">Handouts</span>
-                <span class="folder-tab" onclick="filterFolder('videos')" id="filterVideos">Videos</span>
-                <span class="folder-tab" onclick="filterFolder('papers')" id="filterPapers">Past Papers</span>
-                <span class="folder-tab" onclick="filterFolder('favorites')" id="filterFavorites">Favorites</span>
-            </div>
+                <!-- Folder Tabs -->
+                <div class="folder-tabs">
+                    <span class="folder-tab active" onclick="filterFolder('all')">All Items</span>
+                    <span class="folder-tab" onclick="filterFolder('recent')">Recently Added</span>
+                    <span class="folder-tab" onclick="filterFolder('handouts')">Handouts</span>
+                    <span class="folder-tab" onclick="filterFolder('videos')">Videos</span>
+                    <span class="folder-tab" onclick="filterFolder('papers')">Past Papers</span>
+                    <span class="folder-tab" onclick="filterFolder('favorites')">Favorites</span>
+                </div>
 
-            <!-- Bookmarks Grid -->
-            <div class="bookmarks-grid" id="bookmarksContainer">
-                {% for bookmark in bookmarks %}
-                <div class="bookmark-card"
-                     data-id="{{ bookmark.id }}"
-                     data-type="{{ bookmark.resource.resource_type }}"
-                     data-date="{{ bookmark.created_at|date:'U' }}"
-                     data-title="{{ bookmark.resource.title }}"
-                     data-resource-id="{{ bookmark.resource.id }}">
+                <!-- Bookmarks Grid -->
+                <div class="bookmarks-grid" id="bookmarksContainer">
+                    {% for bookmark in bookmarks %}
+                    <div class="bookmark-card"
+                         data-id="{{ bookmark.id }}"
+                         data-type="{{ bookmark.resource.resource_type }}"
+                         data-date="{{ bookmark.created_at|date:'U' }}"
+                         data-title="{{ bookmark.resource.title }}"
+                         data-resource-id="{{ bookmark.resource.id }}">
 
-                    <!-- Selection Checkbox -->
-                    <div class="select-checkbox">
-                        <input class="form-check-input bookmark-select" type="checkbox" value="{{ bookmark.id }}" id="select{{ bookmark.id }}">
-                    </div>
-
-                    <!-- Bookmark Ribbon for recent -->
-                    {% if forloop.counter <= 3 %}
-                    <div class="bookmark-ribbon">
-                        <i class="fas fa-star"></i>
-                    </div>
-                    {% endif %}
-
-                    <div class="card-content">
-                        <!-- Header -->
-                        <div class="card-header-info">
-                            <div class="type-badge">
-                                <div class="type-icon {{ bookmark.resource.resource_type }}">
-                                    {% if bookmark.resource.resource_type == 'handout' %}
-                                        <i class="fas fa-file-pdf"></i>
-                                    {% elif bookmark.resource.resource_type == 'past_paper' %}
-                                        <i class="fas fa-file-alt"></i>
-                                    {% elif bookmark.resource.resource_type == 'lecture_note' %}
-                                        <i class="fas fa-book"></i>
-                                    {% elif bookmark.resource.resource_type == 'video' %}
-                                        <i class="fas fa-video"></i>
-                                    {% elif bookmark.resource.resource_type == 'clinical_guide' %}
-                                        <i class="fas fa-stethoscope"></i>
-                                    {% else %}
-                                        <i class="fas fa-file"></i>
-                                    {% endif %}
-                                </div>
-                                <span class="resource-type-label">{{ bookmark.resource.get_resource_type_display }}</span>
-                            </div>
-                            <span class="bookmark-time" title="{{ bookmark.created_at|date:'M d, Y H:i' }}">
-                                <i class="far fa-clock me-1"></i>{{ bookmark.created_at|timesince }}
-                            </span>
+                        <!-- Selection Checkbox -->
+                        <div class="select-checkbox">
+                            <input class="form-check-input bookmark-select" type="checkbox" value="{{ bookmark.id }}" id="select{{ bookmark.id }}">
                         </div>
 
-                        <!-- Title -->
-                        <a href="{% url 'resource_detail' bookmark.resource.id %}" data-loading="true" class="bookmark-title">
-                            {{ bookmark.resource.title }}
-                        </a>
-
-                        <!-- Description -->
-                        <p class="bookmark-description">
-                            {{ bookmark.resource.description|truncatechars:80 }}
-                        </p>
-
-                        <!-- Tags & Badges -->
-                        <div class="badge-group">
-                            {% if bookmark.resource.course_code %}
-                            <span class="info-badge">
-                                <i class="fas fa-hashtag"></i>{{ bookmark.resource.course_code }}
-                            </span>
-                            {% endif %}
-                            {% if bookmark.resource.year_of_study %}
-                            <span class="info-badge">
-                                <i class="fas fa-graduation-cap"></i>Year {{ bookmark.resource.year_of_study }}
-                            </span>
-                            {% endif %}
-                            {% if bookmark.resource.semester %}
-                            <span class="info-badge">
-                                <i class="fas fa-calendar-alt"></i>Sem {{ bookmark.resource.semester }}
-                            </span>
-                            {% endif %}
-                        </div>
-
-                        <!-- Tags Preview -->
-                        {% if bookmark.resource.tags %}
-                        <div class="badge-group">
-                            {% for tag in bookmark.resource.tags.split|slice:":2" %}
-                                <span class="info-badge">#{{ tag }}</span>
-                            {% endfor %}
-                            {% if bookmark.resource.tags.split|length > 2 %}
-                                <span class="info-badge">+{{ bookmark.resource.tags.split|length|add:"-2" }}</span>
-                            {% endif %}
+                        <!-- Bookmark Ribbon -->
+                        {% if forloop.counter <= 3 %}
+                        <div class="bookmark-ribbon">
+                            <i class="fas fa-star"></i>
                         </div>
                         {% endif %}
 
-                        <!-- Footer -->
-                        <div class="card-footer-info">
-                            <div class="uploader-info">
-                                <i class="fas fa-user me-1"></i>{{ bookmark.resource.uploader.get_short_name|default:bookmark.resource.uploader.username }}
-                                <span class="mx-1">•</span>
-                                <i class="fas fa-download me-1"></i>{{ bookmark.resource.download_count }}
+                        <div class="card-content">
+                            <!-- Header -->
+                            <div class="card-header-info">
+                                <div class="type-badge">
+                                    <div class="type-icon {{ bookmark.resource.resource_type }}">
+                                        {% if bookmark.resource.resource_type == 'handout' %}
+                                            <i class="fas fa-file-pdf"></i>
+                                        {% elif bookmark.resource.resource_type == 'past_paper' %}
+                                            <i class="fas fa-file-alt"></i>
+                                        {% elif bookmark.resource.resource_type == 'lecture_note' %}
+                                            <i class="fas fa-book"></i>
+                                        {% elif bookmark.resource.resource_type == 'video' %}
+                                            <i class="fas fa-video"></i>
+                                        {% elif bookmark.resource.resource_type == 'clinical_guide' %}
+                                            <i class="fas fa-stethoscope"></i>
+                                        {% else %}
+                                            <i class="fas fa-file"></i>
+                                        {% endif %}
+                                    </div>
+                                    <span class="resource-type-label">{{ bookmark.resource.get_resource_type_display }}</span>
+                                </div>
+                                <span class="bookmark-time">
+                                    <i class="far fa-clock me-1"></i>{{ bookmark.created_at|timesince }}
+                                </span>
                             </div>
-                            <div class="action-buttons-card">
-                                <button class="icon-btn share-btn" onclick="shareResource({{ bookmark.resource.id }})" title="Share">
-                                    <i class="fas fa-share-alt"></i>
-                                </button>
-                                <button class="icon-btn danger remove-btn" onclick="removeBookmark(this, {{ bookmark.resource.id }}, {{ bookmark.id }})" title="Remove bookmark">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
+
+                            <!-- Title -->
+                            <a href="{% url 'resource_detail' bookmark.resource.id %}" data-loading="true" class="bookmark-title">
+                                {{ bookmark.resource.title }}
+                            </a>
+
+                            <!-- Description -->
+                            <p class="bookmark-description">
+                                {{ bookmark.resource.description|truncatechars:80 }}
+                            </p>
+
+                            <!-- Badges -->
+                            <div class="badge-group">
+                                {% if bookmark.resource.course_code %}
+                                <span class="info-badge">
+                                    <i class="fas fa-hashtag"></i>{{ bookmark.resource.course_code }}
+                                </span>
+                                {% endif %}
+                                {% if bookmark.resource.year_of_study %}
+                                <span class="info-badge">
+                                    <i class="fas fa-graduation-cap"></i>Year {{ bookmark.resource.year_of_study }}
+                                </span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Tags -->
+                            {% if bookmark.resource.tags %}
+                            <div class="badge-group">
+                                {% for tag in bookmark.resource.tags.split|slice:":2" %}
+                                    <span class="info-badge">#{{ tag }}</span>
+                                {% endfor %}
+                                {% if bookmark.resource.tags.split|length > 2 %}
+                                    <span class="info-badge">+{{ bookmark.resource.tags.split|length|add:"-2" }}</span>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+
+                            <!-- Footer -->
+                            <div class="card-footer-info">
+                                <div class="uploader-info">
+                                    <i class="fas fa-user me-1"></i>{{ bookmark.resource.uploader.get_short_name|default:bookmark.resource.uploader.username }}
+                                    <span class="mx-1">•</span>
+                                    <i class="fas fa-download me-1"></i>{{ bookmark.resource.download_count }}
+                                </div>
+                                <div class="action-buttons-card">
+                                    <button class="icon-btn" onclick="shareResource({{ bookmark.resource.id }})" title="Share">
+                                        <i class="fas fa-share-alt"></i>
+                                    </button>
+                                    <button class="icon-btn danger" onclick="removeBookmark(this, {{ bookmark.resource.id }}, {{ bookmark.id }})" title="Remove">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
-            </div>
 
-            <!-- Bulk Actions Bar -->
-            <div class="bulk-actions-bar" id="bulkActionsBar">
-                <div class="bulk-content">
-                    <div class="selected-info">
-                        <span id="selectedCount">0</span> items selected
-                    </div>
-                    <div class="bulk-buttons">
-                        <button class="btn-sm-modern" onclick="addToCollection()">
-                            <i class="fas fa-folder-plus me-1"></i>Collection
-                        </button>
-                        <button class="btn-sm-modern" onclick="removeSelectedBookmarks()">
-                            <i class="fas fa-trash me-1"></i>Remove
-                        </button>
-                        <button class="btn-sm-modern" onclick="toggleSelectionMode()">
-                            <i class="fas fa-times me-1"></i>Cancel
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-        {% else %}
-            <!-- Empty State -->
-            <div class="empty-state">
-                <div class="empty-icon">
-                    <i class="fas fa-bookmark"></i>
-                </div>
-                <h3>Your bookmarks are empty</h3>
-                <p class="text-muted mb-4">Start bookmarking resources you find useful. They'll appear here for easy access anytime!</p>
-                <div class="d-flex gap-3 justify-content-center">
-                    <a href="{% url 'browse_resources' %}" data-loading="true" class="btn btn-primary rounded-pill px-4">
-                        <i class="fas fa-search me-2"></i>Browse Resources
-                    </a>
-                    <a href="{% url 'dashboard' %}" data-loading="true" class="btn btn-outline-primary rounded-pill px-4">
-                        <i class="fas fa-tachometer-alt me-2"></i>Go to Dashboard
-                    </a>
-                </div>
-                <div class="mt-5 pt-3">
-                    <p class="small text-muted mb-3">Popular resources students bookmark:</p>
-                    <div class="d-flex flex-wrap gap-2 justify-content-center">
-                        <span class="info-badge"><i class="fas fa-file-pdf me-1"></i>Anatomy Notes</span>
-                        <span class="info-badge"><i class="fas fa-file-alt me-1"></i>Past Papers 2024</span>
-                        <span class="info-badge"><i class="fas fa-video me-1"></i>Clinical Skills</span>
-                        <span class="info-badge"><i class="fas fa-stethoscope me-1"></i>OSCE Guides</span>
+                <!-- Bulk Actions Bar -->
+                <div class="bulk-actions-bar" id="bulkActionsBar">
+                    <div class="bulk-content">
+                        <div class="selected-info">
+                            <span id="selectedCount">0</span> items selected
+                        </div>
+                        <div class="bulk-buttons">
+                            <button class="btn-sm-modern" onclick="addToCollection()">
+                                <i class="fas fa-folder-plus me-1"></i>Collection
+                            </button>
+                            <button class="btn-sm-modern" onclick="removeSelectedBookmarks()">
+                                <i class="fas fa-trash me-1"></i>Remove
+                            </button>
+                            <button class="btn-sm-modern" onclick="toggleSelectionMode()">
+                                <i class="fas fa-times me-1"></i>Cancel
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
-        {% endif %}
-    </div>
-</div>
 
-<!-- Add to Collection Modal -->
-<div class="modal fade" id="collectionModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-folder-plus me-2"></i>Add to Collection</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body p-4">
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Select Collection</label>
-                    <select class="form-select" id="collectionSelect">
-                        <option value="">-- Choose Collection --</option>
-                        <option value="favorites">⭐ Favorites</option>
-                        <option value="study">📚 Study Materials</option>
-                        <option value="clinical">🩺 Clinical</option>
-                        <option value="exams">📝 Exam Prep</option>
-                    </select>
+            {% else %}
+                <!-- Empty State -->
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-bookmark"></i>
+                    </div>
+                    <h3>Your bookmarks are empty</h3>
+                    <p class="text-muted mb-4" style="color: rgba(255,255,255,0.6);">Start bookmarking resources you find useful.</p>
+                    <div class="d-flex gap-3 justify-content-center">
+                        <a href="{% url 'browse_resources' %}" data-loading="true" class="btn-primary" style="padding: 0.6rem 1.5rem; border-radius: 40px; text-decoration: none;">
+                            <i class="fas fa-search me-2"></i>Browse Resources
+                        </a>
+                        <a href="{% url 'dashboard' %}" data-loading="true" class="btn-outline" style="padding: 0.6rem 1.5rem; border-radius: 40px; text-decoration: none;">
+                            <i class="fas fa-tachometer-alt me-2"></i>Go to Dashboard
+                        </a>
+                    </div>
+                    <div class="mt-5 pt-3">
+                        <p class="small text-muted mb-3" style="color: rgba(255,255,255,0.5);">Popular resources students bookmark:</p>
+                        <div class="d-flex flex-wrap gap-2 justify-content-center">
+                            <span class="info-badge"><i class="fas fa-file-pdf me-1"></i>Anatomy Notes</span>
+                            <span class="info-badge"><i class="fas fa-file-alt me-1"></i>Past Papers 2024</span>
+                            <span class="info-badge"><i class="fas fa-video me-1"></i>Clinical Skills</span>
+                            <span class="info-badge"><i class="fas fa-stethoscope me-1"></i>OSCE Guides</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Or create new</label>
-                    <input type="text" class="form-control" placeholder="Collection name" id="newCollection">
-                </div>
-            </div>
-            <div class="modal-footer border-0 pb-4">
-                <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary rounded-pill" onclick="saveToCollection()" id="saveCollectionBtn">
-                    <span class="btn-text">Save</span>
-                </button>
-            </div>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -870,23 +849,23 @@
             <div class="modal-body p-4">
                 <div class="text-center mb-4">
                     <div class="d-flex justify-content-center gap-3 flex-wrap">
-                        <button class="btn btn-outline-primary rounded-circle p-3" onclick="shareVia('whatsapp')" style="width: 56px; height: 56px;">
+                        <button class="btn-outline" style="width: 56px; height: 56px; border-radius: 50%;" onclick="shareVia('whatsapp')">
                             <i class="fab fa-whatsapp fa-xl"></i>
                         </button>
-                        <button class="btn btn-outline-info rounded-circle p-3" onclick="shareVia('email')" style="width: 56px; height: 56px;">
+                        <button class="btn-outline" style="width: 56px; height: 56px; border-radius: 50%;" onclick="shareVia('email')">
                             <i class="fas fa-envelope fa-xl"></i>
                         </button>
-                        <button class="btn btn-outline-success rounded-circle p-3" onclick="shareVia('telegram')" style="width: 56px; height: 56px;">
+                        <button class="btn-outline" style="width: 56px; height: 56px; border-radius: 50%;" onclick="shareVia('telegram')">
                             <i class="fab fa-telegram fa-xl"></i>
                         </button>
-                        <button class="btn btn-outline-secondary rounded-circle p-3" onclick="shareVia('copy')" style="width: 56px; height: 56px;">
+                        <button class="btn-outline" style="width: 56px; height: 56px; border-radius: 50%;" onclick="shareVia('copy')">
                             <i class="fas fa-link fa-xl"></i>
                         </button>
                     </div>
                 </div>
                 <div class="input-group">
-                    <input type="text" class="form-control" id="shareLink" readonly>
-                    <button class="btn btn-primary" onclick="copyLink()">Copy</button>
+                    <input type="text" class="form-control" id="shareLink" readonly style="background: rgba(255,255,255,0.08); border-color: var(--kuhes-card-border); color: white;">
+                    <button class="btn-primary" onclick="copyLink()" style="border-radius: 0 12px 12px 0;">Copy</button>
                 </div>
             </div>
         </div>
@@ -895,21 +874,19 @@
 
 <script>
     // ============================================
-    // BOOKMARKS PAGE INTERACTIONS
+    // BOOKMARKS INTERACTIONS
     // ============================================
 
     let selectionMode = false;
     let selectedItems = new Set();
-    let currentShareResourceId = null;
     let isRemoving = false;
 
-    // Show skeleton loader
     function showSkeletonLoader() {
         const skeleton = document.getElementById('skeletonLoader');
         const content = document.getElementById('bookmarksContent');
         if (skeleton && content && !document.querySelector('.bookmark-card')) {
             content.style.display = 'none';
-            skeleton.style.display = 'block';
+            skeleton.style.display = 'grid';
             setTimeout(() => {
                 skeleton.style.display = 'none';
                 content.style.display = 'block';
@@ -917,7 +894,6 @@
         }
     }
 
-    // Toggle selection mode
     function toggleSelectionMode() {
         selectionMode = !selectionMode;
         const bulkBar = document.getElementById('bulkActionsBar');
@@ -941,7 +917,6 @@
         }
     }
 
-    // Handle checkbox changes
     document.querySelectorAll('.bookmark-select').forEach(checkbox => {
         checkbox.addEventListener('change', function() {
             const card = this.closest('.bookmark-card');
@@ -961,7 +936,6 @@
         if (countEl) countEl.textContent = selectedItems.size;
     }
 
-    // Remove bookmark
     async function removeBookmark(btn, resourceId, bookmarkId) {
         if (isRemoving) return;
         const card = btn.closest('.bookmark-card');
@@ -1006,7 +980,6 @@
         }
     }
 
-    // Remove selected bookmarks
     async function removeSelectedBookmarks() {
         if (selectedItems.size === 0) return;
         if (!confirm(`Remove ${selectedItems.size} bookmark(s)?`)) return;
@@ -1032,9 +1005,7 @@
                 const cards = document.querySelectorAll('.bookmark-card');
                 cards.forEach(card => {
                     const checkbox = card.querySelector('.bookmark-select');
-                    if (checkbox && selectedItems.has(checkbox.value)) {
-                        card.classList.add('removing');
-                    }
+                    if (checkbox && selectedItems.has(checkbox.value)) card.classList.add('removing');
                 });
                 setTimeout(() => {
                     cards.forEach(card => {
@@ -1057,7 +1028,6 @@
         }
     }
 
-    // Clear all bookmarks
     async function clearAllBookmarks() {
         const count = document.querySelectorAll('.bookmark-card').length;
         if (count === 0) return;
@@ -1097,7 +1067,6 @@
         if (remaining === 0) location.reload();
     }
 
-    // Sort bookmarks
     function sortBookmarks(method) {
         const container = document.getElementById('bookmarksContainer');
         const cards = Array.from(document.querySelectorAll('.bookmark-card'));
@@ -1105,10 +1074,9 @@
         cards.sort((a, b) => {
             if (method === 'recent') {
                 return parseInt(b.dataset.date) - parseInt(a.dataset.date);
-            } else if (method === 'title') {
+            } else {
                 return a.dataset.title.localeCompare(b.dataset.title);
             }
-            return 0;
         });
 
         cards.forEach(card => container.appendChild(card));
@@ -1125,7 +1093,6 @@
         if (window.toast) window.toast.success(`Sorted by ${method === 'recent' ? 'recent' : 'title'}`);
     }
 
-    // Filter by folder
     function filterFolder(folder) {
         const cards = document.querySelectorAll('.bookmark-card');
         let visibleCount = 0;
@@ -1148,15 +1115,12 @@
         });
 
         document.querySelectorAll('.folder-tab').forEach(tab => tab.classList.remove('active'));
-        const activeTab = document.getElementById(`filter${folder.charAt(0).toUpperCase() + folder.slice(1)}`);
-        if (activeTab) activeTab.classList.add('active');
+        event.target.classList.add('active');
 
         const itemCountEl = document.getElementById('itemCount');
         if (itemCountEl) itemCountEl.textContent = visibleCount + ' items';
-        if (window.toast) window.toast.info(`Showing ${visibleCount} items`);
     }
 
-    // Export bookmarks
     function exportBookmarks() {
         const bookmarks = [];
         document.querySelectorAll('.bookmark-card').forEach(card => {
@@ -1184,16 +1148,15 @@
         if (navigator.share) {
             navigator.share({
                 title: 'My KUHeS Bookmarks',
-                text: `Check out my ${count} bookmarked resources from KUHeS Knowledge Bank`,
+                text: `Check out my ${count} bookmarked resources`,
                 url: window.location.href
-            }).catch(console.error);
+            });
         } else {
             if (window.toast) window.toast.info(`You have ${count} bookmarked resources. Use Export to save them.`);
         }
     }
 
     function shareResource(resourceId) {
-        currentShareResourceId = resourceId;
         const modal = new bootstrap.Modal(document.getElementById('shareModal'));
         const link = document.getElementById('shareLink');
         link.value = `{{ request.build_absolute_uri|slice:":-1" }}/resource/${resourceId}`;
@@ -1206,13 +1169,13 @@
 
         switch(platform) {
             case 'whatsapp':
-                shareUrl = `https://wa.me/?text=${encodeURIComponent('Check out this resource on KUHeS Knowledge Bank: ' + url)}`;
+                shareUrl = `https://wa.me/?text=${encodeURIComponent('Check out this resource: ' + url)}`;
                 break;
             case 'email':
-                shareUrl = `mailto:?subject=${encodeURIComponent('KUHeS Resource')}&body=${encodeURIComponent('Check out this resource: ' + url)}`;
+                shareUrl = `mailto:?subject=${encodeURIComponent('KUHeS Resource')}&body=${encodeURIComponent(url)}`;
                 break;
             case 'telegram':
-                shareUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent('Check out this resource on KUHeS Knowledge Bank!')}`;
+                shareUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}`;
                 break;
             case 'copy':
                 navigator.clipboard.writeText(url).then(() => {
@@ -1220,14 +1183,14 @@
                 });
                 return;
         }
-        if (shareUrl) window.open(shareUrl, '_blank', 'width=600,height=400');
+        if (shareUrl) window.open(shareUrl, '_blank');
     }
 
     function copyLink() {
         const link = document.getElementById('shareLink');
         link.select();
         document.execCommand('copy');
-        if (window.toast) window.toast.success('Link copied to clipboard!');
+        if (window.toast) window.toast.success('Link copied!');
     }
 
     function addToCollection() {
@@ -1261,14 +1224,13 @@
         }, 500);
     }
 
-    // Initialize
     document.addEventListener('DOMContentLoaded', function() {
         showSkeletonLoader();
 
         document.querySelectorAll('a[data-loading="true"]').forEach(link => {
             link.addEventListener('click', function(e) {
                 const href = this.getAttribute('href');
-                if (!href || href === '#' || href.startsWith('javascript:')) return;
+                if (!href || href === '#') return;
                 if (window.loadingManager) window.loadingManager.showGlobal('Loading...');
             });
         });

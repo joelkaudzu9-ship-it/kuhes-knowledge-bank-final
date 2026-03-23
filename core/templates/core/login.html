@@ -1,170 +1,153 @@
 {% extends 'core/base.html' %}
 {% load static %}
+{% load random_images %}
 
 {% block title %}Login - KUHeS Knowledge Bank{% endblock %}
 
 {% block extra_css %}
 <style>
     /* ============================================
-       MODERN LOGIN PAGE - MATCHING INDEX PAGE STYLES
-       Dark Theme with University Library Background
+       KUHeS OFFICIAL BRAND COLORS
+       Primary: #2A2E7C (Astronaut Blue)
+       Accent: #99674C (Cape Palliser Tan)
+       Floating Cards - No Background Mask
     ============================================ */
 
-    /* Hero Section - Same as Index */
-    .login-hero {
-        position: relative;
+    :root {
+        --kuhes-primary: #2A2E7C;
+        --kuhes-primary-dark: #1F2368;
+        --kuhes-primary-light: #3A3E8C;
+        --kuhes-accent: #99674C;
+        --kuhes-accent-dark: #7A4F3A;
+        --kuhes-accent-light: #B28063;
+        --kuhes-white: #FFFFFF;
+        --kuhes-card-bg: rgba(42, 46, 124, 0.92);
+        --kuhes-card-border: rgba(153, 103, 76, 0.45);
+    }
+
+    /* Login Container */
+    .login-container {
         min-height: calc(100vh - var(--header-height));
+        position: relative;
         display: flex;
         align-items: center;
         justify-content: center;
-        overflow: hidden;
-        background: var(--kuhes-darker, #0F172A);
+        padding: 2rem;
     }
 
-    /* Animated Background Gradient */
-    .login-hero::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: radial-gradient(circle at 20% 50%, rgba(0, 102, 204, 0.2), transparent 60%);
-        animation: pulseGlow 8s ease-in-out infinite;
-        z-index: 0;
-    }
-
-    @keyframes pulseGlow {
-        0%, 100% { opacity: 0.4; transform: scale(1); }
-        50% { opacity: 0.7; transform: scale(1.05); }
-    }
-
-    /* Background Image - University Library */
+    /* Background Image - Fully Visible */
     .login-bg {
-        position: absolute;
+        position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background-image: url('{% static "core/images/university-library.jpg" %}');
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
-        opacity: 0.45;
-        z-index: 0;
-        animation: slowZoom 30s ease-in-out infinite;
-    }
-
-    @keyframes slowZoom {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-    }
-
-    /* Glass Morphism Overlay */
-    .login-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(135deg,
-            rgba(10, 15, 31, 0.85) 0%,
-            rgba(0, 102, 204, 0.7) 50%,
-            rgba(10, 15, 31, 0.85) 100%);
-        backdrop-filter: blur(2px);
-        z-index: 1;
-    }
-
-    /* Floating Shapes Animation */
-    .floating-shape {
-        position: absolute;
-        background: radial-gradient(circle, rgba(255, 184, 28, 0.1), transparent);
-        border-radius: 50%;
-        pointer-events: none;
-        animation: floatShape 12s ease-in-out infinite;
         z-index: 0;
     }
 
-    .shape-1 {
-        width: 400px;
-        height: 400px;
-        top: -150px;
-        right: -150px;
-        animation-delay: 0s;
+    /* No overlay mask */
+    .login-container::before {
+        display: none;
     }
 
-    .shape-2 {
-        width: 300px;
-        height: 300px;
-        bottom: -100px;
-        left: -100px;
-        animation-delay: -4s;
-    }
-
-    .shape-3 {
-        width: 200px;
-        height: 200px;
-        top: 50%;
-        left: 5%;
-        animation-delay: -7s;
-    }
-
-    @keyframes floatShape {
-        0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.35; }
-        50% { transform: translate(30px, -30px) scale(1.1); opacity: 0.55; }
-    }
-
-    /* Main Login Card - Glass Morphism */
-    .login-card {
+    /* Content Wrapper */
+    .login-wrapper {
         position: relative;
-        z-index: 2;
-        background: rgba(30, 41, 59, 0.75);
-        backdrop-filter: blur(12px);
-        border-radius: 32px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        z-index: 1;
         width: 100%;
         max-width: 460px;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        animation: fadeInUp 0.6s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    /* Login Card - Branded Dark Blue */
+    .login-card {
+        background: var(--kuhes-card-bg);
+        border-radius: 28px;
+        border: 1px solid var(--kuhes-card-border);
+        overflow: hidden;
+        transition: all 0.3s;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
     }
 
     .login-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6);
-        border-color: rgba(255, 184, 28, 0.25);
+        border-color: var(--kuhes-accent);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
     }
 
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(50px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+    /* Card Body */
+    .card-body {
+        padding: 2rem;
     }
 
-    /* Form Fields - Modern Design */
-    .form-group {
+    /* Logo Section */
+    .logo-section {
+        text-align: center;
         margin-bottom: 1.5rem;
+    }
+
+    .logo-icon {
+        width: 70px;
+        height: 70px;
+        background: linear-gradient(135deg, var(--kuhes-primary), var(--kuhes-accent));
+        border-radius: 20px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .logo-icon i {
+        font-size: 2rem;
+        color: white;
+    }
+
+    .logo-section h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--kuhes-white);
+        margin-bottom: 0.25rem;
+    }
+
+    .logo-section p {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    /* Badge */
+    .badge-kuhes {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(153, 103, 76, 0.2);
+        border: 1px solid var(--kuhes-card-border);
+        padding: 0.5rem 1rem;
+        border-radius: 40px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: var(--kuhes-accent-light);
+        margin-top: 0.5rem;
+    }
+
+    /* Form Controls */
+    .form-group {
+        margin-bottom: 1.25rem;
     }
 
     .form-label {
         font-size: 0.7rem;
-        font-weight: 700;
+        font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 1px;
+        letter-spacing: 0.5px;
         color: rgba(255, 255, 255, 0.7);
-        margin-bottom: 8px;
+        margin-bottom: 0.5rem;
         display: block;
     }
 
     .input-group-modern {
         position: relative;
-        display: flex;
-        align-items: stretch;
     }
 
     .input-icon {
@@ -178,7 +161,7 @@
         justify-content: center;
         background: rgba(255, 255, 255, 0.05);
         border-radius: 14px 0 0 14px;
-        color: rgba(255, 184, 28, 0.8);
+        color: var(--kuhes-accent);
         z-index: 1;
         pointer-events: none;
     }
@@ -186,13 +169,12 @@
     .form-control-modern {
         width: 100%;
         padding: 12px 16px 12px 48px;
-        border: 1.5px solid rgba(255, 255, 255, 0.15);
+        border: 1px solid var(--kuhes-card-border);
         border-radius: 14px;
         font-size: 0.9rem;
-        transition: all 0.3s ease;
+        transition: all 0.3s;
         background: rgba(255, 255, 255, 0.08);
-        font-family: inherit;
-        color: white;
+        color: var(--kuhes-white);
     }
 
     .form-control-modern::placeholder {
@@ -201,67 +183,77 @@
 
     .form-control-modern:focus {
         outline: none;
-        border-color: rgba(255, 184, 28, 0.6);
-        box-shadow: 0 0 0 4px rgba(255, 184, 28, 0.1);
+        border-color: var(--kuhes-accent);
+        box-shadow: 0 0 0 3px rgba(153, 103, 76, 0.2);
         background: rgba(255, 255, 255, 0.12);
     }
 
     .form-control-modern.is-valid {
-        border-color: #10b981;
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2310b981' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
-        background-repeat: no-repeat;
-        background-position: right 12px center;
-        background-size: 16px;
-        padding-right: 40px;
+        border-color: #28a745;
     }
 
     .form-control-modern.is-invalid {
-        border-color: #ef4444;
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23ef4444'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linecap='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23ef4444' stroke='none'/%3e%3c/svg%3e");
-        background-repeat: no-repeat;
-        background-position: right 12px center;
-        background-size: 16px;
-        padding-right: 40px;
+        border-color: #dc3545;
     }
 
-    /* Password Toggle Button */
+    /* Password Toggle */
     .password-toggle {
         position: absolute;
         right: 12px;
         top: 50%;
         transform: translateY(-50%);
-        background: none;
+        background: transparent;
         border: none;
         color: rgba(255, 255, 255, 0.5);
         cursor: pointer;
         z-index: 10;
-        padding: 0;
         width: 32px;
         height: 32px;
         display: flex;
         align-items: center;
         justify-content: center;
         border-radius: 8px;
-        transition: all 0.2s ease;
+        transition: all 0.2s;
     }
 
     .password-toggle:hover {
-        color: rgba(255, 184, 28, 0.8);
+        color: var(--kuhes-accent);
         background: rgba(255, 255, 255, 0.05);
     }
 
-    /* Modern Button - Matching Index */
+    /* Checkbox */
+    .checkbox-modern {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+    }
+
+    .checkbox-modern input {
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+        accent-color: var(--kuhes-accent);
+    }
+
+    .checkbox-modern span {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.7);
+        cursor: pointer;
+    }
+
+    /* Button */
     .btn-login {
-        background: linear-gradient(135deg, #0066CC, #0052A3);
+        background: linear-gradient(135deg, var(--kuhes-primary), var(--kuhes-primary-dark));
         border: none;
-        border-radius: 50px;
-        padding: 12px 24px;
+        border-radius: 14px;
+        padding: 12px;
         font-weight: 600;
-        font-size: 1rem;
+        font-size: 0.95rem;
         color: white;
         width: 100%;
         cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        transition: all 0.3s;
         position: relative;
         overflow: hidden;
     }
@@ -285,12 +277,12 @@
     }
 
     .btn-login:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 25px rgba(0, 102, 204, 0.4);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(42, 46, 124, 0.4);
     }
 
     .btn-login:disabled {
-        opacity: 0.7;
+        opacity: 0.6;
         cursor: not-allowed;
         transform: none;
     }
@@ -319,83 +311,46 @@
         to { transform: rotate(360deg); }
     }
 
-    /* Badge - Matching Index */
-    .badge-gold {
-        background: linear-gradient(135deg, rgba(255, 184, 28, 0.2), rgba(255, 184, 28, 0.08));
-        color: rgba(255, 184, 28, 0.9);
-        padding: 8px 18px;
-        border-radius: 40px;
-        font-weight: 600;
-        font-size: 0.75rem;
-        border: 1px solid rgba(255, 184, 28, 0.3);
-        backdrop-filter: blur(4px);
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-    }
-
     /* Links */
     .text-link {
-        color: rgba(255, 184, 28, 0.8);
+        color: var(--kuhes-accent);
         text-decoration: none;
-        font-weight: 500;
         font-size: 0.8rem;
-        transition: all 0.2s ease;
+        font-weight: 500;
+        transition: all 0.2s;
     }
 
     .text-link:hover {
-        color: rgba(255, 184, 28, 1);
+        color: var(--kuhes-accent-light);
         text-decoration: underline;
-    }
-
-    /* Checkbox */
-    .checkbox-modern {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        cursor: pointer;
-    }
-
-    .checkbox-modern input {
-        width: 16px;
-        height: 16px;
-        cursor: pointer;
-        accent-color: rgba(255, 184, 28, 0.8);
-    }
-
-    .checkbox-modern label {
-        font-size: 0.8rem;
-        color: rgba(255, 255, 255, 0.7);
-        cursor: pointer;
-        margin: 0;
     }
 
     /* Alert */
     .alert-modern {
-        border-radius: 14px;
-        padding: 12px 16px;
-        font-size: 0.8rem;
+        background: rgba(220, 53, 69, 0.15);
+        border-left: 3px solid #dc3545;
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        margin-bottom: 1.5rem;
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 0.75rem;
+        color: #ff6b6b;
+        font-size: 0.85rem;
         animation: shake 0.4s ease;
-        background: rgba(239, 68, 68, 0.15);
-        border-left: 3px solid #ef4444;
-        color: #f87171;
-        backdrop-filter: blur(4px);
     }
 
     @keyframes shake {
         0%, 100% { transform: translateX(0); }
-        25% { transform: translateX(-5px); }
-        75% { transform: translateX(5px); }
+        25% { transform: translateX(-4px); }
+        75% { transform: translateX(4px); }
     }
 
     /* Divider */
     .divider {
         text-align: center;
         position: relative;
-        margin: 24px 0;
+        margin: 1.5rem 0;
     }
 
     .divider::before,
@@ -405,151 +360,161 @@
         top: 50%;
         width: calc(50% - 60px);
         height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(255, 184, 28, 0.3), transparent);
+        background: linear-gradient(90deg, transparent, var(--kuhes-card-border), transparent);
     }
 
     .divider::before { left: 0; }
     .divider::after { right: 0; }
 
     .divider span {
-        background: rgba(30, 41, 59, 0.5);
+        background: transparent;
         padding: 0 12px;
         font-size: 0.7rem;
         color: rgba(255, 255, 255, 0.5);
     }
 
+    /* Form Text */
+    .form-text {
+        font-size: 0.7rem;
+        color: rgba(255, 255, 255, 0.5);
+        margin-top: 0.25rem;
+    }
+
     /* Mobile */
     @media (max-width: 768px) {
-        .login-card {
-            margin: 1rem;
-            border-radius: 24px;
+        .login-container {
+            padding: 1rem;
         }
         .card-body {
-            padding: 1.5rem !important;
+            padding: 1.5rem;
+        }
+        .logo-icon {
+            width: 60px;
+            height: 60px;
+        }
+        .logo-icon i {
+            font-size: 1.6rem;
+        }
+        .logo-section h2 {
+            font-size: 1.3rem;
         }
         .form-control-modern {
             padding: 10px 12px 10px 44px;
             font-size: 0.85rem;
-        }
-        .shape-1, .shape-2, .shape-3 {
-            display: none;
         }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="login-hero">
-    <div class="login-bg"></div>
-    <div class="login-overlay"></div>
-    <div class="floating-shape shape-1"></div>
-    <div class="floating-shape shape-2"></div>
-    <div class="floating-shape shape-3"></div>
+<!-- Background Image - Fully Visible -->
+<div class="login-bg" style="background-image: url('{% random_kuhes_image_url %}');"></div>
 
-    <div class="login-card">
-        <div class="card-body p-4 p-md-5">
-            <!-- Logo & Title -->
-            <div class="text-center mb-4">
-                <div class="mb-3">
-                    <div class="d-inline-flex align-items-center justify-content-center" style="width: 64px; height: 64px; background: rgba(255, 184, 28, 0.1); border-radius: 20px;">
-                        <i class="fas fa-university fa-2x" style="color: rgba(255, 184, 28, 0.9);"></i>
+<div class="login-container">
+    <div class="login-wrapper">
+
+        <div class="login-card">
+            <div class="card-body">
+                <!-- Logo & Title -->
+                <div class="logo-section">
+                    <div class="logo-icon">
+                        <i class="fas fa-university"></i>
+                    </div>
+                    <h2>Welcome Back</h2>
+                    <p>Sign in to access your resources</p>
+                    <div class="badge-kuhes">
+                        <i class="fas fa-graduation-cap"></i>
+                        KUHeS Students & Staff Only
                     </div>
                 </div>
-                <h2 class="h3 fw-bold mb-1" style="color: white;">Welcome Back</h2>
-                <p class="small text-muted mb-3" style="color: rgba(255, 255, 255, 0.6);">Sign in to access your resources</p>
-                <span class="badge-gold">
-                    <i class="fas fa-graduation-cap me-2"></i>
-                    KUHeS Students & Staff Only
-                </span>
+
+                <!-- Error Alert -->
+                {% if form.errors %}
+                <div class="alert-modern">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>Invalid email or password. Please try again.</span>
+                </div>
+                {% endif %}
+
+                <!-- Login Form -->
+                <form method="post" id="loginForm" novalidate>
+                    {% csrf_token %}
+
+                    <div class="form-group">
+                        <label class="form-label">EMAIL ADDRESS</label>
+                        <div class="input-group-modern">
+                            <span class="input-icon">
+                                <i class="fas fa-envelope"></i>
+                            </span>
+                            <input type="email"
+                                   name="username"
+                                   id="id_username"
+                                   class="form-control-modern"
+                                   placeholder="j.doe@kuhes.ac.mw"
+                                   value="{{ form.username.value|default:'' }}"
+                                   autocomplete="email"
+                                   required
+                                   autofocus>
+                        </div>
+                        <div class="form-text">Use your institutional @kuhes.ac.mw email</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">PASSWORD</label>
+                        <div class="input-group-modern">
+                            <span class="input-icon">
+                                <i class="fas fa-lock"></i>
+                            </span>
+                            <input type="password"
+                                   name="password"
+                                   id="id_password"
+                                   class="form-control-modern"
+                                   placeholder="Enter your password"
+                                   autocomplete="current-password"
+                                   required>
+                            <button type="button" class="password-toggle" onclick="togglePasswordVisibility()">
+                                <i class="fas fa-eye" id="togglePasswordIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <label class="checkbox-modern">
+                            <input type="checkbox" id="rememberMe">
+                            <span>Remember me</span>
+                        </label>
+                        <a href="{% url 'forgot_password' %}" class="text-link">Forgot Password?</a>
+                    </div>
+
+                    <button type="submit" class="btn-login" id="loginBtn">
+                        <span class="spinner-small"></span>
+                        <span class="btn-text">Sign In</span>
+                    </button>
+
+                    <div class="divider">
+                        <span>New to KUHeS KB?</span>
+                    </div>
+
+                    <div class="text-center">
+                        <a href="{% url 'register' %}" class="text-link">
+                            <i class="fas fa-user-plus me-2"></i>Create an account
+                        </a>
+                    </div>
+                    <div class="text-center mt-2">
+                        <a href="{% url 'resend_verification' %}" class="text-link small">
+                            <i class="fas fa-envelope me-1"></i>Resend verification email
+                        </a>
+                    </div>
+                </form>
             </div>
-
-            <!-- Error Alert -->
-            {% if form.errors %}
-            <div class="alert-modern mb-4">
-                <i class="fas fa-exclamation-circle"></i>
-                <span>Invalid email or password. Please try again.</span>
-            </div>
-            {% endif %}
-
-            <!-- Login Form -->
-            <form method="post" id="loginForm" novalidate>
-                {% csrf_token %}
-
-                <div class="form-group">
-                    <label class="form-label">EMAIL ADDRESS</label>
-                    <div class="input-group-modern">
-                        <span class="input-icon">
-                            <i class="fas fa-envelope"></i>
-                        </span>
-                        <input type="email"
-                               name="username"
-                               id="id_username"
-                               class="form-control-modern"
-                               placeholder="j.doe@kuhes.ac.mw"
-                               value="{{ form.username.value|default:'' }}"
-                               autocomplete="email"
-                               required
-                               autofocus>
-                    </div>
-                    <div class="form-text mt-1">
-                        <small class="text-muted" style="color: rgba(255, 255, 255, 0.5);">Use your institutional @kuhes.ac.mw email</small>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">PASSWORD</label>
-                    <div class="input-group-modern">
-                        <span class="input-icon">
-                            <i class="fas fa-lock"></i>
-                        </span>
-                        <input type="password"
-                               name="password"
-                               id="id_password"
-                               class="form-control-modern"
-                               placeholder="Enter your password"
-                               autocomplete="current-password"
-                               required>
-                        <button type="button" class="password-toggle" onclick="togglePasswordVisibility()">
-                            <i class="fas fa-eye" id="togglePasswordIcon"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <label class="checkbox-modern">
-                        <input type="checkbox" id="rememberMe">
-                        <label for="rememberMe">Remember me</label>
-                    </label>
-                    <a href="{% url 'forgot_password' %}" class="text-link">Forgot Password?</a>
-                </div>
-
-                <button type="submit" class="btn-login" id="loginBtn">
-                    <span class="spinner-small"></span>
-                    <span class="btn-text">Sign In</span>
-                </button>
-
-                <div class="divider">
-                    <span>New to KUHeS KB?</span>
-                </div>
-
-                <div class="text-center">
-                    <a href="{% url 'register' %}" class="text-link">
-                        <i class="fas fa-user-plus me-2"></i>Create an account
-                    </a>
-                </div>
-                <div class="text-center mt-2">
-                    <a href="{% url 'resend_verification' %}" class="text-link small">
-                        <i class="fas fa-envelope me-1"></i>Resend verification email
-                    </a>
-                </div>
-            </form>
         </div>
+
     </div>
 </div>
 
 <script>
     // ============================================
-    // MODERN LOGIN INTERACTIONS
+    // LOGIN INTERACTIONS
     // ============================================
 
     const emailInput = document.getElementById('id_username');
@@ -588,7 +553,7 @@
         const value = emailInput.value.trim();
         if (value && !value.includes('@') && !value.includes(' ') && value.length > 2) {
             const suggested = value + '@kuhes.ac.mw';
-            if (confirm(`💡 Did you mean: ${suggested}? Click OK to use this email.`)) {
+            if (confirm(`💡 Did you mean: ${suggested}?`)) {
                 emailInput.value = suggested;
                 validateEmail();
             }
@@ -627,44 +592,28 @@
         }
     }
 
-    // Form submission with proper loading state
+    // Form submission
     loginForm.addEventListener('submit', function(e) {
-        // Validate email first
         if (!validateEmail()) {
             e.preventDefault();
             emailInput.classList.add('is-invalid');
             emailInput.focus();
-
-            // Show error toast
-            if (window.toast) {
-                window.toast.error('Please enter a valid @kuhes.ac.mw email address');
-            }
+            if (window.toast) window.toast.error('Please enter a valid @kuhes.ac.mw email address');
             return;
         }
 
-        // Validate password
         if (!passwordInput.value.trim()) {
             e.preventDefault();
             passwordInput.classList.add('is-invalid');
             passwordInput.focus();
-
-            if (window.toast) {
-                window.toast.warning('Please enter your password');
-            }
+            if (window.toast) window.toast.warning('Please enter your password');
             return;
         }
 
-        // Add loading state to button
         loginBtn.classList.add('loading');
         loginBtn.disabled = true;
-
-        // Save remember me
         saveRememberedEmail();
-
-        // Store login flag
         sessionStorage.setItem('justLoggedIn', 'true');
-
-        // Form will submit normally - base template will handle global loading
     });
 
     // Remove invalid class on input
@@ -672,28 +621,13 @@
         this.classList.remove('is-invalid');
     });
 
-    // Email validation on input
     emailInput.addEventListener('input', validateEmail);
-
-    // Email domain suggestion on blur
     emailInput.addEventListener('blur', suggestEmailDomain);
 
-    // Load remembered email on page load
+    // Load remembered email
     loadRememberedEmail();
 
-    // Animate card on load
-    const loginCard = document.querySelector('.login-card');
-    if (loginCard) {
-        loginCard.style.opacity = '0';
-        loginCard.style.transform = 'translateY(30px)';
-        setTimeout(() => {
-            loginCard.style.transition = 'all 0.6s cubic-bezier(0.2, 0.9, 0.4, 1.1)';
-            loginCard.style.opacity = '1';
-            loginCard.style.transform = 'translateY(0)';
-        }, 100);
-    }
-
-    // Focus email if empty, else password
+    // Focus handling
     if (!emailInput.value) {
         emailInput.focus();
     } else {
