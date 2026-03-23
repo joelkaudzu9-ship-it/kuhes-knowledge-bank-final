@@ -1,4 +1,3 @@
-<!-- core/templates/core/base.html -->
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -30,10 +29,11 @@
     <style>
         /* ============================================
            MODERN DESIGN SYSTEM WITH GLASS MORPHISM
+           FIXED: Sticky navbar, proper margins, no overflow
         ============================================ */
 
         :root {
-            /* Brand Colors - KUHeS Identity */
+            /* Brand Colors */
             --kuhes-blue: #0033A0;
             --kuhes-blue-dark: #00247D;
             --kuhes-blue-light: #1A4CB0;
@@ -45,23 +45,24 @@
             --kuhes-light-bg: #F5F7FA;
             --kuhes-white: #FFFFFF;
 
-            /* Glass Effect Variables */
+            /* Glass Effects */
             --glass-bg-light: rgba(255, 255, 255, 0.85);
             --glass-bg-dark: rgba(0, 51, 160, 0.08);
             --glass-border: rgba(255, 255, 255, 0.3);
             --glass-shadow: 0 8px 32px rgba(0, 51, 160, 0.08);
             --glass-blur: blur(12px);
 
-            /* Spacing & Layout */
+            /* Spacing - FIXED: Better margins */
             --safe-area-top: env(safe-area-inset-top, 0px);
             --safe-area-bottom: env(safe-area-inset-bottom, 0px);
-            --header-height: 70px;
-            --container-padding: 1.5rem;
+            --header-height: 64px;
+            --container-padding-desktop: 2rem;
+            --container-padding-tablet: 1.5rem;
+            --container-padding-mobile: 1rem;
 
             /* Transitions */
             --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             --transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         * {
@@ -80,18 +81,76 @@
             min-height: 100vh;
             line-height: 1.6;
             letter-spacing: -0.01em;
+            overflow-x: hidden;
+            width: 100%;
         }
 
         html {
             height: -webkit-fill-available;
             scroll-behavior: smooth;
+            overflow-x: hidden;
+            width: 100%;
+        }
+
+        /* FIXED: Proper container with margins - content won't touch edges */
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding-left: var(--container-padding-desktop);
+            padding-right: var(--container-padding-desktop);
+        }
+
+        .container-fluid {
+            width: 100%;
+            padding-left: var(--container-padding-desktop);
+            padding-right: var(--container-padding-desktop);
+        }
+
+        /* FIXED: Main content wrapper */
+        main {
+            flex: 1;
+            width: 100%;
+            overflow-x: hidden;
+            margin-top: var(--header-height);
         }
 
         /* ============================================
-           MODERN LOADING SYSTEM - PER-ACTION STATES
+           FIXED: STICKY NAVBAR - Frozen when scrolling
         ============================================ */
 
-        /* Global Loading Overlay - Only for full page transitions */
+        .navbar-glass {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--glass-bg-light);
+            backdrop-filter: var(--glass-blur);
+            border-bottom: 1px solid var(--glass-border);
+            z-index: 1000;
+            padding: 0.5rem 0;
+            width: 100%;
+            transition: all var(--transition-base);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .navbar-glass .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        /* Push main content down to account for fixed navbar */
+        .main-content-wrapper {
+            margin-top: var(--header-height);
+            width: 100%;
+        }
+
+        /* ============================================
+           MODERN LOADING SYSTEM
+        ============================================ */
+
         #global-loading {
             position: fixed;
             inset: 0;
@@ -167,21 +226,10 @@
             box-shadow: var(--glass-shadow);
         }
 
-        /* Button-specific loading states - NO GLOBAL OVERLAP */
-        .btn-loader {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
+        /* Button Loading States */
         .btn-loader.loading {
             pointer-events: none;
             opacity: 0.8;
-        }
-
-        .btn-loader.loading .btn-text {
-            visibility: visible;
         }
 
         .btn-loader .spinner-small {
@@ -198,58 +246,10 @@
             display: inline-block;
         }
 
-        /* Skeleton Loading States */
-        .skeleton {
-            background: linear-gradient(90deg, #e2e8f0 0%, #f1f5f9 50%, #e2e8f0 100%);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
-            border-radius: 12px;
-        }
-
-        @keyframes shimmer {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-
-        .skeleton-text {
-            height: 1rem;
-            margin: 0.5rem 0;
-        }
-
-        .skeleton-title {
-            height: 2rem;
-            width: 60%;
-            border-radius: 8px;
-        }
-
-        .skeleton-card {
-            height: 200px;
-            border-radius: 1rem;
-        }
-
-        /* Card skeleton grid */
-        .skeleton-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-
         /* ============================================
            GLASS MORPHISM COMPONENTS
         ============================================ */
 
-        /* Glass Navbar */
-        .navbar-glass {
-            background: var(--glass-bg-light);
-            backdrop-filter: var(--glass-blur);
-            border-bottom: 1px solid var(--glass-border);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            padding: 0.75rem 0;
-        }
-
-        /* Glass Cards */
         .glass-card {
             background: var(--glass-bg-light);
             backdrop-filter: var(--glass-blur);
@@ -267,9 +267,10 @@
         /* Modern Buttons */
         .btn-modern {
             position: relative;
-            padding: 0.75rem 1.5rem;
+            padding: 0.6rem 1.25rem;
             border-radius: 12px;
             font-weight: 600;
+            font-size: 0.9rem;
             transition: all var(--transition-base);
             overflow: hidden;
             border: none;
@@ -315,12 +316,6 @@
             font-weight: 700;
         }
 
-        .btn-outline {
-            background: transparent;
-            border: 2px solid var(--kuhes-blue);
-            color: var(--kuhes-blue);
-        }
-
         /* Page Transitions */
         .page-transition {
             animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
@@ -337,7 +332,7 @@
             }
         }
 
-        /* Toast Notifications - Modern */
+        /* Toast Notifications */
         .toast-modern {
             background: var(--glass-bg-light);
             backdrop-filter: var(--glass-blur);
@@ -362,7 +357,7 @@
         }
 
         /* ============================================
-           HAMBURGER OVERLAY - GLASS
+           HAMBURGER OVERLAY
         ============================================ */
 
         .hamburger-menu {
@@ -371,9 +366,9 @@
             z-index: 1002;
             cursor: pointer;
             background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
-            width: 48px;
-            height: 48px;
-            border-radius: 16px;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
             flex-direction: column;
             justify-content: center;
             align-items: center;
@@ -386,8 +381,8 @@
         }
 
         .hamburger-menu span {
-            width: 24px;
-            height: 2.5px;
+            width: 20px;
+            height: 2px;
             background: white;
             margin: 3px 0;
             transition: var(--transition-base);
@@ -445,8 +440,8 @@
         }
 
         .nav-user-avatar {
-            width: 88px;
-            height: 88px;
+            width: 80px;
+            height: 80px;
             background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
             border-radius: 50%;
             display: flex;
@@ -457,12 +452,12 @@
         }
 
         .nav-user-avatar i {
-            font-size: 2.8rem;
+            font-size: 2.5rem;
             color: white;
         }
 
         .nav-user-name {
-            font-size: 1.35rem;
+            font-size: 1.25rem;
             font-weight: 700;
             color: var(--kuhes-blue);
         }
@@ -479,8 +474,8 @@
             display: flex;
             align-items: center;
             gap: 16px;
-            padding: 14px 20px;
-            border-radius: 16px;
+            padding: 12px 20px;
+            border-radius: 14px;
             color: var(--kuhes-gray);
             text-decoration: none;
             font-weight: 500;
@@ -489,7 +484,7 @@
 
         .nav-link-item i {
             width: 24px;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             color: var(--kuhes-blue);
         }
 
@@ -516,36 +511,17 @@
             font-weight: 600;
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .hamburger-menu {
-                display: flex;
-            }
-            .navbar-toggler, .navbar-collapse {
-                display: none !important;
-            }
-            :root {
-                --container-padding: 1rem;
-            }
-        }
-
-        @media (min-width: 769px) {
-            .hamburger-menu {
-                display: none !important;
-            }
-        }
-
-        /* Logo Animation */
+        /* Logo */
         .logo-circle {
-            width: 44px;
-            height: 44px;
+            width: 38px;
+            height: 38px;
             background: linear-gradient(135deg, var(--kuhes-white), #f8f9fa);
-            border-radius: 14px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            box-shadow: 0 6px 16px rgba(0, 51, 160, 0.12);
+            box-shadow: 0 2px 8px rgba(0, 51, 160, 0.1);
             transition: transform var(--transition-base);
         }
 
@@ -553,7 +529,13 @@
             transform: scale(1.05);
         }
 
-        /* Scrollbar Styling */
+        .logo-circle img {
+            width: 34px;
+            height: 34px;
+            object-fit: contain;
+        }
+
+        /* Scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -580,9 +562,59 @@
             color: transparent;
         }
 
-        .fade-out {
-            opacity: 0;
-            transition: opacity var(--transition-base);
+        /* Responsive */
+        @media (max-width: 992px) {
+            :root {
+                --container-padding-desktop: 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            :root {
+                --container-padding-desktop: 1rem;
+                --header-height: 60px;
+            }
+
+            .hamburger-menu {
+                display: flex;
+            }
+
+            .navbar-toggler, .navbar-collapse {
+                display: none !important;
+            }
+
+            .navbar-glass .navbar-brand .d-flex.flex-column span:first-child {
+                font-size: 1rem;
+            }
+
+            .navbar-glass .navbar-brand .d-flex.flex-column span:last-child {
+                display: none;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .hamburger-menu {
+                display: none !important;
+            }
+        }
+
+        /* Footer */
+        footer {
+            width: 100%;
+            margin-top: auto;
+            background: var(--glass-bg-light);
+            backdrop-filter: blur(4px);
+            border-top: 1px solid var(--glass-border);
+        }
+
+        /* Navbar brand text */
+        .navbar-brand-text {
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .navbar-brand-sub {
+            font-size: 0.7rem;
         }
     </style>
 
@@ -595,7 +627,7 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <!-- Global Loading Overlay - Only for full page transitions -->
+    <!-- Global Loading Overlay -->
     <div id="global-loading">
         <div class="global-spinner">
             <div class="spinner-ring-outer"></div>
@@ -704,16 +736,16 @@
         </div>
     </div>
 
-    <!-- Glass Navigation Bar -->
-    <nav class="navbar-glass sticky-top py-2">
+    <!-- FIXED: STICKY NAVBAR - Frozen when scrolling -->
+    <nav class="navbar-glass">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="{% url 'index' %}" style="gap: 12px; text-decoration: none;">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'index' %}" style="text-decoration: none;">
                 <div class="logo-circle">
-                    <img src="{% static 'core/images/kuhes-logo.png' %}" alt="KUHeS Logo" loading="eager" width="44" height="44">
+                    <img src="{% static 'core/images/kuhes-logo.png' %}" alt="KUHeS Logo" loading="eager" width="34" height="34">
                 </div>
                 <div class="d-flex flex-column">
-                    <span class="fw-bold gradient-text" style="font-size: 1.25rem;">KUHeS</span>
-                    <span class="small text-muted d-none d-sm-block">Knowledge Bank</span>
+                    <span class="fw-bold gradient-text navbar-brand-text">KUHeS</span>
+                    <span class="small text-muted navbar-brand-sub">Knowledge Bank</span>
                 </div>
             </a>
 
@@ -728,7 +760,7 @@
             </button>
 
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-lg-center" style="gap: 8px;">
+                <ul class="navbar-nav ms-auto align-items-lg-center" style="gap: 4px;">
                     {% if user.is_authenticated %}
                         <li class="nav-item d-none d-lg-block">
                             <a href="{% url 'dashboard' %}" class="nav-link px-3 py-2 rounded-pill">
@@ -795,20 +827,20 @@
     </div>
 
     <!-- Toast Container -->
-    <div id="toast-container" style="position: fixed; top: calc(var(--safe-area-top) + 80px); right: 20px; left: auto; z-index: 9999; display: flex; flex-direction: column; gap: 12px; max-width: 380px; pointer-events: none;"></div>
+    <div id="toast-container" style="position: fixed; top: 80px; right: 20px; left: auto; z-index: 9999; display: flex; flex-direction: column; gap: 12px; max-width: 380px; pointer-events: none;"></div>
 
-    <!-- Main Content -->
-    <main class="flex-grow-1 page-transition" style="min-height: calc(100vh - var(--header-height));">
+    <!-- FIXED: Main Content Wrapper with proper margin for fixed navbar -->
+    <main class="main-content-wrapper page-transition">
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Modern Footer -->
-    <footer class="mt-auto py-4 border-top" style="background: var(--glass-bg-light); backdrop-filter: blur(4px);">
+    <!-- Footer -->
+    <footer class="py-3">
         <div class="container">
-            <div class="row g-3 align-items-center">
+            <div class="row align-items-center">
                 <div class="col-12 col-md-6 text-center text-md-start">
                     <div class="d-flex align-items-center gap-3 justify-content-center justify-content-md-start">
-                        <img src="{% static 'core/images/kuhes-logo.png' %}" alt="KUHeS" height="32">
+                        <img src="{% static 'core/images/kuhes-logo.png' %}" alt="KUHeS" height="28">
                         <p class="mb-0 text-muted small">&copy; {% now "Y" %} KUHeS Knowledge Bank</p>
                     </div>
                 </div>
@@ -825,11 +857,9 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Modern JavaScript with Proper Loading States -->
     <script>
         // ============================================
-        // ADVANCED LOADING STATE MANAGEMENT
-        // No global spinner conflicts - Per-action loading
+        // MODERN LOADING STATE MANAGEMENT
         // ============================================
 
         class LoadingManager {
@@ -839,7 +869,6 @@
                 this.loadingMessage = document.getElementById('loading-message');
             }
 
-            // Show global loading (only for full page transitions)
             showGlobal(message = 'Loading...') {
                 if (this.globalOverlay) {
                     this.loadingMessage.textContent = message;
@@ -853,114 +882,55 @@
                 }
             }
 
-            // Show button-specific loading (NO global overlay)
-            showButtonLoading(button, customText = null) {
+            showButtonLoading(button) {
                 if (!button) return;
-
                 const originalHtml = button.innerHTML;
-                const originalText = button.querySelector('.btn-text')?.innerHTML || button.innerText;
-
                 button.classList.add('loading');
                 button.disabled = true;
+                this.activeLoaders.set(button, originalHtml);
 
-                // Store original content
-                this.activeLoaders.set(button, { originalHtml, originalText });
-
-                // Add spinner if not present
                 if (!button.querySelector('.spinner-small')) {
                     const spinner = document.createElement('span');
                     spinner.className = 'spinner-small';
-                    spinner.style.cssText = 'display: inline-block; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite;';
+                    spinner.style.cssText = 'display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite; margin-right: 8px;';
                     button.insertBefore(spinner, button.firstChild);
                 }
             }
 
             hideButtonLoading(button) {
                 if (!button) return;
-
                 button.classList.remove('loading');
                 button.disabled = false;
-
-                const loader = this.activeLoaders.get(button);
-                if (loader) {
-                    button.innerHTML = loader.originalHtml;
+                const original = this.activeLoaders.get(button);
+                if (original) {
+                    button.innerHTML = original;
                     this.activeLoaders.delete(button);
                 }
-
-                // Remove spinner if exists
                 const spinner = button.querySelector('.spinner-small');
                 if (spinner) spinner.remove();
             }
-
-            // Show skeleton loader
-            showSkeleton(containerId, type = 'card', count = 3) {
-                const container = document.getElementById(containerId);
-                if (!container) return null;
-
-                const originalContent = container.innerHTML;
-                let skeletonHtml = '';
-
-                if (type === 'card') {
-                    skeletonHtml = `
-                        <div class="skeleton-grid">
-                            ${Array(count).fill(0).map(() => `
-                                <div class="glass-card p-4">
-                                    <div class="skeleton skeleton-title mb-3"></div>
-                                    <div class="skeleton skeleton-text mb-2"></div>
-                                    <div class="skeleton skeleton-text" style="width: 80%;"></div>
-                                    <div class="skeleton mt-3" style="height: 40px; width: 100px;"></div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    `;
-                } else if (type === 'table') {
-                    skeletonHtml = `
-                        <div class="glass-card p-4">
-                            ${Array(count).fill(0).map(() => `
-                                <div class="skeleton skeleton-text mb-3" style="height: 50px;"></div>
-                            `).join('')}
-                        </div>
-                    `;
-                }
-
-                container.innerHTML = skeletonHtml;
-
-                return {
-                    restore: () => { container.innerHTML = originalContent; }
-                };
-            }
         }
 
-        // Initialize loading manager
         const loadingManager = new LoadingManager();
 
-        // ============================================
-        // PAGE TRANSITIONS (Global loading for navigation)
-        // ============================================
-
+        // Navigation links
         document.querySelectorAll('a').forEach(link => {
-            // Skip external links, anchors, and logout links
             if (!link.hostname || link.hostname !== window.location.hostname) return;
             if (link.getAttribute('href') === '#') return;
             if (link.hasAttribute('data-logout')) return;
             if (link.hasAttribute('download')) return;
             if (link.target === '_blank') return;
-            if (link.classList.contains('no-loading')) return;
 
             link.addEventListener('click', function(e) {
                 const href = this.getAttribute('href');
                 if (!href || href === '#' || href.startsWith('javascript:')) return;
-
                 e.preventDefault();
                 loadingManager.showGlobal('Loading...');
                 window.location.href = href;
             });
         });
 
-        // ============================================
-        // LOGOUT HANDLER (Isolated loading)
-        // ============================================
-
+        // Logout handler
         document.querySelectorAll('[data-logout="true"]').forEach(logoutLink => {
             logoutLink.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -972,63 +942,28 @@
             });
         });
 
-        // ============================================
-        // FORM SUBMISSIONS (Button-specific loading)
-        // ============================================
-
+        // Form submissions
         document.querySelectorAll('form').forEach(form => {
-            form.addEventListener('submit', function(e) {
+            form.addEventListener('submit', function() {
                 const submitBtn = this.querySelector('button[type="submit"], input[type="submit"]');
                 if (submitBtn && !submitBtn.classList.contains('loading')) {
-                    // Determine loading message based on form
-                    let loadingMsg = 'Processing...';
-                    const action = this.action;
-                    const formId = this.id;
-
-                    if (formId === 'loginForm' || action.includes('/login/')) {
-                        loadingMsg = 'Signing in...';
-                    } else if (formId === 'uploadForm' || action.includes('/upload/')) {
-                        loadingMsg = 'Uploading...';
-                    } else if (formId === 'registerForm' || action.includes('/register/')) {
-                        loadingMsg = 'Creating account...';
-                    } else if (formId === 'resetForm' || action.includes('/reset/')) {
-                        loadingMsg = 'Resetting password...';
-                    }
-
                     loadingManager.showButtonLoading(submitBtn);
-
-                    // Also show global for file uploads (they take longer)
                     if (form.enctype === 'multipart/form-data') {
-                        loadingManager.showGlobal(loadingMsg);
+                        loadingManager.showGlobal('Uploading...');
                     }
                 }
             });
         });
 
-        // ============================================
-        // HIDE LOADING ON PAGE LOAD
-        // ============================================
-
-        window.addEventListener('load', function() {
+        window.addEventListener('load', () => {
             loadingManager.hideGlobal();
-            // Clear any stuck button loaders
-            document.querySelectorAll('.loading').forEach(btn => {
-                loadingManager.hideButtonLoading(btn);
-            });
+            document.querySelectorAll('.loading').forEach(btn => loadingManager.hideButtonLoading(btn));
         });
 
-        window.addEventListener('pageshow', function() {
-            loadingManager.hideGlobal();
-        });
+        window.addEventListener('pageshow', () => loadingManager.hideGlobal());
+        document.addEventListener('DOMContentLoaded', () => loadingManager.hideGlobal());
 
-        document.addEventListener('DOMContentLoaded', function() {
-            loadingManager.hideGlobal();
-        });
-
-        // ============================================
-        // HAMBURGER MENU
-        // ============================================
-
+        // Hamburger menu
         const hamburgerBtn = document.getElementById('hamburgerBtn');
         const navOverlay = document.getElementById('navOverlay');
 
@@ -1043,13 +978,13 @@
             navOverlay.addEventListener('click', function(e) {
                 if (e.target === this) {
                     hamburgerBtn.classList.remove('active');
-                    this.classList.remove('active');
+                    navOverlay.classList.remove('active');
                     document.body.style.overflow = '';
                 }
             });
 
             navOverlay.querySelectorAll('a').forEach(link => {
-                link.addEventListener('click', function() {
+                link.addEventListener('click', () => {
                     hamburgerBtn.classList.remove('active');
                     navOverlay.classList.remove('active');
                     document.body.style.overflow = '';
@@ -1057,107 +992,54 @@
             });
         }
 
-        // ============================================
-        // MODERN TOAST SYSTEM
-        // ============================================
-
+        // Toast Manager
         class ToastManager {
             constructor() {
                 this.container = document.getElementById('toast-container');
-                this.toasts = [];
             }
 
             show(message, type = 'info', duration = 4000) {
                 if (!this.container) return;
-
-                const icons = {
-                    success: 'fa-check-circle',
-                    error: 'fa-exclamation-circle',
-                    warning: 'fa-exclamation-triangle',
-                    info: 'fa-info-circle'
-                };
-
-                const colors = {
-                    success: '#10b981',
-                    error: '#ef4444',
-                    warning: '#f59e0b',
-                    info: '#3b82f6'
-                };
+                const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' };
+                const colors = { success: '#10b981', error: '#ef4444', warning: '#f59e0b', info: '#3b82f6' };
 
                 const toast = document.createElement('div');
                 toast.className = 'toast-modern';
                 toast.style.borderLeft = `4px solid ${colors[type]}`;
                 toast.innerHTML = `
                     <div class="d-flex align-items-start gap-3">
-                        <i class="fas ${icons[type]}" style="color: ${colors[type]}; font-size: 1.25rem;"></i>
-                        <div class="flex-grow-1">
-                            <p class="mb-0 small" style="color: var(--kuhes-gray); line-height: 1.4;">${message}</p>
-                        </div>
-                        <button class="btn-close btn-sm" style="font-size: 0.75rem;"></button>
+                        <i class="fas ${icons[type]}" style="color: ${colors[type]}; font-size: 1.1rem;"></i>
+                        <div class="flex-grow-1"><p class="mb-0 small">${message}</p></div>
+                        <button class="btn-close btn-sm" style="font-size: 0.7rem;"></button>
                     </div>
                 `;
-
-                const closeBtn = toast.querySelector('.btn-close');
-                closeBtn.addEventListener('click', () => this.remove(toast));
-
+                toast.querySelector('.btn-close').addEventListener('click', () => toast.remove());
                 this.container.appendChild(toast);
-                this.toasts.push(toast);
-
-                setTimeout(() => this.remove(toast), duration);
-
-                // Auto-scroll to show latest toast
-                toast.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                setTimeout(() => toast.remove(), duration);
             }
 
-            remove(toast) {
-                toast.style.animation = 'slideOutRight 0.3s ease forwards';
-                setTimeout(() => {
-                    if (toast.parentNode) toast.remove();
-                    this.toasts = this.toasts.filter(t => t !== toast);
-                }, 300);
-            }
-
-            success(msg, duration) { this.show(msg, 'success', duration); }
-            error(msg, duration) { this.show(msg, 'error', duration); }
-            warning(msg, duration) { this.show(msg, 'warning', duration); }
-            info(msg, duration) { this.show(msg, 'info', duration); }
+            success(msg, d) { this.show(msg, 'success', d); }
+            error(msg, d) { this.show(msg, 'error', d); }
+            warning(msg, d) { this.show(msg, 'warning', d); }
+            info(msg, d) { this.show(msg, 'info', d); }
         }
 
-        // Initialize toast manager
         const toastManager = new ToastManager();
-
-        // Process Django messages
         document.querySelectorAll('#django-messages .message-item').forEach(msg => {
             const message = msg.getAttribute('data-message') || msg.textContent.trim();
             const tags = msg.getAttribute('data-tags') || 'info';
-            let type = 'info';
-            if (tags.includes('success')) type = 'success';
-            else if (tags.includes('error')) type = 'error';
-            else if (tags.includes('warning')) type = 'warning';
+            let type = tags.includes('success') ? 'success' : tags.includes('error') ? 'error' : tags.includes('warning') ? 'warning' : 'info';
             toastManager[type](message, 5000);
         });
 
-        // Expose globally
         window.toast = toastManager;
-        window.loading = loadingManager;
-        window.showSkeleton = (containerId, type, count) => loadingManager.showSkeleton(containerId, type, count);
+        window.loadingManager = loadingManager;
 
-        // ============================================
-        // ADD SPIN STYLE IF NOT PRESENT
-        // ============================================
-
+        // Add spin style if not present
         if (!document.querySelector('#spinner-style')) {
             const style = document.createElement('style');
             style.id = 'spinner-style';
-            style.textContent = `
-                @keyframes spin {
-                    to { transform: rotate(360deg); }
-                }
-                @keyframes slideOutRight {
-                    from { transform: translateX(0); opacity: 1; }
-                    to { transform: translateX(100%); opacity: 0; }
-                }
-            `;
+            style.textContent = `@keyframes spin { to { transform: rotate(360deg); } }`;
             document.head.appendChild(style);
         }
     </script>

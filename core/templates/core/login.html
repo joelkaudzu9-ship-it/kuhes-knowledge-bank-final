@@ -5,59 +5,140 @@
 
 {% block extra_css %}
 <style>
-    /* Modern Login Page - Glass Morphism */
-    .login-container {
-        min-height: calc(100vh - var(--header-height) - 80px);
+    /* ============================================
+       MODERN LOGIN PAGE - MATCHING INDEX PAGE STYLES
+       Dark Theme with University Library Background
+    ============================================ */
+
+    /* Hero Section - Same as Index */
+    .login-hero {
+        position: relative;
+        min-height: calc(100vh - var(--header-height));
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 2rem;
-        position: relative;
         overflow: hidden;
+        background: var(--kuhes-darker, #0F172A);
     }
 
-    /* Animated Background */
-    .login-container::before {
+    /* Animated Background Gradient */
+    .login-hero::before {
         content: '';
         position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(0,51,160,0.03) 0%, transparent 70%);
-        animation: rotateBg 60s linear infinite;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle at 20% 50%, rgba(0, 102, 204, 0.2), transparent 60%);
+        animation: pulseGlow 8s ease-in-out infinite;
         z-index: 0;
     }
 
-    @keyframes rotateBg {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
+    @keyframes pulseGlow {
+        0%, 100% { opacity: 0.4; transform: scale(1); }
+        50% { opacity: 0.7; transform: scale(1.05); }
+    }
+
+    /* Background Image - University Library */
+    .login-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('{% static "core/images/university-library.jpg" %}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        opacity: 0.45;
+        z-index: 0;
+        animation: slowZoom 30s ease-in-out infinite;
+    }
+
+    @keyframes slowZoom {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    /* Glass Morphism Overlay */
+    .login-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg,
+            rgba(10, 15, 31, 0.85) 0%,
+            rgba(0, 102, 204, 0.7) 50%,
+            rgba(10, 15, 31, 0.85) 100%);
+        backdrop-filter: blur(2px);
+        z-index: 1;
+    }
+
+    /* Floating Shapes Animation */
+    .floating-shape {
+        position: absolute;
+        background: radial-gradient(circle, rgba(255, 184, 28, 0.1), transparent);
+        border-radius: 50%;
+        pointer-events: none;
+        animation: floatShape 12s ease-in-out infinite;
+        z-index: 0;
+    }
+
+    .shape-1 {
+        width: 400px;
+        height: 400px;
+        top: -150px;
+        right: -150px;
+        animation-delay: 0s;
+    }
+
+    .shape-2 {
+        width: 300px;
+        height: 300px;
+        bottom: -100px;
+        left: -100px;
+        animation-delay: -4s;
+    }
+
+    .shape-3 {
+        width: 200px;
+        height: 200px;
+        top: 50%;
+        left: 5%;
+        animation-delay: -7s;
+    }
+
+    @keyframes floatShape {
+        0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.35; }
+        50% { transform: translate(30px, -30px) scale(1.1); opacity: 0.55; }
     }
 
     /* Main Login Card - Glass Morphism */
     .login-card {
-        background: rgba(255, 255, 255, 0.92);
-        backdrop-filter: blur(20px);
+        position: relative;
+        z-index: 2;
+        background: rgba(30, 41, 59, 0.75);
+        backdrop-filter: blur(12px);
         border-radius: 32px;
-        border: 1px solid rgba(255, 255, 255, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         width: 100%;
         max-width: 460px;
-        position: relative;
-        z-index: 1;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-        animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        animation: fadeInUp 0.6s cubic-bezier(0.2, 0.9, 0.4, 1.1);
         transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
     .login-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 30px 60px -12px rgba(0, 51, 160, 0.2);
+        box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6);
+        border-color: rgba(255, 184, 28, 0.25);
     }
 
     @keyframes fadeInUp {
         from {
             opacity: 0;
-            transform: translateY(30px);
+            transform: translateY(50px);
         }
         to {
             opacity: 1;
@@ -75,7 +156,7 @@
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 1px;
-        color: #475569;
+        color: rgba(255, 255, 255, 0.7);
         margin-bottom: 8px;
         display: block;
     }
@@ -95,9 +176,9 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: linear-gradient(135deg, rgba(0,51,160,0.08), rgba(0,51,160,0.03));
+        background: rgba(255, 255, 255, 0.05);
         border-radius: 14px 0 0 14px;
-        color: var(--kuhes-blue);
+        color: rgba(255, 184, 28, 0.8);
         z-index: 1;
         pointer-events: none;
     }
@@ -105,19 +186,24 @@
     .form-control-modern {
         width: 100%;
         padding: 12px 16px 12px 48px;
-        border: 1.5px solid rgba(0, 51, 160, 0.15);
+        border: 1.5px solid rgba(255, 255, 255, 0.15);
         border-radius: 14px;
         font-size: 0.9rem;
         transition: all 0.3s ease;
-        background: rgba(255, 255, 255, 0.9);
+        background: rgba(255, 255, 255, 0.08);
         font-family: inherit;
+        color: white;
+    }
+
+    .form-control-modern::placeholder {
+        color: rgba(255, 255, 255, 0.4);
     }
 
     .form-control-modern:focus {
         outline: none;
-        border-color: var(--kuhes-blue);
-        box-shadow: 0 0 0 4px rgba(0, 51, 160, 0.1);
-        background: white;
+        border-color: rgba(255, 184, 28, 0.6);
+        box-shadow: 0 0 0 4px rgba(255, 184, 28, 0.1);
+        background: rgba(255, 255, 255, 0.12);
     }
 
     .form-control-modern.is-valid {
@@ -146,7 +232,7 @@
         transform: translateY(-50%);
         background: none;
         border: none;
-        color: #94a3b8;
+        color: rgba(255, 255, 255, 0.5);
         cursor: pointer;
         z-index: 10;
         padding: 0;
@@ -160,22 +246,22 @@
     }
 
     .password-toggle:hover {
-        color: var(--kuhes-blue);
-        background: rgba(0, 51, 160, 0.05);
+        color: rgba(255, 184, 28, 0.8);
+        background: rgba(255, 255, 255, 0.05);
     }
 
-    /* Modern Button */
+    /* Modern Button - Matching Index */
     .btn-login {
-        background: linear-gradient(135deg, var(--kuhes-blue), var(--kuhes-teal));
+        background: linear-gradient(135deg, #0066CC, #0052A3);
         border: none;
-        border-radius: 14px;
+        border-radius: 50px;
         padding: 12px 24px;
         font-weight: 600;
         font-size: 1rem;
         color: white;
         width: 100%;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
         position: relative;
         overflow: hidden;
     }
@@ -188,7 +274,7 @@
         width: 0;
         height: 0;
         border-radius: 50%;
-        background: rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.2);
         transform: translate(-50%, -50%);
         transition: width 0.6s, height 0.6s;
     }
@@ -199,8 +285,8 @@
     }
 
     .btn-login:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(0, 51, 160, 0.3);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0, 102, 204, 0.4);
     }
 
     .btn-login:disabled {
@@ -212,10 +298,6 @@
     /* Button Loading State */
     .btn-login.loading {
         pointer-events: none;
-    }
-
-    .btn-login.loading .btn-text {
-        visibility: visible;
     }
 
     .btn-login .spinner-small {
@@ -237,15 +319,15 @@
         to { transform: rotate(360deg); }
     }
 
-    /* Badge */
+    /* Badge - Matching Index */
     .badge-gold {
         background: linear-gradient(135deg, rgba(255, 184, 28, 0.2), rgba(255, 184, 28, 0.08));
-        color: var(--kuhes-blue);
+        color: rgba(255, 184, 28, 0.9);
         padding: 8px 18px;
         border-radius: 40px;
         font-weight: 600;
         font-size: 0.75rem;
-        border: 1px solid rgba(255, 184, 28, 0.4);
+        border: 1px solid rgba(255, 184, 28, 0.3);
         backdrop-filter: blur(4px);
         display: inline-flex;
         align-items: center;
@@ -254,7 +336,7 @@
 
     /* Links */
     .text-link {
-        color: var(--kuhes-blue);
+        color: rgba(255, 184, 28, 0.8);
         text-decoration: none;
         font-weight: 500;
         font-size: 0.8rem;
@@ -262,7 +344,7 @@
     }
 
     .text-link:hover {
-        color: var(--kuhes-teal);
+        color: rgba(255, 184, 28, 1);
         text-decoration: underline;
     }
 
@@ -278,12 +360,12 @@
         width: 16px;
         height: 16px;
         cursor: pointer;
-        accent-color: var(--kuhes-blue);
+        accent-color: rgba(255, 184, 28, 0.8);
     }
 
     .checkbox-modern label {
         font-size: 0.8rem;
-        color: #64748b;
+        color: rgba(255, 255, 255, 0.7);
         cursor: pointer;
         margin: 0;
     }
@@ -297,18 +379,16 @@
         align-items: center;
         gap: 10px;
         animation: shake 0.4s ease;
+        background: rgba(239, 68, 68, 0.15);
+        border-left: 3px solid #ef4444;
+        color: #f87171;
+        backdrop-filter: blur(4px);
     }
 
     @keyframes shake {
         0%, 100% { transform: translateX(0); }
         25% { transform: translateX(-5px); }
         75% { transform: translateX(5px); }
-    }
-
-    .alert-danger {
-        background: rgba(239, 68, 68, 0.1);
-        border-left: 3px solid #ef4444;
-        color: #dc2626;
     }
 
     /* Divider */
@@ -325,25 +405,23 @@
         top: 50%;
         width: calc(50% - 60px);
         height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(0,51,160,0.2), transparent);
+        background: linear-gradient(90deg, transparent, rgba(255, 184, 28, 0.3), transparent);
     }
 
     .divider::before { left: 0; }
     .divider::after { right: 0; }
 
     .divider span {
-        background: rgba(255, 255, 255, 0.8);
+        background: rgba(30, 41, 59, 0.5);
         padding: 0 12px;
         font-size: 0.7rem;
-        color: #94a3b8;
+        color: rgba(255, 255, 255, 0.5);
     }
 
     /* Mobile */
     @media (max-width: 768px) {
-        .login-container {
-            padding: 1rem;
-        }
         .login-card {
+            margin: 1rem;
             border-radius: 24px;
         }
         .card-body {
@@ -353,23 +431,32 @@
             padding: 10px 12px 10px 44px;
             font-size: 0.85rem;
         }
+        .shape-1, .shape-2, .shape-3 {
+            display: none;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="login-container">
+<div class="login-hero">
+    <div class="login-bg"></div>
+    <div class="login-overlay"></div>
+    <div class="floating-shape shape-1"></div>
+    <div class="floating-shape shape-2"></div>
+    <div class="floating-shape shape-3"></div>
+
     <div class="login-card">
         <div class="card-body p-4 p-md-5">
             <!-- Logo & Title -->
             <div class="text-center mb-4">
                 <div class="mb-3">
-                    <div class="d-inline-flex align-items-center justify-content-center" style="width: 64px; height: 64px; background: linear-gradient(135deg, rgba(0,51,160,0.1), rgba(0,165,176,0.1)); border-radius: 20px;">
-                        <i class="fas fa-university fa-2x" style="color: var(--kuhes-blue);"></i>
+                    <div class="d-inline-flex align-items-center justify-content-center" style="width: 64px; height: 64px; background: rgba(255, 184, 28, 0.1); border-radius: 20px;">
+                        <i class="fas fa-university fa-2x" style="color: rgba(255, 184, 28, 0.9);"></i>
                     </div>
                 </div>
-                <h2 class="h3 fw-bold mb-1" style="color: #1e293b;">Welcome Back</h2>
-                <p class="small text-muted mb-3">Sign in to access your resources</p>
+                <h2 class="h3 fw-bold mb-1" style="color: white;">Welcome Back</h2>
+                <p class="small text-muted mb-3" style="color: rgba(255, 255, 255, 0.6);">Sign in to access your resources</p>
                 <span class="badge-gold">
                     <i class="fas fa-graduation-cap me-2"></i>
                     KUHeS Students & Staff Only
@@ -378,7 +465,7 @@
 
             <!-- Error Alert -->
             {% if form.errors %}
-            <div class="alert-modern alert-danger mb-4">
+            <div class="alert-modern mb-4">
                 <i class="fas fa-exclamation-circle"></i>
                 <span>Invalid email or password. Please try again.</span>
             </div>
@@ -405,7 +492,7 @@
                                autofocus>
                     </div>
                     <div class="form-text mt-1">
-                        <small class="text-muted">Use your institutional @kuhes.ac.mw email</small>
+                        <small class="text-muted" style="color: rgba(255, 255, 255, 0.5);">Use your institutional @kuhes.ac.mw email</small>
                     </div>
                 </div>
 
@@ -595,13 +682,16 @@
     loadRememberedEmail();
 
     // Animate card on load
-    document.querySelector('.login-card').style.opacity = '0';
-    document.querySelector('.login-card').style.transform = 'translateY(20px)';
-    setTimeout(() => {
-        document.querySelector('.login-card').style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
-        document.querySelector('.login-card').style.opacity = '1';
-        document.querySelector('.login-card').style.transform = 'translateY(0)';
-    }, 100);
+    const loginCard = document.querySelector('.login-card');
+    if (loginCard) {
+        loginCard.style.opacity = '0';
+        loginCard.style.transform = 'translateY(30px)';
+        setTimeout(() => {
+            loginCard.style.transition = 'all 0.6s cubic-bezier(0.2, 0.9, 0.4, 1.1)';
+            loginCard.style.opacity = '1';
+            loginCard.style.transform = 'translateY(0)';
+        }, 100);
+    }
 
     // Focus email if empty, else password
     if (!emailInput.value) {
